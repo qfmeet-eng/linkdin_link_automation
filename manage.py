@@ -3,7 +3,7 @@
 import os
 import sys
 
-
+# hey hoy are you there
 def main():
     """Run administrative tasks."""
     os.environ.setdefault("DJANGO_SETTINGS_MODULE", "chatbot_project.settings")
