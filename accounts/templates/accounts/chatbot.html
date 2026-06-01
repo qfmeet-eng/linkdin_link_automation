@@ -1,0 +1,601 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Registration Chatbot</title>
+  <style>
+    :root {
+      --bg: #f6f4ef;
+      --ink: #172026;
+      --muted: #667076;
+      --line: #d7d1c6;
+      --panel: #ffffff;
+      --bot: #e8f2ef;
+      --user: #1f5f6a;
+      --user-ink: #ffffff;
+      --accent: #cf5c36;
+      --accent-dark: #a64222;
+      --ok: #237a57;
+      --danger: #b3261e;
+      --shadow: 0 18px 45px rgba(23, 32, 38, 0.14);
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: Arial, Helvetica, sans-serif;
+      color: var(--ink);
+      background:
+        linear-gradient(135deg, rgba(31, 95, 106, 0.12), transparent 34%),
+        linear-gradient(315deg, rgba(207, 92, 54, 0.16), transparent 32%),
+        var(--bg);
+    }
+
+    main {
+      min-height: 100vh;
+      display: grid;
+      place-items: center;
+      padding: 24px;
+    }
+
+    .chat-shell {
+      width: min(920px, 100%);
+      min-height: min(760px, calc(100vh - 48px));
+      display: grid;
+      grid-template-rows: auto 1fr auto;
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      box-shadow: var(--shadow);
+      overflow: hidden;
+    }
+
+    .chat-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      padding: 18px 20px;
+      border-bottom: 1px solid var(--line);
+      background: #fffaf2;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      min-width: 0;
+    }
+
+    .mark {
+      width: 42px;
+      height: 42px;
+      display: grid;
+      place-items: center;
+      flex: 0 0 auto;
+      border-radius: 8px;
+      background: #1f5f6a;
+      color: #fff;
+      font-weight: 700;
+      letter-spacing: 0;
+    }
+
+    h1 {
+      margin: 0;
+      font-size: 20px;
+      line-height: 1.25;
+      letter-spacing: 0;
+    }
+
+    .subtitle {
+      margin-top: 3px;
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    .progress {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      min-width: 178px;
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    .progress-track {
+      width: 104px;
+      height: 8px;
+      border-radius: 999px;
+      background: #ded8ce;
+      overflow: hidden;
+    }
+
+    .progress-fill {
+      width: 0%;
+      height: 100%;
+      background: var(--accent);
+      transition: width 180ms ease;
+    }
+
+    .messages {
+      min-height: 0;
+      padding: 22px;
+      overflow-y: auto;
+      background:
+        linear-gradient(rgba(255, 255, 255, 0.82), rgba(255, 255, 255, 0.82)),
+        repeating-linear-gradient(0deg, #f0ede6 0, #f0ede6 1px, transparent 1px, transparent 34px);
+    }
+
+    .message-row {
+      display: flex;
+      margin-bottom: 14px;
+    }
+
+    .message-row.user {
+      justify-content: flex-end;
+    }
+
+    .bubble {
+      width: fit-content;
+      max-width: min(640px, 86%);
+      padding: 12px 14px;
+      border-radius: 8px;
+      line-height: 1.45;
+      overflow-wrap: anywhere;
+      box-shadow: 0 1px 0 rgba(23, 32, 38, 0.05);
+    }
+
+    .bot .bubble {
+      color: var(--ink);
+      background: var(--bot);
+      border: 1px solid #cadfd8;
+    }
+
+    .user .bubble {
+      color: var(--user-ink);
+      background: var(--user);
+      border: 1px solid #174b54;
+    }
+
+    .system .bubble {
+      color: var(--danger);
+      background: #fff3f1;
+      border: 1px solid #f0c4be;
+    }
+
+    .system.success .bubble {
+      color: var(--ok);
+      background: #edf8f2;
+      border-color: #badfcc;
+    }
+
+    .composer {
+      display: grid;
+      grid-template-columns: 1fr 48px;
+      gap: 10px;
+      padding: 16px;
+      border-top: 1px solid var(--line);
+      background: #fffaf2;
+    }
+
+    .input-wrap {
+      position: relative;
+    }
+
+    input {
+      width: 100%;
+      height: 48px;
+      padding: 0 14px;
+      border: 1px solid #b9afa2;
+      border-radius: 8px;
+      font-size: 16px;
+      color: var(--ink);
+      background: #ffffff;
+      outline: none;
+    }
+
+    input:focus {
+      border-color: var(--user);
+      box-shadow: 0 0 0 3px rgba(31, 95, 106, 0.16);
+    }
+
+    button {
+      width: 48px;
+      height: 48px;
+      border: 0;
+      border-radius: 8px;
+      color: #ffffff;
+      background: var(--accent);
+      font-size: 22px;
+      font-weight: 700;
+      cursor: pointer;
+    }
+
+    button:hover {
+      background: var(--accent-dark);
+    }
+
+    button:disabled {
+      cursor: wait;
+      opacity: 0.65;
+    }
+
+    @media (max-width: 640px) {
+      main {
+        padding: 0;
+      }
+
+      .chat-shell {
+        min-height: 100vh;
+        border: 0;
+        border-radius: 0;
+      }
+
+      .chat-header {
+        align-items: flex-start;
+        flex-direction: column;
+      }
+
+      .progress {
+        width: 100%;
+      }
+
+      .progress-track {
+        width: 100%;
+      }
+
+      .messages {
+        padding: 16px;
+      }
+
+      .bubble {
+        max-width: 92%;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main>
+    <section class="chat-shell" aria-label="Registration chatbot">
+      <header class="chat-header">
+        <div class="brand">
+          <div class="mark" aria-hidden="true">CB</div>
+          <div>
+            <h1>Registration Chatbot</h1>
+            <div class="subtitle">MySQL ma user account save karo</div>
+          </div>
+        </div>
+        <div class="progress" aria-live="polite">
+          <span id="progressLabel">Step 1 of 5</span>
+          <div class="progress-track" aria-hidden="true">
+            <div class="progress-fill" id="progressFill"></div>
+          </div>
+        </div>
+      </header>
+
+      <div class="messages" id="messages" aria-live="polite"></div>
+
+      <form class="composer" id="chatForm" autocomplete="off">
+        {% csrf_token %}
+        <div class="input-wrap">
+          <input id="chatInput" name="chatInput" type="text" placeholder="Type here..." autofocus>
+        </div>
+        <button id="sendButton" type="submit" title="Send" aria-label="Send">&gt;</button>
+      </form>
+    </section>
+  </main>
+
+  <script>
+    const steps = [
+      {
+        key: "name",
+        question: "Tamaru naam shu che?",
+        placeholder: "Full name",
+        type: "text",
+        mask: false
+      },
+      {
+        key: "phone",
+        question: "Mobile number aapo.",
+        placeholder: "10 digit mobile number",
+        type: "tel",
+        mask: false
+      },
+      {
+        key: "email",
+        question: "Email ID aapo.",
+        placeholder: "name@example.com",
+        type: "email",
+        mask: false
+      },
+      {
+        key: "password",
+        question: "Password aapo.",
+        placeholder: "Password",
+        type: "password",
+        mask: true
+      },
+      {
+        key: "confirm_password",
+        question: "Confirm password aapo.",
+        placeholder: "Confirm password",
+        type: "password",
+        mask: true
+      }
+    ];
+
+    const formData = {};
+    let mode = "idle";
+    let stepIndex = 0;
+    let isSubmitting = false;
+
+    const form = document.getElementById("chatForm");
+    const input = document.getElementById("chatInput");
+    const messages = document.getElementById("messages");
+    const sendButton = document.getElementById("sendButton");
+    const progressLabel = document.getElementById("progressLabel");
+    const progressFill = document.getElementById("progressFill");
+    const csrfToken = document.querySelector("[name=csrfmiddlewaretoken]").value;
+
+    function escapeHtml(value) {
+      return String(value)
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;")
+        .replaceAll('"', "&quot;")
+        .replaceAll("'", "&#039;");
+    }
+
+    function addMessage(text, who, success = false) {
+      const row = document.createElement("div");
+      row.className = `message-row ${who}${success ? " success" : ""}`;
+
+      const bubble = document.createElement("div");
+      bubble.className = "bubble";
+      bubble.innerHTML = escapeHtml(text);
+
+      row.appendChild(bubble);
+      messages.appendChild(row);
+      messages.scrollTop = messages.scrollHeight;
+    }
+
+    function setIdle() {
+      mode = "idle";
+      input.type = "text";
+      input.placeholder = "Message type karo...";
+      input.value = "";
+      input.disabled = false;
+      sendButton.disabled = false;
+      progressLabel.textContent = "Ready";
+      progressFill.style.width = "0%";
+      input.focus();
+    }
+
+    function startRegistration() {
+      mode = "register";
+      stepIndex = 0;
+      Object.keys(formData).forEach((key) => delete formData[key]);
+      updateInputForStep();
+      addMessage(steps[stepIndex].question, "bot");
+    }
+
+    function startForgotPassword() {
+      mode = "forgot";
+      input.type = "email";
+      input.placeholder = "Registered email ID";
+      input.value = "";
+      progressLabel.textContent = "Forgot password";
+      progressFill.style.width = "0%";
+      input.focus();
+      addMessage("Registered email ID aapo.", "bot");
+    }
+
+    function isForgotPasswordMessage(value) {
+      return /forgot|forget|reset password|password bhuli|password bhul/i.test(value);
+    }
+
+    function updateInputForStep() {
+      const step = steps[stepIndex];
+      input.type = step.type;
+      input.placeholder = step.placeholder;
+      input.value = "";
+      input.focus();
+
+      const current = Math.min(stepIndex + 1, steps.length);
+      progressLabel.textContent = `Step ${current} of ${steps.length}`;
+      progressFill.style.width = `${(stepIndex / steps.length) * 100}%`;
+    }
+
+    function validateCurrentStep(value) {
+      const key = steps[stepIndex].key;
+
+      if (!value.trim()) {
+        return "Aa field required che.";
+      }
+
+      if (key === "phone" && !/^\+?[0-9]{10,15}$/.test(value.replaceAll(" ", ""))) {
+        return "Mobile number 10 thi 15 digits no hovo joiye.";
+      }
+
+      if (key === "email" && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)) {
+        return "Email address valid nathi.";
+      }
+
+      if (key === "confirm_password" && value !== formData.password) {
+        return "Password ane confirm password same nathi.";
+      }
+
+      return "";
+    }
+
+    function validateEmail(value) {
+      if (!value.trim()) {
+        return "Email required che.";
+      }
+
+      if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)) {
+        return "Email address valid nathi.";
+      }
+
+      return "";
+    }
+
+    async function submitRegistration() {
+      isSubmitting = true;
+      sendButton.disabled = true;
+      input.disabled = true;
+      addMessage("Details save kari rahyo chu...", "bot");
+
+      try {
+        const response = await fetch("{% url 'register_chatbot_user' %}", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "X-CSRFToken": csrfToken
+          },
+          body: JSON.stringify(formData)
+        });
+
+        const result = await response.json();
+        addMessage(result.message || "Response mali gayo.", "system", result.success);
+
+        if (result.success) {
+          progressFill.style.width = "100%";
+          progressLabel.textContent = "Complete";
+          input.placeholder = "Registration complete";
+          return;
+        }
+
+        input.disabled = false;
+        sendButton.disabled = false;
+        isSubmitting = false;
+
+        const errorKeys = result.errors ? Object.keys(result.errors) : [];
+        const targetIndex = steps.findIndex((item) => errorKeys.includes(item.key));
+        stepIndex = targetIndex >= 0 ? targetIndex : Math.max(0, stepIndex - 1);
+        updateInputForStep();
+        addMessage(steps[stepIndex].question, "bot");
+      } catch (error) {
+        addMessage("Server connect nathi thai rahyo. Thodi vaar pachi try karo.", "system");
+        input.disabled = false;
+        sendButton.disabled = false;
+        isSubmitting = false;
+        updateInputForStep();
+        addMessage(steps[stepIndex].question, "bot");
+      }
+    }
+
+    async function submitForgotPassword(email) {
+      isSubmitting = true;
+      sendButton.disabled = true;
+      input.disabled = true;
+      addMessage("Reset link email ma mokli rahyo chu...", "bot");
+
+      try {
+        const response = await fetch("{% url 'forgot_password_user' %}", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "X-CSRFToken": csrfToken
+          },
+          body: JSON.stringify({ email })
+        });
+
+        const result = await response.json();
+        addMessage(result.message || "Response mali gayo.", "system", result.success);
+
+        if (result.success) {
+          setIdle();
+          return;
+        }
+
+        isSubmitting = false;
+        sendButton.disabled = false;
+        input.disabled = false;
+        input.type = "email";
+        input.placeholder = "Registered email ID";
+        input.value = "";
+        input.focus();
+      } catch (error) {
+        addMessage("Server connect nathi thai rahyo. Thodi vaar pachi try karo.", "system");
+        isSubmitting = false;
+        sendButton.disabled = false;
+        input.disabled = false;
+        input.focus();
+      }
+    }
+
+    form.addEventListener("submit", async (event) => {
+      event.preventDefault();
+
+      if (isSubmitting) {
+        return;
+      }
+
+      const rawValue = input.value;
+      const value = rawValue.trim();
+
+      if (mode === "idle") {
+        if (!value) {
+          input.focus();
+          return;
+        }
+
+        addMessage(value, "user");
+
+        if (isForgotPasswordMessage(value)) {
+          startForgotPassword();
+          return;
+        }
+
+        startRegistration();
+        return;
+      }
+
+      if (mode === "forgot") {
+        const email = value.toLowerCase();
+        const error = validateEmail(email);
+
+        if (error) {
+          addMessage(error, "system");
+          input.focus();
+          return;
+        }
+
+        addMessage(email, "user");
+        await submitForgotPassword(email);
+        return;
+      }
+
+      const step = steps[stepIndex];
+      const normalizedValue = step.key === "phone" ? value.replaceAll(" ", "") : value;
+      const error = validateCurrentStep(normalizedValue);
+
+      if (error) {
+        addMessage(error, "system");
+        input.focus();
+        return;
+      }
+
+      formData[step.key] = normalizedValue;
+      addMessage(step.mask ? "********" : normalizedValue, "user");
+      stepIndex += 1;
+
+      if (stepIndex >= steps.length) {
+        await submitRegistration();
+        return;
+      }
+
+      updateInputForStep();
+      addMessage(steps[stepIndex].question, "bot");
+    });
+
+    setIdle();
+  </script>
+</body>
+</html>
