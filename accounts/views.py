@@ -2,13 +2,15 @@ import json
 import re
 from json import JSONDecodeError
 from django.conf import settings
-from django.contrib.auth import get_user_model
+from django.contrib.auth import authenticate, get_user_model, login
 from django.contrib.auth.password_validation import validate_password
 from django.contrib.auth.tokens import default_token_generator
 from django.core.exceptions import ValidationError
 from django.core.mail import send_mail
 from django.core.validators import validate_email
 from django.db import IntegrityError, transaction
+from django.db.utils import OperationalError, ProgrammingError
+from django.http import HttpResponse
 from django.http import JsonResponse
 from django.shortcuts import render
 from django.urls import reverse
@@ -16,15 +18,20 @@ from django.utils.encoding import force_bytes
 from django.utils.http import urlsafe_base64_encode
 from django.views.decorators.http import require_POST
 
-from .models import UserProfile
+from .models import LoginActivity, UserProfile
 
 
 PHONE_RE = re.compile(r"^\+?[0-9]{10,15}$")
 USER_EXISTS_MESSAGE = "User is already exist."
+DATABASE_NOT_READY_MESSAGE = "Database tables missing che. Pehla python manage.py migrate run karo."
 
 
 def chatbot_register_page(request):
     return render(request, "accounts/chatbot.html")
+
+
+def favicon(request):
+    return HttpResponse(status=204)
 
 
 def parse_json_body(request):
@@ -35,6 +42,35 @@ def parse_json_body(request):
             {"success": False, "message": "Request data valid JSON nathi."},
             status=400,
         )
+
+
+def database_not_ready_response():
+    return JsonResponse(
+        {
+            "success": False,
+            "message": DATABASE_NOT_READY_MESSAGE,
+            "errors": {"database": DATABASE_NOT_READY_MESSAGE},
+        },
+        status=500,
+    )
+
+
+def get_client_ip(request):
+    forwarded_for = request.META.get("HTTP_X_FORWARDED_FOR")
+    if forwarded_for:
+        return forwarded_for.split(",")[0].strip()
+    return request.META.get("REMOTE_ADDR")
+
+
+def create_login_activity(request, email, user=None, success=True, failure_reason=""):
+    return LoginActivity.objects.create(
+        user=user,
+        email=email,
+        success=success,
+        failure_reason=failure_reason,
+        ip_address=get_client_ip(request),
+        user_agent=request.META.get("HTTP_USER_AGENT", "")[:1000],
+    )
 
 
 @require_POST
@@ -76,11 +112,14 @@ def register_chatbot_user(request):
 
     User = get_user_model()
 
-    email_exists = email and (
-        User.objects.filter(email__iexact=email).exists()
-        or User.objects.filter(username__iexact=email).exists()
-    )
-    phone_exists = phone and UserProfile.objects.filter(phone=phone).exists()
+    try:
+        email_exists = email and (
+            User.objects.filter(email__iexact=email).exists()
+            or User.objects.filter(username__iexact=email).exists()
+        )
+        phone_exists = phone and UserProfile.objects.filter(phone=phone).exists()
+    except (OperationalError, ProgrammingError):
+        return database_not_ready_response()
 
     if email_exists:
         errors["email"] = USER_EXISTS_MESSAGE
@@ -125,6 +164,8 @@ def register_chatbot_user(request):
             },
             status=409,
         )
+    except (OperationalError, ProgrammingError):
+        return database_not_ready_response()
 
     return JsonResponse(
         {
@@ -132,6 +173,95 @@ def register_chatbot_user(request):
             "message": "Registration complete thai gayu. Tamari details save thai gai che.",
         },
         status=201,
+    )
+
+
+@require_POST
+def login_chatbot_user(request):
+    data, error_response = parse_json_body(request)
+    if error_response:
+        return error_response
+
+    email = str(data.get("email", "")).strip().lower()
+    password = str(data.get("password", ""))
+
+    errors = {}
+
+    if not email:
+        errors["email"] = "Email required che."
+    else:
+        try:
+            validate_email(email)
+        except ValidationError:
+            errors["email"] = "Email address valid nathi."
+
+    if not password:
+        errors["password"] = "Password required che."
+
+    if errors:
+        return JsonResponse(
+            {
+                "success": False,
+                "message": next(iter(errors.values())),
+                "errors": errors,
+            },
+            status=400,
+        )
+
+    User = get_user_model()
+
+    try:
+        user = User.objects.filter(email__iexact=email, is_active=True).first()
+    except (OperationalError, ProgrammingError):
+        return database_not_ready_response()
+
+    if user:
+        authenticated_user = authenticate(
+            request,
+            username=user.username,
+            password=password,
+        )
+    else:
+        authenticated_user = None
+
+    try:
+        if authenticated_user is None:
+            create_login_activity(
+                request,
+                email=email,
+                user=user,
+                success=False,
+                failure_reason="Invalid email or password",
+            )
+            return JsonResponse(
+                {
+                    "success": False,
+                    "message": "Email athva password khoto che.",
+                    "errors": {"login": "Invalid credentials"},
+                },
+                status=401,
+            )
+
+        login(request, authenticated_user)
+        create_login_activity(
+            request,
+            email=authenticated_user.email,
+            user=authenticated_user,
+            success=True,
+        )
+    except (OperationalError, ProgrammingError):
+        return database_not_ready_response()
+
+    return JsonResponse(
+        {
+            "success": True,
+            "message": "Login successful. Tamari login entry database ma save thai gai che.",
+            "user": {
+                "id": authenticated_user.id,
+                "name": authenticated_user.first_name,
+                "email": authenticated_user.email,
+            },
+        }
     )
 
 
@@ -157,7 +287,10 @@ def forgot_password_user(request):
         )
 
     User = get_user_model()
-    user = User.objects.filter(email__iexact=email, is_active=True).first()
+    try:
+        user = User.objects.filter(email__iexact=email, is_active=True).first()
+    except (OperationalError, ProgrammingError):
+        return database_not_ready_response()
     if not user:
         return JsonResponse(
             {"success": False, "message": "Aa email par user exist nathi."},

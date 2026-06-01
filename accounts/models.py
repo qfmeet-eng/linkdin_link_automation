@@ -25,3 +25,27 @@ class UserProfile(models.Model):
 
     def __str__(self):
         return f"{self.user.email} - {self.phone}"
+
+
+class LoginActivity(models.Model):
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name="login_activities",
+        null=True,
+        blank=True,
+    )
+    email = models.EmailField()
+    success = models.BooleanField(default=True)
+    failure_reason = models.CharField(max_length=255, blank=True)
+    ip_address = models.GenericIPAddressField(null=True, blank=True)
+    user_agent = models.TextField(blank=True)
+    login_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ["-login_at"]
+        verbose_name_plural = "login activities"
+
+    def __str__(self):
+        status = "success" if self.success else "failed"
+        return f"{self.email} - {status} - {self.login_at:%Y-%m-%d %H:%M:%S}"

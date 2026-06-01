@@ -329,9 +329,28 @@
       }
     ];
 
+    const loginSteps = [
+      {
+        key: "email",
+        question: "Login mate email ID aapo.",
+        placeholder: "name@example.com",
+        type: "email",
+        mask: false
+      },
+      {
+        key: "password",
+        question: "Password aapo.",
+        placeholder: "Password",
+        type: "password",
+        mask: true
+      }
+    ];
+
     const formData = {};
+    const loginData = {};
     let mode = "idle";
     let stepIndex = 0;
+    let loginStepIndex = 0;
     let isSubmitting = false;
 
     const form = document.getElementById("chatForm");
@@ -384,6 +403,14 @@
       addMessage(steps[stepIndex].question, "bot");
     }
 
+    function startLogin() {
+      mode = "login";
+      loginStepIndex = 0;
+      Object.keys(loginData).forEach((key) => delete loginData[key]);
+      updateInputForLoginStep();
+      addMessage(loginSteps[loginStepIndex].question, "bot");
+    }
+
     function startForgotPassword() {
       mode = "forgot";
       input.type = "email";
@@ -399,7 +426,12 @@
       return /forgot|forget|reset password|password bhuli|password bhul/i.test(value);
     }
 
+    function isLoginMessage(value) {
+      return /login|log in|signin|sign in|login kar|log in kar/i.test(value);
+    }
+
     function updateInputForStep() {
+      stepIndex = Math.min(Math.max(stepIndex, 0), steps.length - 1);
       const step = steps[stepIndex];
       input.type = step.type;
       input.placeholder = step.placeholder;
@@ -409,6 +441,34 @@
       const current = Math.min(stepIndex + 1, steps.length);
       progressLabel.textContent = `Step ${current} of ${steps.length}`;
       progressFill.style.width = `${(stepIndex / steps.length) * 100}%`;
+    }
+
+    function updateInputForLoginStep() {
+      loginStepIndex = Math.min(Math.max(loginStepIndex, 0), loginSteps.length - 1);
+      const step = loginSteps[loginStepIndex];
+      input.type = step.type;
+      input.placeholder = step.placeholder;
+      input.value = "";
+      input.focus();
+
+      const current = Math.min(loginStepIndex + 1, loginSteps.length);
+      progressLabel.textContent = `Login ${current} of ${loginSteps.length}`;
+      progressFill.style.width = `${(loginStepIndex / loginSteps.length) * 100}%`;
+    }
+
+    async function readJsonResponse(response) {
+      const contentType = response.headers.get("content-type") || "";
+
+      if (contentType.includes("application/json")) {
+        return await response.json();
+      }
+
+      return {
+        success: false,
+        message: response.ok
+          ? "Server response samji nathi shakta."
+          : "Server error aavyo. Database/migrations check karo."
+      };
     }
 
     function validateCurrentStep(value) {
@@ -445,6 +505,20 @@
       return "";
     }
 
+    function validateLoginStep(value) {
+      const key = loginSteps[loginStepIndex].key;
+
+      if (!value.trim()) {
+        return "Aa field required che.";
+      }
+
+      if (key === "email" && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)) {
+        return "Email address valid nathi.";
+      }
+
+      return "";
+    }
+
     async function submitRegistration() {
       isSubmitting = true;
       sendButton.disabled = true;
@@ -461,7 +535,7 @@
           body: JSON.stringify(formData)
         });
 
-        const result = await response.json();
+        const result = await readJsonResponse(response);
         addMessage(result.message || "Response mali gayo.", "system", result.success);
 
         if (result.success) {
@@ -485,6 +559,7 @@
         input.disabled = false;
         sendButton.disabled = false;
         isSubmitting = false;
+        stepIndex = Math.min(stepIndex, steps.length - 1);
         updateInputForStep();
         addMessage(steps[stepIndex].question, "bot");
       }
@@ -506,7 +581,7 @@
           body: JSON.stringify({ email })
         });
 
-        const result = await response.json();
+        const result = await readJsonResponse(response);
         addMessage(result.message || "Response mali gayo.", "system", result.success);
 
         if (result.success) {
@@ -527,6 +602,48 @@
         sendButton.disabled = false;
         input.disabled = false;
         input.focus();
+      }
+    }
+
+    async function submitLogin() {
+      isSubmitting = true;
+      sendButton.disabled = true;
+      input.disabled = true;
+      addMessage("Login check kari rahyo chu...", "bot");
+
+      try {
+        const response = await fetch("{% url 'login_chatbot_user' %}", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "X-CSRFToken": csrfToken
+          },
+          body: JSON.stringify(loginData)
+        });
+
+        const result = await readJsonResponse(response);
+        addMessage(result.message || "Response mali gayo.", "system", result.success);
+
+        if (result.success) {
+          progressFill.style.width = "100%";
+          progressLabel.textContent = "Logged in";
+          input.placeholder = "Login complete";
+          return;
+        }
+
+        isSubmitting = false;
+        sendButton.disabled = false;
+        input.disabled = false;
+        loginStepIndex = 0;
+        updateInputForLoginStep();
+        addMessage(loginSteps[loginStepIndex].question, "bot");
+      } catch (error) {
+        addMessage("Server connect nathi thai rahyo. Thodi vaar pachi try karo.", "system");
+        isSubmitting = false;
+        sendButton.disabled = false;
+        input.disabled = false;
+        updateInputForLoginStep();
+        addMessage(loginSteps[loginStepIndex].question, "bot");
       }
     }
 
@@ -553,6 +670,11 @@
           return;
         }
 
+        if (isLoginMessage(value)) {
+          startLogin();
+          return;
+        }
+
         startRegistration();
         return;
       }
@@ -569,6 +691,31 @@
 
         addMessage(email, "user");
         await submitForgotPassword(email);
+        return;
+      }
+
+      if (mode === "login") {
+        const step = loginSteps[loginStepIndex];
+        const normalizedValue = step.key === "email" ? value.toLowerCase() : value;
+        const error = validateLoginStep(normalizedValue);
+
+        if (error) {
+          addMessage(error, "system");
+          input.focus();
+          return;
+        }
+
+        loginData[step.key] = normalizedValue;
+        addMessage(step.mask ? "********" : normalizedValue, "user");
+        loginStepIndex += 1;
+
+        if (loginStepIndex >= loginSteps.length) {
+          await submitLogin();
+          return;
+        }
+
+        updateInputForLoginStep();
+        addMessage(loginSteps[loginStepIndex].question, "bot");
         return;
       }
 
