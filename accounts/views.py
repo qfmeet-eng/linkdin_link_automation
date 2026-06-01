@@ -18,7 +18,8 @@ from django.utils.encoding import force_bytes
 from django.utils.http import urlsafe_base64_encode
 from django.views.decorators.http import require_POST
 
-from .models import LoginActivity, UserProfile
+from .models import LoginActivity, UserProfile, UserDetails
+from django.utils import timezone
 
 
 PHONE_RE = re.compile(r"^\+?[0-9]{10,15}$")
@@ -155,6 +156,12 @@ def register_chatbot_user(request):
                 first_name=name,
             )
             UserProfile.objects.create(user=user, phone=phone)
+            UserDetails.objects.create(
+                user=user,
+                name=name,
+                email=email,
+                phone=phone,
+            )
     except IntegrityError:
         return JsonResponse(
             {
@@ -249,6 +256,25 @@ def login_chatbot_user(request):
             user=authenticated_user,
             success=True,
         )
+
+        phone_number = ""
+        if hasattr(authenticated_user, 'profile'):
+            phone_number = authenticated_user.profile.phone
+        elif UserProfile.objects.filter(user=authenticated_user).exists():
+            phone_number = UserProfile.objects.filter(user=authenticated_user).first().phone
+
+        user_details, created = UserDetails.objects.get_or_create(
+            user=authenticated_user,
+            defaults={
+                "name": authenticated_user.first_name or authenticated_user.username,
+                "email": authenticated_user.email,
+                "phone": phone_number,
+            }
+        )
+        user_details.last_login = timezone.now()
+        user_details.ip_address = get_client_ip(request)
+        user_details.user_agent = request.META.get("HTTP_USER_AGENT", "")[:1000]
+        user_details.save()
     except (OperationalError, ProgrammingError):
         return database_not_ready_response()
 
@@ -340,3 +366,9 @@ def forgot_password_user(request):
             "message": "Password reset link tamara email par mokli didhi che.",
         }
     )
+
+
+def user_details_view(request):
+    details_list = UserDetails.objects.all().order_by("-created_at")
+    return render(request, "accounts/user_details.html", {"details_list": details_list})
+

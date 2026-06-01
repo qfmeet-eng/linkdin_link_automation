@@ -1,7 +1,7 @@
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin
 
-from .models import LoginActivity, User, UserProfile
+from .models import LoginActivity, User, UserProfile, UserDetails
 
 
 @admin.register(User)
@@ -31,3 +31,11 @@ class LoginActivityAdmin(admin.ModelAdmin):
         "user_agent",
         "login_at",
     )
+
+
+@admin.register(UserDetails)
+class UserDetailsAdmin(admin.ModelAdmin):
+    list_display = ("name", "email", "phone", "last_login", "ip_address", "created_at")
+    search_fields = ("name", "email", "phone", "ip_address")
+    list_filter = ("created_at", "last_login")
+

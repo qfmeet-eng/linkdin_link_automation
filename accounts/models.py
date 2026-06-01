@@ -27,7 +27,7 @@ class UserProfile(models.Model):
         return f"{self.user.email} - {self.phone}"
 
 
-class LoginActivity(models.Model):
+class LoginActivity(models.Model): 
     user = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         on_delete=models.CASCADE,
@@ -49,3 +49,26 @@ class LoginActivity(models.Model):
     def __str__(self):
         status = "success" if self.success else "failed"
         return f"{self.email} - {status} - {self.login_at:%Y-%m-%d %H:%M:%S}"
+
+
+class UserDetails(models.Model):
+    user = models.OneToOneField(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name="user_details",
+    )
+    name = models.CharField(max_length=150)
+    email = models.EmailField(unique=True)
+    phone = models.CharField(max_length=15)
+    last_login = models.DateTimeField(null=True, blank=True)
+    ip_address = models.GenericIPAddressField(null=True, blank=True)
+    user_agent = models.TextField(blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        db_table = "user_details"
+        verbose_name_plural = "user details"
+
+    def __str__(self):
+        return f"{self.name} ({self.email})"
+
