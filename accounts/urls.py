@@ -8,11 +8,13 @@ from .views import (
     forgot_password_user,
     login_chatbot_user,
     register_chatbot_user,
+    user_details_view,
 )
 
 
 urlpatterns = [
     path("", chatbot_register_page, name="chatbot_register"),
+    path("user-details/", user_details_view, name="user_details"),
     path("favicon.ico", favicon, name="favicon"),
     path("api/register/", register_chatbot_user, name="register_chatbot_user"),
     path("api/login/", login_chatbot_user, name="login_chatbot_user"),
