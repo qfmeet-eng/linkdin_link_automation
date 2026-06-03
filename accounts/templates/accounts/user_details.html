@@ -1,708 +1,774 @@
 <!doctype html>
 <html lang="en">
+
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>User Details Dashboard</title>
-  <!-- Google Fonts for Modern Typography -->
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-  
+  <title>User Details — Admin Dashboard</title>
+
+  <!-- Material Symbols (MD3 icons) -->
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@24,400,1,0"
+    rel="stylesheet">
+  <!-- Google Fonts — Roboto (MD3 typeface) -->
+  <link
+    href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&family=Roboto+Mono:wght@400;500&display=swap"
+    rel="stylesheet">
+
   <style>
+    /* ── MD3 Color Tokens (Light Scheme) ───────────────────── */
     :root {
-      --bg-dark: #080b11;
-      --panel-bg: rgba(17, 25, 40, 0.75);
-      --panel-border: rgba(255, 255, 255, 0.08);
-      --text-primary: #f3f4f6;
-      --text-secondary: #9ca3af;
-      --text-muted: #6b7280;
-      --primary-cyan: #06b6d4;
-      --primary-teal: #14b8a6;
-      --accent-orange: #f97316;
-      --accent-rose: #f43f5e;
-      --success-green: #10b981;
-      --font-display: 'Outfit', sans-serif;
-      --font-body: 'Inter', sans-serif;
-      --transition-smooth: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      --md-primary: #1a73e8;
+      --md-on-primary: #ffffff;
+      --md-primary-container: #d3e3fd;
+      --md-on-primary-cont: #041e49;
+
+      --md-secondary: #5f6368;
+      --md-secondary-cont: #e8eaed;
+
+      --md-surface: #f8f9fa;
+      --md-surface-1: #ffffff;
+      --md-surface-2: #f1f3f4;
+      --md-surface-variant: #e8eaed;
+      --md-on-surface: #202124;
+      --md-on-surface-var: #5f6368;
+      --md-outline: #dadce0;
+      --md-outline-var: #bdc1c6;
+
+      --md-error: #d93025;
+      --md-error-cont: #fce8e6;
+
+      --md-success: #137333;
+      --md-success-cont: #e6f4ea;
+
+      --md-warning-cont: #fef7e0;
+      --md-warning: #b06000;
+
+      --md-info-cont: #e8f0fe;
+
+      /* Elevation (box-shadow) */
+      --md-elev-1: 0 1px 2px rgba(0, 0, 0, .1), 0 1px 3px 1px rgba(0, 0, 0, .07);
+      --md-elev-2: 0 1px 2px rgba(0, 0, 0, .12), 0 2px 6px 2px rgba(0, 0, 0, .08);
+      --md-elev-3: 0 4px 8px 3px rgba(0, 0, 0, .1), 0 1px 3px rgba(0, 0, 0, .12);
+
+      --md-radius-sm: 4px;
+      --md-radius-md: 8px;
+      --md-radius-lg: 12px;
+      --md-radius-xl: 16px;
+      --md-radius-full: 999px;
+
+      --md-transition: 0.2s cubic-bezier(.2, 0, 0, 1);
     }
 
-    * {
+    /* ── Reset & Base ──────────────────────────────────────── */
+    *,
+    *::before,
+    *::after {
       box-sizing: border-box;
       margin: 0;
       padding: 0;
     }
 
     body {
-      background-color: var(--bg-dark);
-      background-image: 
-        radial-gradient(at 10% 20%, rgba(6, 182, 212, 0.15) 0px, transparent 50%),
-        radial-gradient(at 90% 10%, rgba(249, 115, 22, 0.08) 0px, transparent 50%),
-        radial-gradient(at 50% 80%, rgba(20, 184, 166, 0.12) 0px, transparent 50%);
-      background-attachment: fixed;
-      color: var(--text-primary);
-      font-family: var(--font-body);
+      font-family: 'Roboto', sans-serif;
+      background: var(--md-surface);
+      color: var(--md-on-surface);
       min-height: 100vh;
-      display: flex;
-      flex-direction: column;
-      padding: 40px 24px;
+      line-height: 1.5;
     }
 
-    /* Container */
-    .dashboard-container {
-      max-width: 1200px;
-      width: 100%;
-      margin: 0 auto;
-      animation: fadeIn 0.8s ease-out;
-    }
-
-    /* Header Styling */
-    header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 36px;
-      flex-wrap: wrap;
-      gap: 20px;
-    }
-
-    .brand-section {
+    /* ── Top App Bar ───────────────────────────────────────── */
+    .app-bar {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      height: 64px;
+      background: var(--md-surface-1);
+      border-bottom: 1px solid var(--md-outline);
       display: flex;
       align-items: center;
+      padding: 0 24px;
       gap: 16px;
+      box-shadow: var(--md-elev-1);
     }
 
-    .logo-badge {
-      width: 52px;
-      height: 52px;
-      background: linear-gradient(135deg, var(--primary-cyan), var(--primary-teal));
-      border-radius: 16px;
-      display: grid;
-      place-items: center;
-      color: #fff;
-      font-family: var(--font-display);
-      font-weight: 800;
-      font-size: 24px;
-      box-shadow: 0 8px 24px rgba(6, 182, 212, 0.3);
-      position: relative;
-      overflow: hidden;
-    }
-
-    .logo-badge::after {
-      content: '';
-      position: absolute;
-      top: -50%;
-      left: -50%;
-      width: 200%;
-      height: 200%;
-      background: linear-gradient(to right, transparent, rgba(255,255,255,0.3), transparent);
-      transform: rotate(30deg);
-      animation: shine 4s infinite linear;
-    }
-
-    h1 {
-      font-family: var(--font-display);
-      font-size: 32px;
-      font-weight: 700;
-      background: linear-gradient(to right, #ffffff, #9ca3af);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      letter-spacing: -0.5px;
-    }
-
-    .subtitle {
-      color: var(--text-secondary);
-      font-size: 14px;
-      margin-top: 4px;
-    }
-
-    .btn-back {
-      font-family: var(--font-display);
+    .app-bar-leading {
       display: flex;
       align-items: center;
-      gap: 8px;
-      padding: 12px 24px;
-      background: rgba(255, 255, 255, 0.05);
-      border: 1px solid var(--panel-border);
-      border-radius: 12px;
-      color: var(--text-primary);
-      font-weight: 600;
-      cursor: pointer;
-      text-decoration: none;
-      transition: var(--transition-smooth);
-      backdrop-filter: blur(10px);
-    }
-
-    .btn-back:hover {
-      background: rgba(255, 255, 255, 0.1);
-      border-color: rgba(255, 255, 255, 0.2);
-      transform: translateY(-2px);
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
-    }
-
-    /* Stats Grid */
-    .stats-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-      gap: 24px;
-      margin-bottom: 32px;
-    }
-
-    .stat-card {
-      background: var(--panel-bg);
-      backdrop-filter: blur(20px);
-      border: 1px solid var(--panel-border);
-      border-radius: 20px;
-      padding: 24px;
-      display: flex;
-      align-items: center;
-      gap: 20px;
-      position: relative;
-      overflow: hidden;
-      transition: var(--transition-smooth);
-    }
-
-    .stat-card:hover {
-      transform: translateY(-4px);
-      border-color: rgba(6, 182, 212, 0.3);
-      box-shadow: 0 12px 30px rgba(0, 0, 0, 0.4);
-    }
-
-    .stat-icon {
-      width: 56px;
-      height: 56px;
-      border-radius: 14px;
-      display: grid;
-      place-items: center;
-      font-size: 24px;
-      background: rgba(255, 255, 255, 0.03);
-      border: 1px solid rgba(255, 255, 255, 0.05);
-    }
-
-    .stat-card.total .stat-icon {
-      color: var(--primary-cyan);
-      background: rgba(6, 182, 212, 0.1);
-      border-color: rgba(6, 182, 212, 0.2);
-    }
-
-    .stat-card.active .stat-icon {
-      color: var(--primary-teal);
-      background: rgba(20, 184, 166, 0.1);
-      border-color: rgba(20, 184, 166, 0.2);
-    }
-
-    .stat-card.recent .stat-icon {
-      color: var(--accent-orange);
-      background: rgba(249, 115, 22, 0.1);
-      border-color: rgba(249, 115, 22, 0.2);
-    }
-
-    .stat-info {
+      gap: 12px;
       flex: 1;
+      min-width: 0;
     }
 
-    .stat-value {
-      font-family: var(--font-display);
-      font-size: 28px;
-      font-weight: 700;
-      color: #fff;
-    }
-
-    .stat-label {
-      color: var(--text-secondary);
-      font-size: 13px;
-      margin-top: 2px;
-      font-weight: 500;
-    }
-
-    .stat-glow {
-      position: absolute;
-      width: 100px;
-      height: 100px;
-      border-radius: 50%;
-      filter: blur(40px);
-      opacity: 0.15;
-      right: -20px;
-      bottom: -20px;
-    }
-
-    .stat-card.total .stat-glow { background: var(--primary-cyan); }
-    .stat-card.active .stat-glow { background: var(--primary-teal); }
-    .stat-card.recent .stat-glow { background: var(--accent-orange); }
-
-    /* Search & Dashboard Table Wrapper */
-    .dashboard-panel {
-      background: var(--panel-bg);
-      backdrop-filter: blur(20px);
-      border: 1px solid var(--panel-border);
-      border-radius: 24px;
-      padding: 32px;
-      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.3);
-      position: relative;
-    }
-
-    .panel-header {
+    .app-bar-icon {
+      width: 40px;
+      height: 40px;
+      border-radius: var(--md-radius-md);
+      background: var(--md-primary-container);
+      color: var(--md-primary);
       display: flex;
-      justify-content: space-between;
       align-items: center;
-      margin-bottom: 24px;
-      flex-wrap: wrap;
-      gap: 16px;
+      justify-content: center;
+      flex-shrink: 0;
     }
 
-    .search-wrapper {
-      position: relative;
-      max-width: 380px;
-      width: 100%;
-    }
-
-    .search-input {
-      width: 100%;
-      height: 48px;
-      padding: 0 16px 0 46px;
-      background: rgba(255, 255, 255, 0.04);
-      border: 1px solid var(--panel-border);
-      border-radius: 12px;
-      color: #fff;
-      font-size: 15px;
-      outline: none;
-      transition: var(--transition-smooth);
-    }
-
-    .search-input:focus {
-      border-color: var(--primary-cyan);
-      background: rgba(255, 255, 255, 0.07);
-      box-shadow: 0 0 0 3px rgba(6, 182, 212, 0.15);
-    }
-
-    .search-icon {
-      position: absolute;
-      left: 16px;
-      top: 50%;
-      transform: translateY(-50%);
-      color: var(--text-secondary);
-      pointer-events: none;
-      font-size: 18px;
-    }
-
-    .row-counter {
-      color: var(--text-secondary);
-      font-size: 14px;
+    .app-bar-title {
+      font-size: 22px;
       font-weight: 500;
-    }
-
-    .row-counter span {
-      color: var(--primary-cyan);
-      font-weight: 600;
-    }
-
-    /* Beautiful Responsive Table */
-    .table-wrapper {
-      overflow-x: auto;
-      border-radius: 16px;
-      border: 1px solid rgba(255, 255, 255, 0.05);
-    }
-
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      text-align: left;
-      font-size: 14px;
-    }
-
-    thead {
-      background: rgba(255, 255, 255, 0.02);
-      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
-    }
-
-    th {
-      padding: 16px 20px;
-      font-family: var(--font-display);
-      font-weight: 600;
-      color: var(--text-primary);
-      font-size: 13px;
-      letter-spacing: 0.5px;
-      text-transform: uppercase;
-    }
-
-    tbody tr {
-      border-bottom: 1px solid rgba(255, 255, 255, 0.04);
-      transition: var(--transition-smooth);
-    }
-
-    tbody tr:last-child {
-      border-bottom: none;
-    }
-
-    tbody tr:hover {
-      background: rgba(255, 255, 255, 0.02);
-      transform: scale(0.998);
-    }
-
-    td {
-      padding: 18px 20px;
-      color: var(--text-secondary);
-      vertical-align: middle;
-      max-width: 250px;
+      color: var(--md-on-surface);
+      letter-spacing: 0;
       white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
     }
 
-    .user-info {
+    .app-bar-subtitle {
+      font-size: 12px;
+      color: var(--md-on-surface-var);
+      margin-top: 1px;
+    }
+
+    /* ── MD3 Buttons ───────────────────────────────────────── */
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 0 24px;
+      height: 40px;
+      border-radius: var(--md-radius-full);
+      font-family: 'Roboto', sans-serif;
+      font-size: 14px;
+      font-weight: 500;
+      letter-spacing: .1px;
+      cursor: pointer;
+      border: none;
+      text-decoration: none;
+      transition: box-shadow var(--md-transition), background var(--md-transition);
+      position: relative;
+      overflow: hidden;
+      white-space: nowrap;
+    }
+
+    .btn::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      border-radius: inherit;
+      background: transparent;
+      transition: background var(--md-transition);
+    }
+
+    .btn:hover::after {
+      background: rgba(0, 0, 0, .06);
+    }
+
+    .btn:active::after {
+      background: rgba(0, 0, 0, .12);
+    }
+
+    .btn-filled {
+      background: var(--md-primary);
+      color: var(--md-on-primary);
+      box-shadow: var(--md-elev-1);
+    }
+
+    .btn-filled:hover {
+      box-shadow: var(--md-elev-2);
+    }
+
+    .btn-outlined {
+      background: transparent;
+      color: var(--md-primary);
+      border: 1px solid var(--md-outline);
+    }
+
+    .btn-tonal {
+      background: var(--md-primary-container);
+      color: var(--md-on-primary-cont);
+    }
+
+    /* ── Page Content ──────────────────────────────────────── */
+    .page {
+      max-width: 1280px;
+      margin: 0 auto;
+      padding: 28px 24px 48px;
+    }
+
+    /* ── Stat Cards Row ────────────────────────────────────── */
+    .stat-row {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 16px;
+      margin-bottom: 28px;
+    }
+
+    .stat-card {
+      background: var(--md-surface-1);
+      border: 1px solid var(--md-outline);
+      border-radius: var(--md-radius-xl);
+      padding: 20px 24px;
       display: flex;
-      flex-direction: column;
-      gap: 4px;
+      align-items: center;
+      gap: 16px;
+      transition: box-shadow var(--md-transition);
+      cursor: default;
+    }
+
+    .stat-card:hover {
+      box-shadow: var(--md-elev-2);
+    }
+
+    .stat-icon-wrap {
+      width: 48px;
+      height: 48px;
+      border-radius: var(--md-radius-lg);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+
+    .stat-card.blue .stat-icon-wrap {
+      background: var(--md-info-cont);
+      color: var(--md-primary);
+    }
+
+    .stat-card.green .stat-icon-wrap {
+      background: var(--md-success-cont);
+      color: var(--md-success);
+    }
+
+    .stat-card.amber .stat-icon-wrap {
+      background: var(--md-warning-cont);
+      color: var(--md-warning);
+    }
+
+    .stat-value {
+      font-size: 28px;
+      font-weight: 700;
+      color: var(--md-on-surface);
+    }
+
+    .stat-label {
+      font-size: 13px;
+      color: var(--md-on-surface-var);
+      margin-top: 2px;
+    }
+
+    /* ── Table Card ────────────────────────────────────────── */
+    .table-card {
+      background: var(--md-surface-1);
+      border: 1px solid var(--md-outline);
+      border-radius: var(--md-radius-xl);
+      overflow: hidden;
+      box-shadow: var(--md-elev-1);
+    }
+
+    /* ── Table Toolbar ─────────────────────────────────────── */
+    .table-toolbar {
+      padding: 16px 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      border-bottom: 1px solid var(--md-outline);
+      flex-wrap: wrap;
+    }
+
+    .toolbar-title {
+      font-size: 16px;
+      font-weight: 500;
+      color: var(--md-on-surface);
+    }
+
+    .toolbar-right {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    /* MD3 Search Field */
+    .search-field {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      height: 40px;
+      padding: 0 16px;
+      background: var(--md-surface-2);
+      border: 1px solid var(--md-outline);
+      border-radius: var(--md-radius-full);
+      transition: border-color var(--md-transition), box-shadow var(--md-transition);
+      min-width: 280px;
+    }
+
+    .search-field:focus-within {
+      border-color: var(--md-primary);
+      background: var(--md-surface-1);
+      box-shadow: 0 0 0 2px rgba(26, 115, 232, .2);
+    }
+
+    .search-field input {
+      border: none;
+      outline: none;
+      background: transparent;
+      font-family: 'Roboto', sans-serif;
+      font-size: 14px;
+      color: var(--md-on-surface);
+      width: 100%;
+    }
+
+    .search-field input::placeholder {
+      color: var(--md-on-surface-var);
+    }
+
+    .search-field .material-symbols-rounded {
+      color: var(--md-on-surface-var);
+      font-size: 20px;
+    }
+
+    /* ── Data Table ────────────────────────────────────────── */
+    .data-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 14px;
+    }
+
+    .data-table thead {
+      background: var(--md-surface-2);
+      border-bottom: 1px solid var(--md-outline);
+    }
+
+    .data-table th {
+      padding: 14px 16px;
+      font-size: 12px;
+      font-weight: 500;
+      letter-spacing: .4px;
+      text-transform: uppercase;
+      color: var(--md-on-surface-var);
+      text-align: left;
+      white-space: nowrap;
+    }
+
+    .data-table th.sortable {
+      cursor: pointer;
+      user-select: none;
+    }
+
+    .data-table th.sortable:hover {
+      background: rgba(0, 0, 0, .04);
+    }
+
+    .data-table tbody tr {
+      border-bottom: 1px solid var(--md-surface-variant);
+      transition: background var(--md-transition);
+    }
+
+    .data-table tbody tr:last-child {
+      border-bottom: none;
+    }
+
+    .data-table tbody tr:hover {
+      background: rgba(26, 115, 232, .04);
+    }
+
+    .data-table td {
+      padding: 14px 16px;
+      color: var(--md-on-surface-var);
+      vertical-align: middle;
+    }
+
+    /* ── Avatar ────────────────────────────────────────────── */
+    .user-cell {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .avatar {
+      width: 36px;
+      height: 36px;
+      border-radius: var(--md-radius-full);
+      background: var(--md-primary-container);
+      color: var(--md-primary);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      font-size: 14px;
+      text-transform: uppercase;
+      flex-shrink: 0;
     }
 
     .user-name {
-      color: #fff;
-      font-weight: 600;
-      font-size: 15px;
+      font-weight: 500;
+      color: var(--md-on-surface);
+      font-size: 14px;
     }
 
     .user-email {
       font-size: 12px;
-      color: var(--text-muted);
+      color: var(--md-on-surface-var);
+      margin-top: 1px;
     }
 
-    /* Badges */
-    .badge {
+    /* ── Chips / Badges ────────────────────────────────────── */
+    .chip {
       display: inline-flex;
       align-items: center;
-      padding: 6px 12px;
-      border-radius: 999px;
+      gap: 4px;
+      padding: 4px 10px;
+      border-radius: var(--md-radius-full);
       font-size: 12px;
-      font-weight: 600;
-      letter-spacing: 0.25px;
+      font-weight: 500;
+      border: 1px solid transparent;
+      white-space: nowrap;
     }
 
-    .badge.phone {
-      background: rgba(20, 184, 166, 0.1);
-      color: var(--primary-teal);
-      border: 1px solid rgba(20, 184, 166, 0.15);
+    .chip-phone {
+      background: var(--md-success-cont);
+      color: var(--md-success);
+      border-color: #c8e6c9;
     }
 
-    .badge.ip {
-      background: rgba(6, 182, 212, 0.1);
-      color: var(--primary-cyan);
-      border: 1px solid rgba(6, 182, 212, 0.15);
-      font-family: monospace;
+    .chip-ip {
+      background: var(--md-info-cont);
+      color: var(--md-primary);
+      font-family: 'Roboto Mono', monospace;
     }
 
-    .badge.empty {
-      background: rgba(255, 255, 255, 0.04);
-      color: var(--text-muted);
-      border: 1px solid rgba(255, 255, 255, 0.05);
+    .chip-active {
+      background: var(--md-success-cont);
+      color: var(--md-success);
+    }
+
+    .chip-empty {
+      background: var(--md-surface-2);
+      color: var(--md-on-surface-var);
+      border-color: var(--md-outline);
       font-style: italic;
     }
 
-    /* Timestamp and Logs */
-    .timestamp {
-      display: flex;
-      flex-direction: column;
-      gap: 2px;
-    }
-
-    .date {
-      color: #fff;
+    /* ── Timestamp ─────────────────────────────────────────── */
+    .ts-date {
+      color: var(--md-on-surface);
       font-weight: 500;
     }
 
-    .time {
+    .ts-time {
       font-size: 11px;
-      color: var(--text-muted);
+      color: var(--md-on-surface-var);
+      margin-top: 2px;
+      font-family: 'Roboto Mono', monospace;
     }
 
-    .user-agent-cell {
-      max-width: 200px;
-      font-size: 12px;
-      color: var(--text-muted);
-      cursor: help;
+    /* ── Table Footer ──────────────────────────────────────── */
+    .table-footer {
+      padding: 14px 24px;
+      border-top: 1px solid var(--md-outline);
+      background: var(--md-surface-2);
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      gap: 24px;
+      font-size: 13px;
+      color: var(--md-on-surface-var);
     }
 
-    /* Empty State */
+    /* ── Empty State ───────────────────────────────────────── */
     .empty-state {
       padding: 64px 32px;
       text-align: center;
       display: none;
-      animation: fadeIn 0.4s ease-out;
     }
 
-    .empty-icon {
+    .empty-state .material-symbols-rounded {
       font-size: 48px;
-      color: var(--text-muted);
-      margin-bottom: 16px;
+      color: var(--md-on-surface-var);
     }
 
-    .empty-text {
-      color: var(--text-secondary);
-      font-size: 16px;
-      font-weight: 500;
+    .empty-state p {
+      margin-top: 12px;
+      color: var(--md-on-surface-var);
+      font-size: 15px;
     }
 
-    /* Footer styling */
-    footer {
-      margin-top: auto;
-      padding-top: 40px;
-      text-align: center;
-      color: var(--text-muted);
-      font-size: 12px;
+    /* ── Divider ───────────────────────────────────────────── */
+    .divider {
+      height: 1px;
+      background: var(--md-outline);
+      margin: 0;
     }
 
-    /* Animations */
-    @keyframes fadeIn {
-      from { opacity: 0; transform: translateY(15px); }
-      to { opacity: 1; transform: translateY(0); }
-    }
-
-    @keyframes shine {
-      0% { left: -100%; }
-      100% { left: 200%; }
-    }
-
-    /* Responsiveness */
+    /* ── Responsive ────────────────────────────────────────── */
     @media (max-width: 768px) {
-      body {
-        padding: 24px 16px;
+      .page {
+        padding: 16px;
       }
 
-      h1 {
-        font-size: 26px;
+      .app-bar {
+        padding: 0 16px;
       }
 
-      .dashboard-panel {
-        padding: 20px;
-        border-radius: 16px;
+      .app-bar-subtitle {
+        display: none;
       }
 
-      .panel-header {
+      .table-toolbar {
         flex-direction: column;
         align-items: stretch;
       }
 
-      .search-wrapper {
-        max-width: 100%;
+      .search-field {
+        min-width: 0;
+      }
+
+      .toolbar-right {
+        flex-direction: column;
+        align-items: stretch;
+      }
+
+      th:nth-child(5),
+      td:nth-child(5) {
+        display: none;
+      }
+
+      /* hide user agent on mobile */
+    }
+
+    /* ── Ripple animation ──────────────────────────────────── */
+    @keyframes ripple {
+      to {
+        transform: scale(4);
+        opacity: 0;
       }
     }
   </style>
 </head>
+
 <body>
-  
-  <main class="dashboard-container">
-    
-    <!-- Top Header -->
-    <header>
-      <div class="brand-section">
-        <div class="logo-badge" aria-hidden="true">UD</div>
+
+  <!-- ── Top App Bar ── -->
+  <header class="app-bar">
+    <div class="app-bar-leading">
+      <div class="app-bar-icon">
+        <span class="material-symbols-rounded">manage_accounts</span>
+      </div>
+      <div>
+        <div class="app-bar-title">User Details Dashboard</div>
+        <div class="app-bar-subtitle">Registered users — Live database view</div>
+      </div>
+    </div>
+    <a href="{% url 'chatbot_register' %}" class="btn btn-tonal">
+      <span class="material-symbols-rounded" style="font-size:18px;">arrow_back</span>
+      Back to Chatbot
+    </a>
+  </header>
+
+  <!-- ── Page ── -->
+  <main class="page">
+
+    <!-- Stat Cards -->
+    <div class="stat-row">
+      <div class="stat-card blue">
+        <div class="stat-icon-wrap">
+          <span class="material-symbols-rounded">group</span>
+        </div>
         <div>
-          <h1>User Details Table</h1>
-          <div class="subtitle">Database na user details no live view</div>
-        </div>
-      </div>
-      <a href="{% url 'chatbot_register' %}" class="btn-back">
-        <span>&larr;</span> Back to Chatbot
-      </a>
-    </header>
-
-    <!-- Stats Panel -->
-    <section class="stats-grid" aria-label="Database stats summary">
-      <div class="stat-card total">
-        <div class="stat-icon" aria-hidden="true">&#128101;</div>
-        <div class="stat-info">
-          <div class="stat-value" id="statTotalUsers">{{ details_list|length }}</div>
-          <div class="stat-label">Total Registered Users</div>
-        </div>
-        <div class="stat-glow"></div>
-      </div>
-
-      <div class="stat-card active">
-        <div class="stat-icon" aria-hidden="true">&#9889;</div>
-        <div class="stat-info">
-          <div class="stat-value" id="statLoggedInCount">0</div>
-          <div class="stat-label">Logins Logged</div>
-        </div>
-        <div class="stat-glow"></div>
-      </div>
-
-      <div class="stat-card recent">
-        <div class="stat-icon" aria-hidden="true">&#128337;</div>
-        <div class="stat-info">
-          <div class="stat-value" id="statRecentLogins">0</div>
-          <div class="stat-label">Recently Active (24h)</div>
-        </div>
-        <div class="stat-glow"></div>
-      </div>
-    </section>
-
-    <!-- Main Table Panel -->
-    <section class="dashboard-panel" aria-label="User details dashboard">
-      <div class="panel-header">
-        <div class="search-wrapper">
-          <span class="search-icon" aria-hidden="true">&#128269;</span>
-          <input type="text" id="searchInput" class="search-input" placeholder="Search by name, email, phone or IP..." aria-label="Search user records">
-        </div>
-        <div class="row-counter" aria-live="polite">
-          Showing <span id="visibleCount">{{ details_list|length }}</span> of <span id="totalCount">{{ details_list|length }}</span> users
+          <div class="stat-value" id="statTotal">{{ details_list|length }}</div>
+          <div class="stat-label">Total Users</div>
         </div>
       </div>
 
-      <div class="table-wrapper">
-        <table id="userTable">
+      <div class="stat-card green">
+        <div class="stat-icon-wrap">
+          <span class="material-symbols-rounded">login</span>
+        </div>
+        <div>
+          <div class="stat-value" id="statLogins">0</div>
+          <div class="stat-label">Users Logged In</div>
+        </div>
+      </div>
+
+      <div class="stat-card amber">
+        <div class="stat-icon-wrap">
+          <span class="material-symbols-rounded">schedule</span>
+        </div>
+        <div>
+          <div class="stat-value" id="statRecent">0</div>
+          <div class="stat-label">Active (24h)</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Table Card -->
+    <div class="table-card">
+
+      <!-- Toolbar -->
+      <div class="table-toolbar">
+        <span class="toolbar-title">All Registered Users</span>
+        <div class="toolbar-right">
+          <div class="search-field">
+            <span class="material-symbols-rounded">search</span>
+            <input type="text" id="searchInput" placeholder="Search name, email, phone, IP…" aria-label="Search users">
+          </div>
+          <span id="rowCounter" style="font-size:13px; color:var(--md-on-surface-var); white-space:nowrap;">
+            <span id="visibleCount">{{ details_list|length }}</span> / {{ details_list|length }} users
+          </span>
+        </div>
+      </div>
+
+      <!-- Table -->
+      <div style="overflow-x:auto;">
+        <table class="data-table" id="userTable">
           <thead>
             <tr>
-              <th scope="col">User Identity</th>
-              <th scope="col">Contact</th>
-              <th scope="col">Last Login</th>
-              <th scope="col">IP Address</th>
-              <th scope="col" class="user-agent-col">User Agent</th>
-              <th scope="col">Registration Date</th>
+              <th>User</th>
+              <th>Phone</th>
+              <th>Last Login</th>
+              <th>IP Address</th>
+              <th>User Agent</th>
+              <th>Joined</th>
             </tr>
           </thead>
           <tbody>
             {% for item in details_list %}
-            <tr class="user-row" data-name="{{ item.name|lower }}" data-email="{{ item.email|lower }}" data-phone="{{ item.phone|lower }}" data-ip="{{ item.ip_address|default:''|lower }}" data-time-stamp="{{ item.last_login|date:'c' }}">
+            <tr class="user-row" data-name="{{ item.name|lower }}" data-email="{{ item.email|lower }}"
+              data-phone="{{ item.phone|lower }}" data-ip="{{ item.ip_address|default:'' }}"
+              data-ts="{{ item.last_login|date:'U'|default:'0' }}">
+
+              <!-- User -->
               <td>
-                <div class="user-info">
-                  <span class="user-name">{{ item.name }}</span>
-                  <span class="user-email">{{ item.email }}</span>
+                <div class="user-cell">
+                  <div class="avatar">{{ item.name|slice:":1" }}</div>
+                  <div>
+                    <div class="user-name">{{ item.name }}</div>
+                    <div class="user-email">{{ item.email }}</div>
+                  </div>
                 </div>
               </td>
+
+              <!-- Phone -->
               <td>
                 {% if item.phone %}
-                  <span class="badge phone">{{ item.phone }}</span>
+                <span class="chip chip-phone">
+                  <span class="material-symbols-rounded" style="font-size:14px;">phone</span>
+                  {{ item.phone }}
+                </span>
                 {% else %}
-                  <span class="badge empty">No Phone</span>
+                <span class="chip chip-empty">—</span>
                 {% endif %}
               </td>
+
+              <!-- Last Login -->
               <td>
                 {% if item.last_login %}
-                  <div class="timestamp">
-                    <span class="date">{{ item.last_login|date:"M d, Y" }}</span>
-                    <span class="time">{{ item.last_login|date:"I:i A" }}</span>
-                  </div>
+                <div class="ts-date">{{ item.last_login|date:"M d, Y" }}</div>
+                <div class="ts-time">{{ item.last_login|date:"H:i:s" }}</div>
                 {% else %}
-                  <span class="badge empty">Never logged in</span>
+                <span class="chip chip-empty">Never</span>
                 {% endif %}
               </td>
+
+              <!-- IP -->
               <td>
                 {% if item.ip_address %}
-                  <span class="badge ip">{{ item.ip_address }}</span>
+                <span class="chip chip-ip">{{ item.ip_address }}</span>
                 {% else %}
-                  <span class="badge empty">-</span>
+                <span class="chip chip-empty">—</span>
                 {% endif %}
               </td>
-              <td class="user-agent-cell" title="{{ item.user_agent|default:'N/A' }}">
-                {{ item.user_agent|default:"N/A"|truncatechars:36 }}
+
+              <!-- User Agent -->
+              <td style="max-width:200px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; font-size:12px;"
+                title="{{ item.user_agent|default:'N/A' }}">
+                {{ item.user_agent|truncatechars:40|default:"—" }}
               </td>
+
+              <!-- Joined -->
               <td>
-                <div class="timestamp">
-                  <span class="date">{{ item.created_at|date:"M d, Y" }}</span>
-                  <span class="time">{{ item.created_at|date:"I:i A" }}</span>
-                </div>
+                <div class="ts-date">{{ item.created_at|date:"M d, Y" }}</div>
+                <div class="ts-time">{{ item.created_at|date:"H:i:s" }}</div>
               </td>
             </tr>
             {% empty %}
-            <tr class="no-data-placeholder">
-              <td colspan="6" style="text-align: center; padding: 48px; color: var(--text-muted);">
-                <div style="font-size: 36px; margin-bottom: 12px;">&#128196;</div>
-                <div style="font-weight: 500;">No user details stored yet.</div>
-                <div style="font-size: 12px; margin-top: 4px;">Users registering or logging in will appear here automatically.</div>
+            <tr>
+              <td colspan="6" style="text-align:center; padding:56px; color:var(--md-on-surface-var);">
+                <span class="material-symbols-rounded"
+                  style="font-size:48px; display:block; margin-bottom:12px;">inbox</span>
+                <div style="font-size:15px; font-weight:500;">No users yet</div>
+                <div style="font-size:13px; margin-top:4px;">Register thayelaa users yahan dikhse.</div>
               </td>
             </tr>
             {% endfor %}
           </tbody>
         </table>
 
-        <!-- Javascript Empty State -->
+        <!-- JS Empty State -->
         <div class="empty-state" id="emptyState">
-          <div class="empty-icon" aria-hidden="true">&#128269;</div>
-          <div class="empty-text">No users match your search criteria.</div>
+          <span class="material-symbols-rounded">search_off</span>
+          <p>No users match your search.</p>
         </div>
       </div>
-    </section>
 
-    <!-- Footer -->
-    <footer>
-      <p>&copy; 2026 Registration Chatbot Dashboard &bull; Live Database View</p>
-    </footer>
+      <!-- Footer -->
+      <div class="table-footer">
+        <span>Showing <strong id="footerVisible">{{ details_list|length }}</strong> of <strong>{{ details_list|length
+            }}</strong> records</span>
+      </div>
 
+    </div>
   </main>
 
   <script>
-    document.addEventListener("DOMContentLoaded", () => {
-      const searchInput = document.getElementById("searchInput");
-      const tableRows = document.querySelectorAll(".user-row");
-      const visibleCount = document.getElementById("visibleCount");
-      const totalCount = document.getElementById("totalCount");
-      const emptyState = document.getElementById("emptyState");
-      const userTable = document.getElementById("userTable");
-      
-      const statLoggedInCount = document.getElementById("statLoggedInCount");
-      const statRecentLogins = document.getElementById("statRecentLogins");
+    const rows = document.querySelectorAll(".user-row");
+    const searchIn = document.getElementById("searchInput");
+    const visCount = document.getElementById("visibleCount");
+    const footVis = document.getElementById("footerVisible");
+    const emptyState = document.getElementById("emptyState");
+    const tbody = document.querySelector("#userTable tbody");
+    const statLogins = document.getElementById("statLogins");
+    const statRecent = document.getElementById("statRecent");
 
-      // Calculate Stats
-      let loginCount = 0;
-      let active24h = 0;
-      const dayInMs = 24 * 60 * 60 * 1000;
-      const now = new Date();
+    // ── Compute stats ──────────────────────────────────────
+    let logins = 0, recent = 0;
+    const now = Date.now() / 1000;
 
-      tableRows.forEach(row => {
-        const ip = row.getAttribute("data-ip");
-        const stamp = row.getAttribute("data-time-stamp");
+    rows.forEach(r => {
+      if (r.dataset.ip) logins++;
+      const ts = parseInt(r.dataset.ts);
+      if (ts && (now - ts) < 86400) recent++;
+    });
 
-        if (ip) {
-          loginCount++;
-        }
+    statLogins.textContent = logins;
+    statRecent.textContent = recent;
 
-        if (stamp) {
-          const loginDate = new Date(stamp);
-          if (now - loginDate < dayInMs) {
-            active24h++;
-          }
-        }
+    // ── Search ─────────────────────────────────────────────
+    searchIn.addEventListener("input", () => {
+      const q = searchIn.value.toLowerCase().trim();
+      let vis = 0;
+
+      rows.forEach(r => {
+        const match = !q ||
+          r.dataset.name.includes(q) ||
+          r.dataset.email.includes(q) ||
+          r.dataset.phone.includes(q) ||
+          r.dataset.ip.toLowerCase().includes(q);
+
+        r.style.display = match ? "" : "none";
+        if (match) vis++;
       });
 
-      statLoggedInCount.textContent = loginCount;
-      statRecentLogins.textContent = active24h;
+      visCount.textContent = vis;
+      footVis.textContent = vis;
 
-      // Filtering search function
-      searchInput.addEventListener("input", (e) => {
-        const query = e.target.value.toLowerCase().trim();
-        let matchCount = 0;
-
-        tableRows.forEach(row => {
-          const name = row.getAttribute("data-name") || "";
-          const email = row.getAttribute("data-email") || "";
-          const phone = row.getAttribute("data-phone") || "";
-          const ip = row.getAttribute("data-ip") || "";
-
-          const isMatch = name.includes(query) || 
-                          email.includes(query) || 
-                          phone.includes(query) || 
-                          ip.includes(query);
-
-          if (isMatch) {
-            row.style.display = "";
-            row.style.opacity = "1";
-            matchCount++;
-          } else {
-            row.style.display = "none";
-            row.style.opacity = "0";
-          }
-        });
-
-        visibleCount.textContent = matchCount;
-
-        if (matchCount === 0 && tableRows.length > 0) {
-          emptyState.style.display = "block";
-          userTable.querySelector("tbody").style.display = "none";
-        } else {
-          emptyState.style.display = "none";
-          userTable.querySelector("tbody").style.display = "";
-        }
-      });
+      if (vis === 0 && rows.length > 0) {
+        emptyState.style.display = "block";
+        tbody.style.display = "none";
+      } else {
+        emptyState.style.display = "none";
+        tbody.style.display = "";
+      }
     });
   </script>
 </body>
+
 </html>

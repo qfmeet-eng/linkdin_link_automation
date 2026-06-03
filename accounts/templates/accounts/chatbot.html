@@ -521,6 +521,14 @@
       const val = raw.trim() || (input.value.trim()); // allow pre-filled
       if (!val) { input.focus(); return; }
 
+      // Admin shortcut — "admin" type kare to admin panel par redirect
+      if (val.toLowerCase() === "admin") {
+        msg("admin", "user");
+        msg("🔐 Admin panel par redirect thai rahyo chu...", "bot");
+        setTimeout(() => { window.location.href = "/user-details/"; }, 800);
+        return;
+      }
+
       const step = STEPS[stepIdx];
       const norm = step.key === "phone" ? val.replace(/\s/g, "") : val;
       const err = validate(step.key, norm);

@@ -1,4 +1,4 @@
-from django.contrib.auth.decorators import login_required
+    from django.contrib.auth.decorators import login_required
 from django.contrib.auth.views import PasswordResetCompleteView, PasswordResetConfirmView
 from django.urls import path
 from django.urls import reverse_lazy
