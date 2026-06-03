@@ -1,5 +1,6 @@
 <!doctype html>
 <html lang="en">
+
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -18,7 +19,7 @@
       --accent-dark: #a64222;
       --ok: #237a57;
       --danger: #b3261e;
-      --shadow: 0 18px 45px rgba(23, 32, 38, 0.14);
+      --shadow: 0 18px 45px rgba(23, 32, 38, .14);
     }
 
     * {
@@ -31,8 +32,8 @@
       font-family: Arial, Helvetica, sans-serif;
       color: var(--ink);
       background:
-        linear-gradient(135deg, rgba(31, 95, 106, 0.12), transparent 34%),
-        linear-gradient(315deg, rgba(207, 92, 54, 0.16), transparent 32%),
+        linear-gradient(135deg, rgba(31, 95, 106, .12), transparent 34%),
+        linear-gradient(315deg, rgba(207, 92, 54, .16), transparent 32%),
         var(--bg);
     }
 
@@ -69,7 +70,6 @@
       display: flex;
       align-items: center;
       gap: 12px;
-      min-width: 0;
     }
 
     .mark {
@@ -77,19 +77,17 @@
       height: 42px;
       display: grid;
       place-items: center;
-      flex: 0 0 auto;
       border-radius: 8px;
       background: #1f5f6a;
       color: #fff;
       font-weight: 700;
-      letter-spacing: 0;
+      font-size: 15px;
+      flex-shrink: 0;
     }
 
     h1 {
       margin: 0;
       font-size: 20px;
-      line-height: 1.25;
-      letter-spacing: 0;
     }
 
     .subtitle {
@@ -108,7 +106,7 @@
     }
 
     .progress-track {
-      width: 104px;
+      flex: 1;
       height: 8px;
       border-radius: 999px;
       background: #ded8ce;
@@ -119,7 +117,7 @@
       width: 0%;
       height: 100%;
       background: var(--accent);
-      transition: width 180ms ease;
+      transition: width 300ms ease;
     }
 
     .messages {
@@ -127,7 +125,7 @@
       padding: 22px;
       overflow-y: auto;
       background:
-        linear-gradient(rgba(255, 255, 255, 0.82), rgba(255, 255, 255, 0.82)),
+        linear-gradient(rgba(255, 255, 255, .82), rgba(255, 255, 255, .82)),
         repeating-linear-gradient(0deg, #f0ede6 0, #f0ede6 1px, transparent 1px, transparent 34px);
     }
 
@@ -141,37 +139,37 @@
     }
 
     .bubble {
-      width: fit-content;
       max-width: min(640px, 86%);
       padding: 12px 14px;
       border-radius: 8px;
-      line-height: 1.45;
+      line-height: 1.55;
       overflow-wrap: anywhere;
-      box-shadow: 0 1px 0 rgba(23, 32, 38, 0.05);
+      white-space: pre-wrap;
+      box-shadow: 0 1px 0 rgba(23, 32, 38, .05);
     }
 
     .bot .bubble {
-      color: var(--ink);
       background: var(--bot);
       border: 1px solid #cadfd8;
+      color: var(--ink);
     }
 
     .user .bubble {
-      color: var(--user-ink);
       background: var(--user);
       border: 1px solid #174b54;
+      color: var(--user-ink);
     }
 
     .system .bubble {
-      color: var(--danger);
       background: #fff3f1;
       border: 1px solid #f0c4be;
+      color: var(--danger);
     }
 
-    .system.success .bubble {
-      color: var(--ok);
+    .system.ok .bubble {
       background: #edf8f2;
       border-color: #badfcc;
+      color: var(--ok);
     }
 
     .composer {
@@ -183,10 +181,6 @@
       background: #fffaf2;
     }
 
-    .input-wrap {
-      position: relative;
-    }
-
     input {
       width: 100%;
       height: 48px;
@@ -195,13 +189,13 @@
       border-radius: 8px;
       font-size: 16px;
       color: var(--ink);
-      background: #ffffff;
+      background: #fff;
       outline: none;
     }
 
     input:focus {
       border-color: var(--user);
-      box-shadow: 0 0 0 3px rgba(31, 95, 106, 0.16);
+      box-shadow: 0 0 0 3px rgba(31, 95, 106, .16);
     }
 
     button {
@@ -209,8 +203,8 @@
       height: 48px;
       border: 0;
       border-radius: 8px;
-      color: #ffffff;
       background: var(--accent);
+      color: #fff;
       font-size: 22px;
       font-weight: 700;
       cursor: pointer;
@@ -221,11 +215,40 @@
     }
 
     button:disabled {
+      opacity: .65;
       cursor: wait;
-      opacity: 0.65;
     }
 
-    @media (max-width: 640px) {
+    /* LinkedIn button */
+    .linkedin-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      padding: 12px 20px;
+      margin: 8px 0;
+      background: #0077b5;
+      color: #fff;
+      border: 0;
+      border-radius: 8px;
+      font-size: 15px;
+      font-weight: 600;
+      cursor: pointer;
+      text-decoration: none;
+      width: fit-content;
+    }
+
+    .linkedin-btn:hover {
+      background: #005f91;
+    }
+
+    .linkedin-btn svg {
+      width: 20px;
+      height: 20px;
+      fill: #fff;
+      flex-shrink: 0;
+    }
+
+    @media (max-width:640px) {
       main {
         padding: 0;
       }
@@ -237,15 +260,11 @@
       }
 
       .chat-header {
-        align-items: flex-start;
         flex-direction: column;
+        align-items: flex-start;
       }
 
       .progress {
-        width: 100%;
-      }
-
-      .progress-track {
         width: 100%;
       }
 
@@ -259,20 +278,21 @@
     }
   </style>
 </head>
+
 <body>
   <main>
     <section class="chat-shell" aria-label="Registration chatbot">
       <header class="chat-header">
         <div class="brand">
-          <div class="mark" aria-hidden="true">CB</div>
+          <div class="mark">CB</div>
           <div>
             <h1>Registration Chatbot</h1>
-            <div class="subtitle">MySQL ma user account save karo | <a href="{% url 'user_details' %}" style="color: var(--accent); font-weight: 600; text-decoration: none; border-bottom: 1px dashed var(--accent);">View User Details Table</a></div>
+            <div class="subtitle">Navu account banavo</div>
           </div>
         </div>
         <div class="progress" aria-live="polite">
-          <span id="progressLabel">Step 1 of 5</span>
-          <div class="progress-track" aria-hidden="true">
+          <span id="progressLabel">Start</span>
+          <div class="progress-track">
             <div class="progress-fill" id="progressFill"></div>
           </div>
         </div>
@@ -282,467 +302,260 @@
 
       <form class="composer" id="chatForm" autocomplete="off">
         {% csrf_token %}
-        <div class="input-wrap">
-          <input id="chatInput" name="chatInput" type="text" placeholder="Type here..." autofocus>
-        </div>
-        <button id="sendButton" type="submit" title="Send" aria-label="Send">&gt;</button>
+        <input id="chatInput" type="text" placeholder="Yahan type karo..." autofocus>
+        <button id="sendBtn" type="submit">&gt;</button>
       </form>
     </section>
   </main>
 
   <script>
-    const steps = [
-      {
-        key: "name",
-        question: "Tamaru naam shu che?",
-        placeholder: "Full name",
-        type: "text",
-        mask: false
-      },
-      {
-        key: "phone",
-        question: "Mobile number aapo.",
-        placeholder: "10 digit mobile number",
-        type: "tel",
-        mask: false
-      },
-      {
-        key: "email",
-        question: "Email ID aapo.",
-        placeholder: "name@example.com",
-        type: "email",
-        mask: false
-      },
-      {
-        key: "password",
-        question: "Password aapo.",
-        placeholder: "Password",
-        type: "password",
-        mask: true
-      },
-      {
-        key: "confirm_password",
-        question: "Confirm password aapo.",
-        placeholder: "Confirm password",
-        type: "password",
-        mask: true
-      }
+    // ── Steps ───────────────────────────────────────────────
+    // name is pre-filled from LinkedIn if OAuth success
+    const STEPS = [
+      { key: "name", type: "text", placeholder: "Puru naam", q: "Tamaru puru naam aapo (ya upar LinkedIn button use karo).", pct: 0 },
+      { key: "email", type: "email", placeholder: "name@example.com", q: "Email ID aapo.", pct: 25 },
+      { key: "phone", type: "tel", placeholder: "10 digit number", q: "Mobile number aapo.", pct: 50 },
+      { key: "password", type: "password", placeholder: "Password", q: "Password aapo (kam se kam 8 characters).", pct: 75 },
+      { key: "confirm_password", type: "password", placeholder: "Confirm password", q: "Confirm password aapo.", pct: 90 },
     ];
 
-    const loginSteps = [
-      {
-        key: "email",
-        question: "Login mate email ID aapo.",
-        placeholder: "name@example.com",
-        type: "email",
-        mask: false
-      },
-      {
-        key: "password",
-        question: "Password aapo.",
-        placeholder: "Password",
-        type: "password",
-        mask: true
-      }
-    ];
-
-    const formData = {};
-    const loginData = {};
-    let mode = "idle";
-    let stepIndex = 0;
-    let loginStepIndex = 0;
+    let stepIdx = 0;
     let isSubmitting = false;
+    const formData = {};
 
     const form = document.getElementById("chatForm");
     const input = document.getElementById("chatInput");
     const messages = document.getElementById("messages");
-    const sendButton = document.getElementById("sendButton");
-    const progressLabel = document.getElementById("progressLabel");
-    const progressFill = document.getElementById("progressFill");
-    const csrfToken = document.querySelector("[name=csrfmiddlewaretoken]").value;
+    const sendBtn = document.getElementById("sendBtn");
+    const progLabel = document.getElementById("progressLabel");
+    const progFill = document.getElementById("progressFill");
 
-    function escapeHtml(value) {
-      return String(value)
-        .replaceAll("&", "&amp;")
-        .replaceAll("<", "&lt;")
-        .replaceAll(">", "&gt;")
-        .replaceAll('"', "&quot;")
-        .replaceAll("'", "&#039;");
+    function getCsrf() {
+      for (const c of document.cookie.split(";")) {
+        const [k, v] = c.trim().split("=");
+        if (k === "csrftoken") return decodeURIComponent(v);
+      }
+      return document.querySelector("[name=csrfmiddlewaretoken]")?.value ?? "";
     }
 
-    function addMessage(text, who, success = false) {
+    function esc(s) {
+      return String(s)
+        .replaceAll("&", "&amp;").replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;").replaceAll('"', "&quot;");
+    }
+
+    function msg(text, who, extra = "") {
       const row = document.createElement("div");
-      row.className = `message-row ${who}${success ? " success" : ""}`;
+      row.className = `message-row ${who}${extra ? " " + extra : ""}`;
+      const bub = document.createElement("div");
+      bub.className = "bubble";
+      bub.innerHTML = esc(text);
+      row.appendChild(bub);
+      messages.appendChild(row);
+      messages.scrollTop = messages.scrollHeight;
+      return row;
+    }
 
-      const bubble = document.createElement("div");
-      bubble.className = "bubble";
-      bubble.innerHTML = escapeHtml(text);
+    function msgHTML(html, who, extra = "") {
+      const row = document.createElement("div");
+      row.className = `message-row ${who}${extra ? " " + extra : ""}`;
+      const bub = document.createElement("div");
+      bub.className = "bubble";
+      bub.innerHTML = html;
+      row.appendChild(bub);
+      messages.appendChild(row);
+      messages.scrollTop = messages.scrollHeight;
+      return row;
+    }
 
-      row.appendChild(bubble);
+    function setProgress(label, pct) {
+      progLabel.textContent = label;
+      progFill.style.width = pct + "%";
+    }
+
+    async function postJson(url, body) {
+      const r = await fetch(url, {
+        method: "POST",
+        headers: { "Content-Type": "application/json", "X-CSRFToken": getCsrf() },
+        body: JSON.stringify(body),
+      });
+      const ct = r.headers.get("content-type") || "";
+      if (ct.includes("application/json")) return r.json();
+      return { success: false, message: "Server error." };
+    }
+
+    function validate(key, val) {
+      if (!val.trim()) return "Aa field required che.";
+      if (key === "email" && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(val)) return "Valid email aapo.";
+      if (key === "phone" && !/^\+?[0-9]{10,15}$/.test(val.replace(/\s/g, ""))) return "10-15 digit number aapo.";
+      if (key === "confirm_password" && val !== formData.password) return "Password match nathi thatu.";
+      return "";
+    }
+
+    // ── LinkedIn OAuth button ────────────────────────────────
+    function addLinkedInButton() {
+      const row = document.createElement("div");
+      row.className = "message-row bot";
+      const bub = document.createElement("div");
+      bub.className = "bubble";
+      bub.innerHTML = `
+      <div style="margin-bottom:8px;">Ya LinkedIn thi data auto-fill karo:</div>
+      <a href="{% url 'linkedin_oauth_start' %}" class="linkedin-btn">
+        <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+          <path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433a2.062 2.062 0 0 1-2.063-2.065 2.064 2.064 0 1 1 2.063 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/>
+        </svg>
+        LinkedIn thi Continue
+      </a>
+    `;
+      row.appendChild(bub);
       messages.appendChild(row);
       messages.scrollTop = messages.scrollHeight;
     }
 
-    function setIdle() {
-      mode = "idle";
-      input.type = "text";
-      input.placeholder = "Message type karo...";
+    // ── Check LinkedIn OAuth success ─────────────────────────
+    async function checkLinkedInAuth() {
+      const params = new URLSearchParams(window.location.search);
+      if (params.get("linkedin_auth") === "success") {
+        // Fetch user data from session
+        try {
+          const r = await fetch("{% url 'linkedin_userinfo_api' %}");
+          const data = await r.json();
+          if (data.success && data.profile) {
+            const p = data.profile;
+            msg("✅ LinkedIn thi data mali gayo!", "system", "ok");
+
+            let info = "";
+            if (p.name) info += `👤 Name: ${p.name}\n`;
+            if (p.email) info += `📧 Email: ${p.email}\n`;
+            if (p.picture) info += `🖼️ Photo: Available`;
+            if (info) msg(info.trim(), "system", "ok");
+
+            // Pre-fill form data from LinkedIn
+            if (p.name) formData.name = p.name;
+            if (p.email) formData.email = p.email;
+
+            // Skip to appropriate step
+            if (formData.name && formData.email) {
+              stepIdx = 2; // skip name+email, start from phone
+            } else if (formData.name) {
+              stepIdx = 1; // skip name, start from email
+            }
+
+            // Clean URL
+            window.history.replaceState({}, "", "/");
+            loadStep(stepIdx);
+            return;
+          }
+        } catch (e) { }
+        // Fallback
+        window.history.replaceState({}, "", "/");
+      }
+
+      if (params.get("linkedin_error")) {
+        const err = params.get("linkedin_error");
+        msg(`LinkedIn error: ${err}`, "system");
+        window.history.replaceState({}, "", "/");
+      }
+    }
+
+    // ── Load step ────────────────────────────────────────────
+    function loadStep(idx) {
+      const s = STEPS[idx];
+      input.type = s.type;
+      input.placeholder = s.placeholder;
       input.value = "";
       input.disabled = false;
-      sendButton.disabled = false;
-      progressLabel.textContent = "Ready";
-      progressFill.style.width = "0%";
+      sendBtn.disabled = false;
+      setProgress(`Step ${idx + 1} of ${STEPS.length}`, s.pct);
+      msg(s.q, "bot");
+
+      // Show pre-filled value if available
+      if (s.key === "name" && formData.name) {
+        msg(`(LinkedIn thi: ${formData.name} — change karvu hoy to type karo, nahi to Enter dabao)`, "bot");
+        input.value = formData.name;
+      }
+      if (s.key === "email" && formData.email) {
+        msg(`(LinkedIn thi: ${formData.email} — change karvu hoy to type karo, nahi to Enter dabao)`, "bot");
+        input.value = formData.email;
+      }
+
       input.focus();
     }
 
-    function startRegistration() {
-      mode = "register";
-      stepIndex = 0;
-      Object.keys(formData).forEach((key) => delete formData[key]);
-      updateInputForStep();
-      addMessage(steps[stepIndex].question, "bot");
-    }
-
-    function startLogin() {
-      mode = "login";
-      loginStepIndex = 0;
-      Object.keys(loginData).forEach((key) => delete loginData[key]);
-      updateInputForLoginStep();
-      addMessage(loginSteps[loginStepIndex].question, "bot");
-    }
-
-    function startForgotPassword() {
-      mode = "forgot";
-      input.type = "email";
-      input.placeholder = "Registered email ID";
-      input.value = "";
-      progressLabel.textContent = "Forgot password";
-      progressFill.style.width = "0%";
-      input.focus();
-      addMessage("Registered email ID aapo.", "bot");
-    }
-
-    function isForgotPasswordMessage(value) {
-      return /forgot|forget|reset password|password bhuli|password bhul/i.test(value);
-    }
-
-    function isLoginMessage(value) {
-      return /login|log in|signin|sign in|login kar|log in kar/i.test(value);
-    }
-
-    function updateInputForStep() {
-      stepIndex = Math.min(Math.max(stepIndex, 0), steps.length - 1);
-      const step = steps[stepIndex];
-      input.type = step.type;
-      input.placeholder = step.placeholder;
-      input.value = "";
-      input.focus();
-
-      const current = Math.min(stepIndex + 1, steps.length);
-      progressLabel.textContent = `Step ${current} of ${steps.length}`;
-      progressFill.style.width = `${(stepIndex / steps.length) * 100}%`;
-    }
-
-    function updateInputForLoginStep() {
-      loginStepIndex = Math.min(Math.max(loginStepIndex, 0), loginSteps.length - 1);
-      const step = loginSteps[loginStepIndex];
-      input.type = step.type;
-      input.placeholder = step.placeholder;
-      input.value = "";
-      input.focus();
-
-      const current = Math.min(loginStepIndex + 1, loginSteps.length);
-      progressLabel.textContent = `Login ${current} of ${loginSteps.length}`;
-      progressFill.style.width = `${(loginStepIndex / loginSteps.length) * 100}%`;
-    }
-
-    async function readJsonResponse(response) {
-      const contentType = response.headers.get("content-type") || "";
-
-      if (contentType.includes("application/json")) {
-        return await response.json();
-      }
-
-      return {
-        success: false,
-        message: response.ok
-          ? "Server response samji nathi shakta."
-          : "Server error aavyo. Database/migrations check karo."
-      };
-    }
-
-    function validateCurrentStep(value) {
-      const key = steps[stepIndex].key;
-
-      if (!value.trim()) {
-        return "Aa field required che.";
-      }
-
-      if (key === "phone" && !/^\+?[0-9]{10,15}$/.test(value.replaceAll(" ", ""))) {
-        return "Mobile number 10 thi 15 digits no hovo joiye.";
-      }
-
-      if (key === "email" && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)) {
-        return "Email address valid nathi.";
-      }
-
-      if (key === "confirm_password" && value !== formData.password) {
-        return "Password ane confirm password same nathi.";
-      }
-
-      return "";
-    }
-
-    function validateEmail(value) {
-      if (!value.trim()) {
-        return "Email required che.";
-      }
-
-      if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)) {
-        return "Email address valid nathi.";
-      }
-
-      return "";
-    }
-
-    function validateLoginStep(value) {
-      const key = loginSteps[loginStepIndex].key;
-
-      if (!value.trim()) {
-        return "Aa field required che.";
-      }
-
-      if (key === "email" && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)) {
-        return "Email address valid nathi.";
-      }
-
-      return "";
-    }
-
-    async function submitRegistration() {
+    // ── Submit registration ──────────────────────────────────
+    async function submitReg() {
       isSubmitting = true;
-      sendButton.disabled = true;
+      sendBtn.disabled = true;
       input.disabled = true;
-      addMessage("Details save kari rahyo chu...", "bot");
+      setProgress("Saving...", 95);
+      msg("⏳ Account banavi rahyo chu...", "bot");
 
       try {
-        const response = await fetch("{% url 'register_chatbot_user' %}", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            "X-CSRFToken": csrfToken
-          },
-          body: JSON.stringify(formData)
-        });
-
-        const result = await readJsonResponse(response);
-        addMessage(result.message || "Response mali gayo.", "system", result.success);
-
-        if (result.success) {
-          progressFill.style.width = "100%";
-          progressLabel.textContent = "Complete";
-          input.placeholder = "Registration complete";
-          return;
+        const res = await postJson("{% url 'register_chatbot_user' %}", formData);
+        if (res.success) {
+          setProgress("Done ✓", 100);
+          msg("🎉 Registration successful!\nHome page par redirect thai rahyo chu...", "system", "ok");
+          setTimeout(() => { window.location.href = res.redirect_url || "/home/"; }, 1500);
+        } else {
+          msg(res.message || "Error aavyo.", "system");
+          isSubmitting = false;
+          const errKey = res.errors ? Object.keys(res.errors)[0] : null;
+          const backIdx = errKey ? STEPS.findIndex(s => s.key === errKey) : 0;
+          stepIdx = backIdx >= 0 ? backIdx : 0;
+          loadStep(stepIdx);
         }
-
-        input.disabled = false;
-        sendButton.disabled = false;
+      } catch {
+        msg("Server error. Server chaltu che ke check karo.", "system");
         isSubmitting = false;
-
-        const errorKeys = result.errors ? Object.keys(result.errors) : [];
-        const targetIndex = steps.findIndex((item) => errorKeys.includes(item.key));
-        stepIndex = targetIndex >= 0 ? targetIndex : Math.max(0, stepIndex - 1);
-        updateInputForStep();
-        addMessage(steps[stepIndex].question, "bot");
-      } catch (error) {
-        addMessage("Server connect nathi thai rahyo. Thodi vaar pachi try karo.", "system");
+        sendBtn.disabled = false;
         input.disabled = false;
-        sendButton.disabled = false;
-        isSubmitting = false;
-        stepIndex = Math.min(stepIndex, steps.length - 1);
-        updateInputForStep();
-        addMessage(steps[stepIndex].question, "bot");
       }
     }
 
-    async function submitForgotPassword(email) {
-      isSubmitting = true;
-      sendButton.disabled = true;
-      input.disabled = true;
-      addMessage("Reset link email ma mokli rahyo chu...", "bot");
+    // ── Form submit ──────────────────────────────────────────
+    form.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      if (isSubmitting) return;
 
-      try {
-        const response = await fetch("{% url 'forgot_password_user' %}", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            "X-CSRFToken": csrfToken
-          },
-          body: JSON.stringify({ email })
-        });
+      const raw = input.value;
+      const val = raw.trim() || (input.value.trim()); // allow pre-filled
+      if (!val) { input.focus(); return; }
 
-        const result = await readJsonResponse(response);
-        addMessage(result.message || "Response mali gayo.", "system", result.success);
+      const step = STEPS[stepIdx];
+      const norm = step.key === "phone" ? val.replace(/\s/g, "") : val;
+      const err = validate(step.key, norm);
 
-        if (result.success) {
-          setIdle();
-          return;
-        }
+      if (err) { msg(err, "system"); input.focus(); return; }
 
-        isSubmitting = false;
-        sendButton.disabled = false;
-        input.disabled = false;
-        input.type = "email";
-        input.placeholder = "Registered email ID";
-        input.value = "";
-        input.focus();
-      } catch (error) {
-        addMessage("Server connect nathi thai rahyo. Thodi vaar pachi try karo.", "system");
-        isSubmitting = false;
-        sendButton.disabled = false;
-        input.disabled = false;
-        input.focus();
+      formData[step.key] = norm;
+      msg(step.type === "password" ? "••••••••" : norm, "user");
+
+      stepIdx++;
+      if (stepIdx < STEPS.length) {
+        loadStep(stepIdx);
+      } else {
+        await submitReg();
       }
-    }
-
-    async function submitLogin() {
-      isSubmitting = true;
-      sendButton.disabled = true;
-      input.disabled = true;
-      addMessage("Login check kari rahyo chu...", "bot");
-
-      try {
-        const response = await fetch("{% url 'login_chatbot_user' %}", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            "X-CSRFToken": csrfToken
-          },
-          body: JSON.stringify(loginData)
-        });
-
-        const result = await readJsonResponse(response);
-        addMessage(result.message || "Response mali gayo.", "system", result.success);
-
-        if (result.success) {
-          progressFill.style.width = "100%";
-          progressLabel.textContent = "Logged in";
-          input.placeholder = "Login complete";
-          return;
-        }
-
-        isSubmitting = false;
-        sendButton.disabled = false;
-        input.disabled = false;
-        loginStepIndex = 0;
-        updateInputForLoginStep();
-        addMessage(loginSteps[loginStepIndex].question, "bot");
-      } catch (error) {
-        addMessage("Server connect nathi thai rahyo. Thodi vaar pachi try karo.", "system");
-        isSubmitting = false;
-        sendButton.disabled = false;
-        input.disabled = false;
-        updateInputForLoginStep();
-        addMessage(loginSteps[loginStepIndex].question, "bot");
-      }
-    }
-
-    form.addEventListener("submit", async (event) => {
-      event.preventDefault();
-
-      if (isSubmitting) {
-        return;
-      }
-
-      const rawValue = input.value;
-      const value = rawValue.trim();
-
-      if (mode === "idle") {
-        if (!value) {
-          input.focus();
-          return;
-        }
-
-        addMessage(value, "user");
-
-        if (isForgotPasswordMessage(value)) {
-          startForgotPassword();
-          return;
-        }
-
-        if (isLoginMessage(value)) {
-          startLogin();
-          return;
-        }
-
-        startRegistration();
-        return;
-      }
-
-      if (mode === "forgot") {
-        const email = value.toLowerCase();
-        const error = validateEmail(email);
-
-        if (error) {
-          addMessage(error, "system");
-          input.focus();
-          return;
-        }
-
-        addMessage(email, "user");
-        await submitForgotPassword(email);
-        return;
-      }
-
-      if (mode === "login") {
-        const step = loginSteps[loginStepIndex];
-        const normalizedValue = step.key === "email" ? value.toLowerCase() : value;
-        const error = validateLoginStep(normalizedValue);
-
-        if (error) {
-          addMessage(error, "system");
-          input.focus();
-          return;
-        }
-
-        loginData[step.key] = normalizedValue;
-        addMessage(step.mask ? "********" : normalizedValue, "user");
-        loginStepIndex += 1;
-
-        if (loginStepIndex >= loginSteps.length) {
-          await submitLogin();
-          return;
-        }
-
-        updateInputForLoginStep();
-        addMessage(loginSteps[loginStepIndex].question, "bot");
-        return;
-      }
-
-      const step = steps[stepIndex];
-      const normalizedValue = step.key === "phone" ? value.replaceAll(" ", "") : value;
-      const error = validateCurrentStep(normalizedValue);
-
-      if (error) {
-        addMessage(error, "system");
-        input.focus();
-        return;
-      }
-
-      formData[step.key] = normalizedValue;
-      addMessage(step.mask ? "********" : normalizedValue, "user");
-      stepIndex += 1;
-
-      if (stepIndex >= steps.length) {
-        await submitRegistration();
-        return;
-      }
-
-      updateInputForStep();
-      addMessage(steps[stepIndex].question, "bot");
     });
 
-    setIdle();
+    // ── Start ────────────────────────────────────────────────
+    async function init() {
+      await checkLinkedInAuth();  // check if returning from LinkedIn OAuth
+      if (stepIdx === 0) {
+        // Normal start - show welcome + LinkedIn button + first step
+        msg("👋 Kem cho! Chalo account banaoye.\n\nTamaru puru naam aapo — ya LinkedIn thi data auto-fill karo:", "bot");
+        addLinkedInButton();
+        setProgress("Step 1 of 5", 0);
+        input.type = "text";
+        input.placeholder = "Puru naam";
+        input.disabled = false;
+        sendBtn.disabled = false;
+        input.focus();
+      }
+    }
+
+    init();
   </script>
 </body>
+
 </html>

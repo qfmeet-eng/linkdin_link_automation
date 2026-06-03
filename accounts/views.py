@@ -1,5 +1,6 @@
 import json
 import re
+import secrets
 from json import JSONDecodeError
 from django.conf import settings
 from django.contrib.auth import authenticate, get_user_model, login
@@ -10,9 +11,9 @@ from django.core.mail import send_mail
 from django.core.validators import validate_email
 from django.db import IntegrityError, transaction
 from django.db.utils import OperationalError, ProgrammingError
-from django.http import HttpResponse
+from django.http import HttpResponse, HttpResponseRedirect
 from django.http import JsonResponse
-from django.shortcuts import render
+from django.shortcuts import render, redirect
 from django.urls import reverse
 from django.utils.encoding import force_bytes
 from django.utils.http import urlsafe_base64_encode
@@ -178,6 +179,7 @@ def register_chatbot_user(request):
         {
             "success": True,
             "message": "Registration complete thai gayu. Tamari details save thai gai che.",
+            "redirect_url": "/home/",
         },
         status=201,
     )
@@ -282,6 +284,7 @@ def login_chatbot_user(request):
         {
             "success": True,
             "message": "Login successful. Tamari login entry database ma save thai gai che.",
+            "redirect_url": "/home/",
             "user": {
                 "id": authenticated_user.id,
                 "name": authenticated_user.first_name,
@@ -368,7 +371,119 @@ def forgot_password_user(request):
     )
 
 
+def home_view(request):
+    user = request.user
+    user_detail = None
+    if user.is_authenticated:
+        try:
+            user_detail = UserDetails.objects.get(user=user)
+        except UserDetails.DoesNotExist:
+            user_detail = None
+    return render(request, "accounts/home.html", {
+        "user": user,
+        "user_detail": user_detail,
+    })
+
+
 def user_details_view(request):
     details_list = UserDetails.objects.all().order_by("-created_at")
     return render(request, "accounts/user_details.html", {"details_list": details_list})
 
+
+@require_POST
+def scrape_linkedin_view(request):
+    """Accept a LinkedIn profile URL and return structured profile data via Gemini."""
+    data, error_response = parse_json_body(request)
+    if error_response:
+        return error_response
+
+    url = str(data.get("url", "")).strip()
+    if not url:
+        return JsonResponse(
+            {"success": False, "message": "LinkedIn profile URL required che."},
+            status=400,
+        )
+
+    if "linkedin.com" not in url.lower():
+        return JsonResponse(
+            {"success": False, "message": "Valid LinkedIn profile URL aapo (linkedin.com/in/...)."},
+            status=400,
+        )
+
+    from .linkedin_scraper import get_linkedin_profile_data
+
+    result = get_linkedin_profile_data(url)
+
+    if result.get("error"):
+        return JsonResponse(
+            {"success": False, "message": result["error"]},
+            status=500,
+        )
+
+    return JsonResponse({"success": True, "profile": result})
+
+
+
+# ── LinkedIn OAuth 2.0 Views ──────────────────────────────────────────────────
+
+def linkedin_oauth_start(request):
+    """
+    Step 1: User ne LinkedIn authorization page par redirect karo.
+    GET /auth/linkedin/
+    """
+    from .linkedin_oauth import build_authorization_url
+
+    # CSRF protection mate random state generate karo
+    state = secrets.token_urlsafe(16)
+    request.session["linkedin_oauth_state"] = state
+
+    auth_url = build_authorization_url(state)
+    return redirect(auth_url)
+
+
+def linkedin_oauth_callback(request):
+    """
+    Step 2: LinkedIn callback — code exchange karo, userinfo fetch karo.
+    GET /auth/linkedin/callback/?code=...&state=...
+    """
+    from .linkedin_oauth import get_linkedin_user_data
+
+    # State verify karo
+    returned_state = request.GET.get("state", "")
+    saved_state    = request.session.pop("linkedin_oauth_state", "")
+    if returned_state != saved_state:
+        return JsonResponse(
+            {"success": False, "message": "Invalid OAuth state. Please try again."},
+            status=400,
+        )
+
+    # Error check (user ne denied karyun hoy)
+    error = request.GET.get("error")
+    if error:
+        error_desc = request.GET.get("error_description", error)
+        return redirect(f"/?linkedin_error={error_desc}")
+
+    code = request.GET.get("code", "")
+    if not code:
+        return redirect("/?linkedin_error=No code received")
+
+    # Code thi user data fetch karo
+    user_data = get_linkedin_user_data(code)
+
+    if "error" in user_data:
+        return redirect(f"/?linkedin_error={user_data['error']}")
+
+    # Session ma store karo — chatbot page read karso
+    request.session["linkedin_user_data"] = user_data
+    return redirect("/?linkedin_auth=success")
+
+
+def linkedin_userinfo_api(request):
+    """
+    GET /auth/linkedin/userinfo/
+    Session ma thi LinkedIn user data JSON ma return karo — chatbot JS use karashe.
+    """
+    user_data = request.session.get("linkedin_user_data")
+    if not user_data:
+        return JsonResponse({"success": False, "message": "LinkedIn data session ma nathi."})
+    return JsonResponse({"success": True, "profile": user_data})

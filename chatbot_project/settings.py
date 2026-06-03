@@ -180,3 +180,6 @@ APP_BASE_URL = os.environ.get("APP_BASE_URL", "")
 # https://docs.djangoproject.com/en/5.0/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
+
+# CSRF cookie must be readable by JavaScript
+CSRF_COOKIE_HTTPONLY = False
