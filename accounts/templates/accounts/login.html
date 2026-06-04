@@ -1,0 +1,366 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>User Login - LinkedIn Assistant</title>
+  <!-- Google Fonts — Outfit -->
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    /* ── MD3 Color Tokens (Light Scheme) ───────────────────── */
+    :root {
+      --md-primary: #00639b;
+      --md-on-primary: #ffffff;
+      --md-primary-container: #d1e4ff;
+      --md-on-primary-cont: #001d35;
+
+      --md-surface: #f8f9ff;
+      --md-surface-1: #ffffff;
+      --md-surface-2: #f1f3f9;
+      --md-surface-variant: #e1e2ec;
+      --md-on-surface: #1a1c1e;
+      --md-on-surface-variant: #44474f;
+      --md-outline: #74777f;
+      --md-outline-variant: #c4c6d0;
+
+      --md-error: #ba1a1a;
+      --md-error-container: #ffdad6;
+      --md-on-error-cont: #410002;
+
+      --md-elev-1: 0 1px 3px 1px rgba(0, 0, 0, .15), 0 1px 2px 0 rgba(0, 0, 0, .3);
+      --md-elev-2: 0 2px 6px 2px rgba(0, 0, 0, .15), 0 1px 2px 0 rgba(0, 0, 0, .3);
+      --md-elev-3: 0 4px 8px 3px rgba(0, 0, 0, .15), 0 1px 3px 0 rgba(0, 0, 0, .3);
+
+      --md-radius-md: 12px;
+      --md-radius-lg: 16px;
+      --md-radius-xl: 24px;
+      --md-radius-full: 999px;
+
+      --transition: 0.25s cubic-bezier(0.2, 0, 0, 1);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      min-height: 100vh;
+      font-family: 'Outfit', sans-serif;
+      color: var(--md-on-surface);
+      background: var(--md-surface);
+      background-image: radial-gradient(circle at 10% 20%, rgba(0, 99, 155, 0.05) 0%, transparent 40%),
+        radial-gradient(circle at 90% 80%, rgba(83, 95, 112, 0.05) 0%, transparent 40%);
+      display: grid;
+      place-items: center;
+      padding: 24px;
+    }
+
+    .login-card {
+      width: min(440px, 100%);
+      background: var(--md-surface-1);
+      border-radius: var(--md-radius-xl);
+      box-shadow: var(--md-elev-3);
+      padding: 40px;
+      text-align: center;
+      border: 1px solid var(--md-outline-variant);
+    }
+
+    .brand-mark {
+      width: 56px;
+      height: 56px;
+      display: grid;
+      place-items: center;
+      border-radius: var(--md-radius-lg);
+      background: var(--md-primary);
+      color: var(--md-on-primary);
+      font-weight: 700;
+      font-size: 20px;
+      margin: 0 auto 16px;
+      box-shadow: var(--md-elev-1);
+    }
+
+    h1 {
+      font-size: 24px;
+      font-weight: 600;
+      color: var(--md-on-surface);
+      margin-bottom: 8px;
+    }
+
+    .subtitle {
+      font-size: 14px;
+      color: var(--md-on-surface-variant);
+      margin-bottom: 32px;
+    }
+
+    .error-container {
+      background: var(--md-error-container);
+      color: var(--md-on-error-cont);
+      border-radius: var(--md-radius-md);
+      padding: 12px 16px;
+      font-size: 14px;
+      text-align: left;
+      margin-bottom: 24px;
+      display: none;
+      border: 1px solid transparent;
+    }
+
+    .field-container {
+      position: relative;
+      margin-bottom: 20px;
+      width: 100%;
+    }
+
+    .field-container input {
+      width: 100%;
+      height: 56px;
+      padding: 8px 16px;
+      font-size: 16px;
+      border: 1px solid var(--md-outline);
+      border-radius: 8px;
+      outline: none;
+      background: transparent;
+      transition: border-color 0.2s, border-width 0.1s;
+      font-family: 'Outfit', sans-serif;
+      color: var(--md-on-surface);
+    }
+
+    .field-container input:focus {
+      border-color: var(--md-primary);
+      border-width: 2px;
+      padding: 7px 15px;
+    }
+
+    .field-container label {
+      position: absolute;
+      left: 16px;
+      top: 50%;
+      transform: translateY(-50%);
+      background: var(--md-surface-1);
+      padding: 0 4px;
+      color: var(--md-on-surface-variant);
+      transition: 0.2s ease all;
+      pointer-events: none;
+      font-size: 16px;
+    }
+
+    .field-container input:focus ~ label,
+    .field-container input:not(:placeholder-shown) ~ label {
+      top: 0;
+      font-size: 12px;
+      color: var(--md-primary);
+      font-weight: 500;
+    }
+
+    .btn-submit {
+      width: 100%;
+      height: 48px;
+      background: var(--md-primary);
+      color: var(--md-on-primary);
+      border: none;
+      border-radius: var(--md-radius-full);
+      font-size: 16px;
+      font-weight: 600;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: var(--md-elev-1);
+      transition: background 0.2s, box-shadow 0.2s, transform 0.1s;
+      font-family: 'Outfit', sans-serif;
+      margin-top: 12px;
+    }
+
+    .btn-submit:hover {
+      background: #004d7a;
+      box-shadow: var(--md-elev-2);
+    }
+
+    .btn-submit:active {
+      transform: scale(0.98);
+    }
+
+    .btn-submit:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+
+    /* LinkedIn button */
+    .linkedin-btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+      padding: 14px 24px;
+      margin: 8px auto;
+      background: #0077b5;
+      color: #fff;
+      border: 0;
+      border-radius: var(--md-radius-full);
+      font-size: 15px;
+      font-weight: 600;
+      cursor: pointer;
+      text-decoration: none;
+      width: 100%;
+      box-shadow: var(--md-elev-1);
+      transition: background var(--transition), box-shadow var(--transition), transform var(--transition);
+    }
+
+    .linkedin-btn:hover {
+      background: #005f91;
+      box-shadow: var(--md-elev-2);
+      transform: translateY(-1px);
+    }
+
+    .linkedin-btn:active {
+      transform: translateY(0);
+    }
+
+    .linkedin-btn svg {
+      width: 20px;
+      height: 20px;
+      fill: #fff;
+      flex-shrink: 0;
+    }
+
+    /* Divider */
+    .divider {
+      display: flex;
+      align-items: center;
+      text-align: center;
+      margin: 20px 0;
+      color: var(--md-on-surface-variant);
+      font-size: 13px;
+      font-weight: 500;
+    }
+
+    .divider::before, .divider::after {
+      content: '';
+      flex: 1;
+      border-bottom: 1px solid var(--md-outline-variant);
+    }
+
+    .divider:not(:empty)::before {
+      margin-right: 16px;
+    }
+
+    .divider:not(:empty)::after {
+      margin-left: 16px;
+    }
+
+    .links-footer {
+      margin-top: 24px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      font-size: 14px;
+    }
+
+    .links-footer a {
+      color: var(--md-primary);
+      text-decoration: none;
+      font-weight: 500;
+    }
+
+    .links-footer a:hover {
+      text-decoration: underline;
+    }
+
+    .forgot-link {
+      color: var(--md-on-surface-variant) !important;
+      font-size: 13px;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="login-card">
+    <div class="brand-mark">CB</div>
+    <h1>Welcome Back</h1>
+    <div class="subtitle">Chatbot account ma login thava details aapo</div>
+
+    <div class="error-container" id="errorBox"></div>
+
+    <a href="{% url 'linkedin_oauth_start' %}" class="linkedin-btn">
+      <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+        <path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433a2.062 2.062 0 0 1-2.063-2.065 2.064 2.064 0 1 1 2.063 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/>
+      </svg>
+      LinkedIn thi Login karo
+    </a>
+
+    <div class="divider">ATHVA</div>
+
+    <form id="loginForm" autocomplete="on">
+      {% csrf_token %}
+      <div class="field-container">
+        <input type="text" name="email" id="id_email" placeholder=" " required autofocus>
+        <label for="id_email">Username or Email ID</label>
+      </div>
+
+      <div class="field-container">
+        <input type="password" name="password" id="id_password" placeholder=" " required>
+        <label for="id_password">Password</label>
+      </div>
+
+      <button type="submit" class="btn-submit" id="submitBtn">
+        Login
+      </button>
+    </form>
+
+    <div class="links-footer">
+      <a href="{% url 'chatbot_register' %}">Chalo account banavo (Chatbot)</a>
+      <a href="{% url 'chatbot_forgot_password' %}" class="forgot-link">Forgot Password?</a>
+    </div>
+  </div>
+
+  <script>
+    const form = document.getElementById("loginForm");
+    const errorBox = document.getElementById("errorBox");
+    const submitBtn = document.getElementById("submitBtn");
+
+    form.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      errorBox.style.display = "none";
+      errorBox.innerHTML = "";
+      submitBtn.disabled = true;
+      submitBtn.innerText = "Processing...";
+
+      const email = document.getElementById("id_email").value.trim();
+      const password = document.getElementById("id_password").value;
+      const csrf = document.querySelector("[name=csrfmiddlewaretoken]")?.value ?? "";
+
+      try {
+        const r = await fetch("{% url 'login_chatbot_user' %}", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "X-CSRFToken": csrf
+          },
+          body: JSON.stringify({ email, password })
+        });
+        const data = await r.json();
+        
+        if (data.success) {
+          submitBtn.innerText = "Redirecting...";
+          const urlParams = new URLSearchParams(window.location.search);
+          const nextUrl = urlParams.get("next") || data.redirect_url || "/home/";
+          window.location.href = nextUrl;
+        } else {
+          submitBtn.disabled = false;
+          submitBtn.innerText = "Login";
+          errorBox.style.display = "block";
+          errorBox.innerText = data.message || "Email athva password khoto che.";
+        }
+      } catch (e) {
+        submitBtn.disabled = false;
+        submitBtn.innerText = "Login";
+        errorBox.style.display = "block";
+        errorBox.innerText = "Server error. Try again.";
+      }
+    });
+  </script>
+</body>
+
+</html>

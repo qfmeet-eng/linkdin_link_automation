@@ -447,6 +447,274 @@
       font-style: italic;
     }
 
+    .chip-inactive {
+      background: var(--md-error-cont);
+      color: var(--md-error);
+      border-color: #ffcdd2;
+    }
+
+    /* Actions buttons */
+    .action-btn {
+      width: 32px;
+      height: 32px;
+      border-radius: var(--md-radius-full);
+      border: none;
+      background: transparent;
+      color: var(--md-on-surface-var);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: background var(--md-transition), color var(--md-transition);
+    }
+
+    .action-btn:hover {
+      background: var(--md-surface-2);
+      color: var(--md-primary);
+    }
+
+    .action-btn.delete-btn:hover {
+      background: var(--md-error-cont);
+      color: var(--md-error);
+    }
+
+    .status-toggle-btn {
+      border: none;
+      background: transparent;
+      cursor: pointer;
+      padding: 0;
+      outline: none;
+      display: inline-flex;
+    }
+
+    /* ── Modal Dialogs ─────────────────────────────────────── */
+    .modal-backdrop {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.4);
+      backdrop-filter: blur(4px);
+      z-index: 1000;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.25s cubic-bezier(0.2, 0, 0, 1);
+    }
+
+    .modal-backdrop.open {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    .modal-window {
+      background: var(--md-surface-1);
+      border-radius: var(--md-radius-xl);
+      box-shadow: var(--md-elev-3);
+      width: 90%;
+      max-width: 500px;
+      max-height: 85vh;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      transform: scale(0.9) translateY(20px);
+      transition: transform 0.25s cubic-bezier(0.2, 0, 0, 1);
+    }
+
+    .modal-backdrop.open .modal-window {
+      transform: scale(1) translateY(0);
+    }
+
+    .modal-header {
+      padding: 24px 24px 16px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 1px solid var(--md-outline);
+    }
+
+    .modal-title {
+      font-size: 20px;
+      font-weight: 500;
+      color: var(--md-on-surface);
+    }
+
+    .modal-close {
+      background: transparent;
+      border: none;
+      color: var(--md-on-surface-var);
+      cursor: pointer;
+      width: 36px;
+      height: 36px;
+      border-radius: var(--md-radius-full);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: background var(--md-transition);
+    }
+
+    .modal-close:hover {
+      background: var(--md-surface-2);
+    }
+
+    .modal-body {
+      padding: 24px;
+      overflow-y: auto;
+    }
+
+    .modal-footer {
+      padding: 16px 24px 24px;
+      display: flex;
+      justify-content: flex-end;
+      gap: 12px;
+      border-top: 1px solid var(--md-outline);
+    }
+
+    /* Form Fields */
+    .form-group {
+      margin-bottom: 20px;
+    }
+
+    .form-group:last-child {
+      margin-bottom: 0;
+    }
+
+    .form-label {
+      display: block;
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--md-on-surface-var);
+      margin-bottom: 6px;
+    }
+
+    .form-control {
+      width: 100%;
+      height: 48px;
+      padding: 0 16px;
+      border: 1px solid var(--md-outline);
+      border-radius: var(--md-radius-md);
+      font-family: 'Roboto', sans-serif;
+      font-size: 15px;
+      color: var(--md-on-surface);
+      background: var(--md-surface-1);
+      transition: border-color var(--md-transition), box-shadow var(--md-transition);
+    }
+
+    .form-control:focus {
+      outline: none;
+      border-color: var(--md-primary);
+      box-shadow: 0 0 0 2px rgba(26, 115, 232, 0.2);
+    }
+
+    .form-error {
+      color: var(--md-error);
+      font-size: 12px;
+      margin-top: 4px;
+      display: none;
+    }
+
+    /* Switch styling */
+    .switch-container {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 8px 0;
+    }
+
+    .switch {
+      position: relative;
+      display: inline-block;
+      width: 52px;
+      height: 32px;
+    }
+
+    .switch input {
+      opacity: 0;
+      width: 0;
+      height: 0;
+    }
+
+    .slider {
+      position: absolute;
+      cursor: pointer;
+      inset: 0;
+      background-color: var(--md-outline);
+      transition: .3s;
+      border-radius: 32px;
+    }
+
+    .slider:before {
+      position: absolute;
+      content: "";
+      height: 24px;
+      width: 24px;
+      left: 4px;
+      bottom: 4px;
+      background-color: white;
+      transition: .3s;
+      border-radius: 50%;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+    }
+
+    input:checked + .slider {
+      background-color: var(--md-primary);
+    }
+
+    input:checked + .slider:before {
+      transform: translateX(20px);
+    }
+
+    /* ── Toast Notification ────────────────────────────────── */
+    .toast-container {
+      position: fixed;
+      bottom: 24px;
+      right: 24px;
+      z-index: 2000;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .toast {
+      background: #322f35;
+      color: #f5eff7;
+      padding: 14px 20px;
+      border-radius: var(--md-radius-md);
+      font-size: 14px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      box-shadow: var(--md-elev-2);
+      transform: translateY(100px);
+      opacity: 0;
+      animation: toastIn 0.3s forwards cubic-bezier(0.2, 0, 0, 1);
+      max-width: 350px;
+    }
+
+    .toast.success {
+      border-left: 4px solid var(--md-success);
+    }
+
+    .toast.error {
+      border-left: 4px solid var(--md-error);
+    }
+
+    @keyframes toastIn {
+      to {
+        transform: translateY(0);
+        opacity: 1;
+      }
+    }
+
+    .toast-close {
+      background: transparent;
+      border: none;
+      color: #cac4d0;
+      cursor: pointer;
+      margin-left: auto;
+      display: flex;
+    }
+
     /* ── Timestamp ─────────────────────────────────────────── */
     .ts-date {
       color: var(--md-on-surface);
@@ -623,22 +891,36 @@
             <tr>
               <th>User</th>
               <th>Phone</th>
+              <th>Status</th>
               <th>Last Login</th>
               <th>IP Address</th>
               <th>User Agent</th>
               <th>Joined</th>
+              <th style="text-align: center;">Actions</th>
             </tr>
           </thead>
           <tbody>
             {% for item in details_list %}
-            <tr class="user-row" data-name="{{ item.name|lower }}" data-email="{{ item.email|lower }}"
-              data-phone="{{ item.phone|lower }}" data-ip="{{ item.ip_address|default:'' }}"
+            <tr class="user-row" id="user-row-{{ item.user.id }}"
+              data-user-id="{{ item.user.id }}"
+              data-name="{{ item.name }}"
+              data-email="{{ item.email }}"
+              data-phone="{{ item.phone }}"
+              data-active="{% if item.user.is_active %}true{% else %}false{% endif %}"
+              data-search-name="{{ item.name|lower }}"
+              data-search-email="{{ item.email|lower }}"
+              data-search-phone="{{ item.phone|lower }}"
+              data-ip="{{ item.ip_address|default:'' }}"
               data-ts="{{ item.last_login|date:'U'|default:'0' }}">
 
               <!-- User -->
               <td>
                 <div class="user-cell">
+                  {% if item.profile_picture_url %}
+                  <img class="avatar" src="{{ item.profile_picture_url }}" alt="Avatar" style="object-fit: cover;">
+                  {% else %}
                   <div class="avatar">{{ item.name|slice:":1" }}</div>
+                  {% endif %}
                   <div>
                     <div class="user-name">{{ item.name }}</div>
                     <div class="user-email">{{ item.email }}</div>
@@ -656,6 +938,23 @@
                 {% else %}
                 <span class="chip chip-empty">—</span>
                 {% endif %}
+              </td>
+
+              <!-- Status -->
+              <td>
+                <button class="status-toggle-btn" onclick="toggleUserStatus({{ item.user.id }})" title="Click to toggle status">
+                  {% if item.user.is_active %}
+                  <span class="chip chip-active">
+                    <span class="material-symbols-rounded" style="font-size:14px; margin-right:4px;">check_circle</span>
+                    Active
+                  </span>
+                  {% else %}
+                  <span class="chip chip-inactive">
+                    <span class="material-symbols-rounded" style="font-size:14px; margin-right:4px;">cancel</span>
+                    Inactive
+                  </span>
+                  {% endif %}
+                </button>
               </td>
 
               <!-- Last Login -->
@@ -688,10 +987,25 @@
                 <div class="ts-date">{{ item.created_at|date:"M d, Y" }}</div>
                 <div class="ts-time">{{ item.created_at|date:"H:i:s" }}</div>
               </td>
+
+              <!-- Actions -->
+              <td>
+                <div style="display: flex; gap: 4px; justify-content: center; align-items: center;">
+                  <button class="action-btn" onclick="openEditModal({{ item.user.id }})" title="Edit User">
+                    <span class="material-symbols-rounded" style="font-size:18px;">edit</span>
+                  </button>
+                  <button class="action-btn" onclick="openLogsModal({{ item.user.id }}, '{{ item.name|escapejs }}')" title="Login History">
+                    <span class="material-symbols-rounded" style="font-size:18px;">history</span>
+                  </button>
+                  <button class="action-btn delete-btn" onclick="openDeleteModal({{ item.user.id }}, '{{ item.name|escapejs }}')" title="Delete User">
+                    <span class="material-symbols-rounded" style="font-size:18px;">delete</span>
+                  </button>
+                </div>
+              </td>
             </tr>
             {% empty %}
             <tr>
-              <td colspan="6" style="text-align:center; padding:56px; color:var(--md-on-surface-var);">
+              <td colspan="8" style="text-align:center; padding:56px; color:var(--md-on-surface-var);">
                 <span class="material-symbols-rounded"
                   style="font-size:48px; display:block; margin-bottom:12px;">inbox</span>
                 <div style="font-size:15px; font-weight:500;">No users yet</div>
@@ -711,12 +1025,122 @@
 
       <!-- Footer -->
       <div class="table-footer">
-        <span>Showing <strong id="footerVisible">{{ details_list|length }}</strong> of <strong>{{ details_list|length
-            }}</strong> records</span>
+        <span>Showing <strong id="footerVisible">{{ details_list|length }}</strong> of <strong>{{ details_list|length }}</strong> records</span>
       </div>
 
     </div>
   </main>
+
+  <!-- Toast Container -->
+  <div class="toast-container" id="toastContainer"></div>
+
+  <!-- Add/Edit User Modal -->
+  <div class="modal-backdrop" id="userModal">
+    <div class="modal-window">
+      <div class="modal-header">
+        <h2 class="modal-title" id="modalTitle">Add New User</h2>
+        <button class="modal-close" onclick="closeUserModal()">
+          <span class="material-symbols-rounded">close</span>
+        </button>
+      </div>
+      <form id="userForm" onsubmit="saveUser(event)">
+        <input type="hidden" id="formUserId">
+        <div class="modal-body">
+          <div class="form-group">
+            <label class="form-label" for="formName">Full Name</label>
+            <input type="text" id="formName" class="form-control" placeholder="Enter full name" required>
+            <div class="form-error" id="errorName"></div>
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="formEmail">Email Address</label>
+            <input type="email" id="formEmail" class="form-control" placeholder="Enter email address" required>
+            <div class="form-error" id="errorEmail"></div>
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="formPhone">Phone Number</label>
+            <input type="tel" id="formPhone" class="form-control" placeholder="Enter phone (e.g. 9876543210)" required>
+            <div class="form-error" id="errorPhone"></div>
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="formPassword">Password</label>
+            <input type="password" id="formPassword" class="form-control" placeholder="Enter password">
+            <div class="form-error" id="errorPassword"></div>
+            <small style="color: var(--md-on-surface-var); display: block; margin-top: 4px;" id="passwordHelp">
+              For new users, password is required. For existing users, leave blank to keep unchanged.
+            </small>
+          </div>
+          <div class="form-group switch-container">
+            <span class="form-label" style="margin-bottom: 0;">Account Active</span>
+            <label class="switch">
+              <input type="checkbox" id="formActive" checked>
+              <span class="slider"></span>
+            </label>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-outlined" onclick="closeUserModal()">Cancel</button>
+          <button type="submit" class="btn btn-filled" id="btnSubmit">Save</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Delete Confirmation Modal -->
+  <div class="modal-backdrop" id="deleteModal">
+    <div class="modal-window" style="max-width: 400px;">
+      <div class="modal-header">
+        <h2 class="modal-title">Delete User</h2>
+        <button class="modal-close" onclick="closeDeleteModal()">
+          <span class="material-symbols-rounded">close</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <p>Are you sure you want to delete <strong id="deleteUserName"></strong>?</p>
+        <p style="color: var(--md-error); font-size: 13px; margin-top: 8px;">
+          <span class="material-symbols-rounded" style="font-size: 16px; vertical-align: text-bottom;">warning</span>
+          This action is permanent and will delete their profile, details, and login logs.
+        </p>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-outlined" onclick="closeDeleteModal()">Cancel</button>
+        <button type="button" class="btn btn-filled" style="background: var(--md-error); color: white;" onclick="confirmDeleteUser()">Delete</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Login History Modal -->
+  <div class="modal-backdrop" id="logsModal">
+    <div class="modal-window" style="max-width: 800px;">
+      <div class="modal-header">
+        <h2 class="modal-title">Login History: <span id="logsUserName"></span></h2>
+        <button class="modal-close" onclick="closeLogsModal()">
+          <span class="material-symbols-rounded">close</span>
+        </button>
+      </div>
+      <div class="modal-body" style="padding: 0; max-height: 50vh;">
+        <table class="data-table" id="logsTable" style="margin: 0;">
+          <thead style="position: sticky; top: 0; z-index: 10;">
+            <tr>
+              <th>Timestamp</th>
+              <th>Status</th>
+              <th>IP Address</th>
+              <th>User Agent</th>
+            </tr>
+          </thead>
+          <tbody id="logsTableBody">
+            <!-- Dynamically populated -->
+          </tbody>
+        </table>
+        <div id="logsEmptyState" style="text-align: center; padding: 48px 16px; display: none;">
+          <span class="material-symbols-rounded" style="font-size: 40px; color: var(--md-on-surface-var);">history_toggle_off</span>
+          <p style="margin-top: 8px; color: var(--md-on-surface-var);">No login activities found for this user.</p>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-tonal" onclick="closeLogsModal()">Close</button>
+      </div>
+    </div>
+  </div>
 
   <script>
     const rows = document.querySelectorAll(".user-row");
@@ -748,9 +1172,9 @@
 
       rows.forEach(r => {
         const match = !q ||
-          r.dataset.name.includes(q) ||
-          r.dataset.email.includes(q) ||
-          r.dataset.phone.includes(q) ||
+          r.dataset.searchName.includes(q) ||
+          r.dataset.searchEmail.includes(q) ||
+          r.dataset.searchPhone.includes(q) ||
           r.dataset.ip.toLowerCase().includes(q);
 
         r.style.display = match ? "" : "none";
@@ -768,6 +1192,286 @@
         tbody.style.display = "";
       }
     });
+
+    // ── CSRF Utility ────────────────────────────────────────
+    function getCookie(name) {
+      let cookieValue = null;
+      if (document.cookie && document.cookie !== '') {
+        const cookies = document.cookie.split(';');
+        for (let i = 0; i < cookies.length; i++) {
+          const cookie = cookies[i].trim();
+          if (cookie.substring(0, name.length + 1) === (name + '=')) {
+            cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+            break;
+          }
+        }
+      }
+      return cookieValue;
+    }
+    const csrftoken = getCookie('csrftoken');
+
+    // ── Toast Utility ───────────────────────────────────────
+    function showToast(message, type = 'success') {
+      const container = document.getElementById('toastContainer');
+      const toast = document.createElement('div');
+      toast.className = `toast ${type}`;
+      
+      const icon = type === 'success' ? 'check_circle' : 'error';
+      toast.innerHTML = `
+        <span class="material-symbols-rounded" style="color: ${type === 'success' ? 'var(--md-success)' : 'var(--md-error)'}">${icon}</span>
+        <span>${message}</span>
+        <button class="toast-close" onclick="this.parentElement.remove()">
+          <span class="material-symbols-rounded" style="font-size: 16px;">close</span>
+        </button>
+      `;
+      
+      container.appendChild(toast);
+      setTimeout(() => {
+        toast.style.animation = 'none';
+        toast.offsetHeight; // trigger reflow
+        toast.style.animation = '';
+        setTimeout(() => toast.remove(), 4000);
+      }, 3000);
+    }
+
+    // ── Modal Handlers ──────────────────────────────────────
+    function openModal(modalId) {
+      document.getElementById(modalId).classList.add('open');
+    }
+
+    function closeModal(modalId) {
+      document.getElementById(modalId).classList.remove('open');
+    }
+
+    // Add / Edit Modal
+    function openAddModal() {
+      document.getElementById('modalTitle').textContent = 'Add New User';
+      document.getElementById('formUserId').value = '';
+      document.getElementById('userForm').reset();
+      document.getElementById('formPassword').placeholder = 'Enter password';
+      document.getElementById('formPassword').required = true;
+      document.getElementById('passwordHelp').style.display = 'none';
+      clearErrors();
+      openModal('userModal');
+    }
+
+    function openEditModal(userId) {
+      const row = document.getElementById(`user-row-${userId}`);
+      if (!row) return;
+
+      document.getElementById('modalTitle').textContent = 'Edit User';
+      document.getElementById('formUserId').value = userId;
+      document.getElementById('formName').value = row.dataset.name;
+      document.getElementById('formEmail').value = row.dataset.email;
+      document.getElementById('formPhone').value = row.dataset.phone;
+      document.getElementById('formActive').checked = row.dataset.active === 'true';
+      document.getElementById('formPassword').placeholder = 'Leave blank to keep unchanged';
+      document.getElementById('formPassword').required = false;
+      document.getElementById('passwordHelp').style.display = 'block';
+      clearErrors();
+      openModal('userModal');
+    }
+
+    function closeUserModal() {
+      closeModal('userModal');
+    }
+
+    function clearErrors() {
+      const errorDivs = document.querySelectorAll('.form-error');
+      errorDivs.forEach(div => {
+        div.textContent = '';
+        div.style.display = 'none';
+      });
+    }
+
+    // Delete Modal
+    let userIdToDelete = null;
+    function openDeleteModal(userId, name) {
+      userIdToDelete = userId;
+      document.getElementById('deleteUserName').textContent = name;
+      openModal('deleteModal');
+    }
+
+    function closeDeleteModal() {
+      userIdToDelete = null;
+      closeModal('deleteModal');
+    }
+
+    // Logs Modal
+    function openLogsModal(userId, name) {
+      document.getElementById('logsUserName').textContent = name;
+      const tbodyLogs = document.getElementById('logsTableBody');
+      const emptyStateLogs = document.getElementById('logsEmptyState');
+      
+      tbodyLogs.innerHTML = '<tr><td colspan="4" style="text-align:center; padding: 24px;">Loading logs...</td></tr>';
+      emptyStateLogs.style.display = 'none';
+      openModal('logsModal');
+
+      fetch(`/api/admin/users/${userId}/login-activities/`)
+        .then(res => res.json())
+        .then(data => {
+          if (data.success) {
+            if (data.activities.length === 0) {
+              tbodyLogs.innerHTML = '';
+              emptyStateLogs.style.display = 'block';
+            } else {
+              tbodyLogs.innerHTML = data.activities.map(act => `
+                <tr>
+                  <td>${act.login_at}</td>
+                  <td>
+                    ${act.success 
+                      ? '<span class="chip chip-active"><span class="material-symbols-rounded" style="font-size:14px; margin-right:4px;">check_circle</span>Success</span>' 
+                      : `<span class="chip chip-inactive" title="${act.failure_reason}"><span class="material-symbols-rounded" style="font-size:14px; margin-right:4px;">cancel</span>Failed</span>`
+                    }
+                  </td>
+                  <td><span class="chip chip-ip">${act.ip_address}</span></td>
+                  <td style="max-width:250px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;" title="${act.user_agent}">
+                    ${act.user_agent}
+                  </td>
+                </tr>
+              `).join('');
+            }
+          } else {
+            tbodyLogs.innerHTML = `<tr><td colspan="4" style="text-align:center; color:var(--md-error);">${data.message}</td></tr>`;
+          }
+        })
+        .catch(err => {
+          tbodyLogs.innerHTML = '<tr><td colspan="4" style="text-align:center; color:var(--md-error);">Failed to fetch logs.</td></tr>';
+        });
+    }
+
+    function closeLogsModal() {
+      closeModal('logsModal');
+    }
+
+    // ── Save User (Create or Update API call) ────────────────
+    function saveUser(event) {
+      event.preventDefault();
+      clearErrors();
+      
+      const userId = document.getElementById('formUserId').value;
+      const name = document.getElementById('formName').value;
+      const email = document.getElementById('formEmail').value;
+      const phone = document.getElementById('formPhone').value;
+      const password = document.getElementById('formPassword').value;
+      const is_active = document.getElementById('formActive').checked;
+      
+      const isEdit = !!userId;
+      const url = isEdit ? `/api/admin/users/${userId}/update/` : '/api/admin/users/create/';
+      
+      const payload = { name, email, phone, is_active };
+      if (password) {
+        payload.password = password;
+      }
+      
+      const btn = document.getElementById('btnSubmit');
+      const originalText = btn.textContent;
+      btn.disabled = true;
+      btn.textContent = 'Saving...';
+      
+      fetch(url, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-CSRFToken': csrftoken
+        },
+        body: JSON.stringify(payload)
+      })
+      .then(res => res.json())
+      .then(data => {
+        btn.disabled = false;
+        btn.textContent = originalText;
+        
+        if (data.success) {
+          showToast(data.message, 'success');
+          closeUserModal();
+          setTimeout(() => window.location.reload(), 1000);
+        } else {
+          showToast(data.message || 'Validation failed.', 'error');
+          if (data.errors) {
+            for (const field in data.errors) {
+              const errDiv = document.getElementById(`error${field.charAt(0).toUpperCase() + field.slice(1)}`);
+              if (errDiv) {
+                errDiv.textContent = data.errors[field];
+                errDiv.style.display = 'block';
+              }
+            }
+          }
+        }
+      })
+      .catch(err => {
+        btn.disabled = false;
+        btn.textContent = originalText;
+        showToast('An unexpected error occurred.', 'error');
+      });
+    }
+
+    // ── Delete User ─────────────────────────────────────────
+    function confirmDeleteUser() {
+      if (!userIdToDelete) return;
+      
+      fetch(`/api/admin/users/${userIdToDelete}/delete/`, {
+        method: 'POST',
+        headers: {
+          'X-CSRFToken': csrftoken
+        }
+      })
+      .then(res => res.json())
+      .then(data => {
+        closeDeleteModal();
+        if (data.success) {
+          showToast(data.message, 'success');
+          setTimeout(() => window.location.reload(), 1000);
+        } else {
+          showToast(data.message, 'error');
+        }
+      })
+      .catch(err => {
+        closeDeleteModal();
+        showToast('An unexpected error occurred.', 'error');
+      });
+    }
+
+    // ── Toggle Status ───────────────────────────────────────
+    function toggleUserStatus(userId) {
+      fetch(`/api/admin/users/${userId}/toggle-status/`, {
+        method: 'POST',
+        headers: {
+          'X-CSRFToken': csrftoken
+        }
+      })
+      .then(res => res.json())
+      .then(data => {
+        if (data.success) {
+          showToast(data.message, 'success');
+          const row = document.getElementById(`user-row-${userId}`);
+          if (row) {
+            row.dataset.active = data.is_active ? 'true' : 'false';
+            const btn = row.querySelector('.status-toggle-btn');
+            if (btn) {
+              btn.innerHTML = data.is_active 
+                ? '<span class="chip chip-active"><span class="material-symbols-rounded" style="font-size:14px; margin-right:4px;">check_circle</span>Active</span>' 
+                : '<span class="chip chip-inactive"><span class="material-symbols-rounded" style="font-size:14px; margin-right:4px;">cancel</span>Inactive</span>';
+            }
+            
+            // Recompute active/inactive count
+            let recentCount = 0;
+            const rowsList = document.querySelectorAll(".user-row");
+            const nowTime = Date.now() / 1000;
+            rowsList.forEach(r => {
+              const ts = parseInt(r.dataset.ts);
+              if (ts && (nowTime - ts) < 86400) recentCount++;
+            });
+            document.getElementById("statRecent").textContent = recentCount;
+          }
+        } else {
+          showToast(data.message, 'error');
+        }
+      })
+      .catch(err => {
+        showToast('An unexpected error occurred.', 'error');
+      });
+    }
   </script>
 </body>
 

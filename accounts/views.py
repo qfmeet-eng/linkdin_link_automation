@@ -3,13 +3,14 @@ import re
 import secrets
 from json import JSONDecodeError
 from django.conf import settings
-from django.contrib.auth import authenticate, get_user_model, login
+from django.contrib.auth import authenticate, get_user_model, login, logout
 from django.contrib.auth.password_validation import validate_password
 from django.contrib.auth.tokens import default_token_generator
 from django.core.exceptions import ValidationError
 from django.core.mail import send_mail
 from django.core.validators import validate_email
 from django.db import IntegrityError, transaction
+from django.db.models import Q
 from django.db.utils import OperationalError, ProgrammingError
 from django.http import HttpResponse, HttpResponseRedirect
 from django.http import JsonResponse
@@ -18,6 +19,8 @@ from django.urls import reverse
 from django.utils.encoding import force_bytes
 from django.utils.http import urlsafe_base64_encode
 from django.views.decorators.http import require_POST
+from django.contrib.admin.views.decorators import staff_member_required
+from django.template.loader import render_to_string
 
 from .models import LoginActivity, UserProfile, UserDetails
 from django.utils import timezone
@@ -30,6 +33,14 @@ DATABASE_NOT_READY_MESSAGE = "Database tables missing che. Pehla python manage.p
 
 def chatbot_register_page(request):
     return render(request, "accounts/chatbot.html")
+
+
+def chatbot_login_page(request):
+    return render(request, "accounts/login.html")
+
+
+def chatbot_forgot_password_page(request):
+    return render(request, "accounts/forgot_password.html")
 
 
 def favicon(request):
@@ -148,6 +159,12 @@ def register_chatbot_user(request):
             status=409 if email_exists or phone_exists else 400,
         )
 
+    # Grab LinkedIn picture URL if registration matches the LinkedIn session email
+    linkedin_data = request.session.get("linkedin_user_data")
+    picture_url = None
+    if linkedin_data and linkedin_data.get("email", "").lower() == email:
+        picture_url = linkedin_data.get("picture")
+
     try:
         with transaction.atomic():
             user = User.objects.create_user(
@@ -157,12 +174,30 @@ def register_chatbot_user(request):
                 first_name=name,
             )
             UserProfile.objects.create(user=user, phone=phone)
-            UserDetails.objects.create(
+            user_details = UserDetails.objects.create(
                 user=user,
                 name=name,
                 email=email,
                 phone=phone,
+                profile_picture_url=picture_url,
             )
+            
+            # Log the user in directly after signup
+            login(request, user)
+            
+            # Create login activity
+            create_login_activity(
+                request,
+                email=user.email,
+                user=user,
+                success=True,
+            )
+            
+            # Update last login info
+            user_details.last_login = timezone.now()
+            user_details.ip_address = get_client_ip(request)
+            user_details.user_agent = request.META.get("HTTP_USER_AGENT", "")[:1000]
+            user_details.save()
     except IntegrityError:
         return JsonResponse(
             {
@@ -191,18 +226,13 @@ def login_chatbot_user(request):
     if error_response:
         return error_response
 
-    email = str(data.get("email", "")).strip().lower()
+    username_or_email = str(data.get("email", "")).strip().lower()
     password = str(data.get("password", ""))
 
     errors = {}
 
-    if not email:
-        errors["email"] = "Email required che."
-    else:
-        try:
-            validate_email(email)
-        except ValidationError:
-            errors["email"] = "Email address valid nathi."
+    if not username_or_email:
+        errors["email"] = "Username athva email required che."
 
     if not password:
         errors["password"] = "Password required che."
@@ -220,7 +250,10 @@ def login_chatbot_user(request):
     User = get_user_model()
 
     try:
-        user = User.objects.filter(email__iexact=email, is_active=True).first()
+        user = User.objects.filter(
+            Q(email__iexact=username_or_email) | Q(username__iexact=username_or_email),
+            is_active=True
+        ).first()
     except (OperationalError, ProgrammingError):
         return database_not_ready_response()
 
@@ -237,15 +270,15 @@ def login_chatbot_user(request):
         if authenticated_user is None:
             create_login_activity(
                 request,
-                email=email,
+                email=username_or_email,
                 user=user,
                 success=False,
-                failure_reason="Invalid email or password",
+                failure_reason="Invalid credentials",
             )
             return JsonResponse(
                 {
                     "success": False,
-                    "message": "Email athva password khoto che.",
+                    "message": "Username/Email athva password khoto che.",
                     "errors": {"login": "Invalid credentials"},
                 },
                 status=401,
@@ -346,6 +379,12 @@ def forgot_password_user(request):
         "Jo tame aa request na kari hoy to aa email ignore karo."
     )
 
+    context = {
+        "name": user.first_name or user.username,
+        "reset_url": reset_url,
+    }
+    html_message = render_to_string("accounts/email_reset_password.html", context)
+
     try:
         send_mail(
             subject=subject,
@@ -353,6 +392,7 @@ def forgot_password_user(request):
             from_email=settings.DEFAULT_FROM_EMAIL,
             recipient_list=[user.email],
             fail_silently=False,
+            html_message=html_message,
         )
     except Exception:
         return JsonResponse(
@@ -385,7 +425,15 @@ def home_view(request):
     })
 
 
+def chatbot_logout(request):
+    logout(request)
+    return redirect("chatbot_register")
+
+
+
 def user_details_view(request):
+    if not request.user.is_authenticated or not request.user.is_staff:
+        return redirect(f"{reverse('admin:login')}?next={request.path}")
     details_list = UserDetails.objects.all().order_by("-created_at")
     return render(request, "accounts/user_details.html", {"details_list": details_list})
 
@@ -473,6 +521,46 @@ def linkedin_oauth_callback(request):
     if "error" in user_data:
         return redirect(f"/?linkedin_error={user_data['error']}")
 
+    # Check if a user with this email is already registered in our DB
+    email = user_data.get("email", "").strip().lower()
+    User = get_user_model()
+    existing_user = User.objects.filter(email__iexact=email).first()
+
+    if existing_user:
+        # User is already registered! Log them in directly.
+        login(request, existing_user)
+        create_login_activity(
+            request,
+            email=existing_user.email,
+            user=existing_user,
+            success=True,
+        )
+
+        phone_number = ""
+        if hasattr(existing_user, 'profile'):
+            phone_number = existing_user.profile.phone
+        elif UserProfile.objects.filter(user=existing_user).exists():
+            phone_number = UserProfile.objects.filter(user=existing_user).first().phone
+
+        user_details, created = UserDetails.objects.get_or_create(
+            user=existing_user,
+            defaults={
+                "name": existing_user.first_name or existing_user.username,
+                "email": existing_user.email,
+                "phone": phone_number,
+                "profile_picture_url": user_data.get("picture"),
+            }
+        )
+        if not created and user_data.get("picture"):
+            user_details.profile_picture_url = user_data.get("picture")
+        user_details.last_login = timezone.now()
+        user_details.ip_address = get_client_ip(request)
+        user_details.user_agent = request.META.get("HTTP_USER_AGENT", "")[:1000]
+        user_details.save()
+
+        # Redirect directly to home
+        return redirect("/home/")
+
     # Session ma store karo — chatbot page read karso
     request.session["linkedin_user_data"] = user_data
     return redirect("/?linkedin_auth=success")
@@ -487,3 +575,301 @@ def linkedin_userinfo_api(request):
     if not user_data:
         return JsonResponse({"success": False, "message": "LinkedIn data session ma nathi."})
     return JsonResponse({"success": True, "profile": user_data})
+
+
+@require_POST
+def admin_create_user(request):
+    if not request.user.is_authenticated or not request.user.is_staff:
+        return JsonResponse({"success": False, "message": "Permission denied."}, status=403)
+    data, error_response = parse_json_body(request)
+    if error_response:
+        return error_response
+
+    name = str(data.get("name", "")).strip()
+    phone = str(data.get("phone", "")).strip().replace(" ", "")
+    email = str(data.get("email", "")).strip().lower()
+    password = str(data.get("password", ""))
+    is_active = data.get("is_active", True)
+    if not isinstance(is_active, bool):
+        is_active = str(is_active).lower() == "true"
+
+    errors = {}
+
+    if not name:
+        errors["name"] = "Naam required che."
+    elif len(name) > 150:
+        errors["name"] = "Naam 150 characters karta ochhu hovu joiye."
+
+    if not phone:
+        errors["phone"] = "Mobile number required che."
+    elif not PHONE_RE.match(phone):
+        errors["phone"] = "Mobile number 10 thi 15 digits no hovo joiye."
+
+    if not email:
+        errors["email"] = "Email required che."
+    else:
+        try:
+            validate_email(email)
+        except ValidationError:
+            errors["email"] = "Email address valid nathi."
+
+    if not password:
+        errors["password"] = "Password required che."
+
+    User = get_user_model()
+
+    try:
+        email_exists = email and (
+            User.objects.filter(email__iexact=email).exists()
+            or User.objects.filter(username__iexact=email).exists()
+        )
+        phone_exists = phone and UserProfile.objects.filter(phone=phone).exists()
+    except (OperationalError, ProgrammingError):
+        return database_not_ready_response()
+
+    if email_exists:
+        errors["email"] = USER_EXISTS_MESSAGE
+
+    if phone_exists:
+        errors["phone"] = USER_EXISTS_MESSAGE
+
+    if password:
+        try:
+            user_candidate = User(username=email, email=email, first_name=name)
+            validate_password(password, user=user_candidate)
+        except ValidationError as exc:
+            errors["password"] = " ".join(exc.messages)
+
+    if errors:
+        return JsonResponse(
+            {
+                "success": False,
+                "message": next(iter(errors.values())),
+                "errors": errors,
+            },
+            status=400,
+        )
+
+    try:
+        with transaction.atomic():
+            user = User.objects.create_user(
+                username=email,
+                email=email,
+                password=password,
+                first_name=name,
+                is_active=is_active,
+            )
+            UserProfile.objects.create(user=user, phone=phone)
+            UserDetails.objects.create(
+                user=user,
+                name=name,
+                email=email,
+                phone=phone,
+            )
+    except IntegrityError:
+        return JsonResponse(
+            {
+                "success": False,
+                "message": USER_EXISTS_MESSAGE,
+                "errors": {"user": USER_EXISTS_MESSAGE},
+            },
+            status=409,
+        )
+    except (OperationalError, ProgrammingError):
+        return database_not_ready_response()
+
+    return JsonResponse(
+        {
+            "success": True,
+            "message": "User successfully created.",
+        },
+        status=201,
+    )
+
+
+@require_POST
+def admin_update_user(request, user_id):
+    if not request.user.is_authenticated or not request.user.is_staff:
+        return JsonResponse({"success": False, "message": "Permission denied."}, status=403)
+    data, error_response = parse_json_body(request)
+    if error_response:
+        return error_response
+
+    User = get_user_model()
+    user = User.objects.filter(id=user_id).first()
+    if not user:
+        return JsonResponse({"success": False, "message": "User not found."}, status=404)
+
+    name = str(data.get("name", "")).strip()
+    phone = str(data.get("phone", "")).strip().replace(" ", "")
+    email = str(data.get("email", "")).strip().lower()
+    password = str(data.get("password", ""))
+    is_active = data.get("is_active", True)
+    if not isinstance(is_active, bool):
+        is_active = str(is_active).lower() == "true"
+
+    errors = {}
+
+    if not name:
+        errors["name"] = "Naam required che."
+    elif len(name) > 150:
+        errors["name"] = "Naam 150 characters karta ochhu hovu joiye."
+
+    if not phone:
+        errors["phone"] = "Mobile number required che."
+    elif not PHONE_RE.match(phone):
+        errors["phone"] = "Mobile number 10 thi 15 digits no hovo joiye."
+
+    if not email:
+        errors["email"] = "Email required che."
+    else:
+        try:
+            validate_email(email)
+        except ValidationError:
+            errors["email"] = "Email address valid nathi."
+
+    try:
+        email_exists = email and (
+            User.objects.filter(email__iexact=email).exclude(id=user_id).exists()
+            or User.objects.filter(username__iexact=email).exclude(id=user_id).exists()
+        )
+        phone_exists = phone and UserProfile.objects.filter(phone=phone).exclude(user_id=user_id).exists()
+    except (OperationalError, ProgrammingError):
+        return database_not_ready_response()
+
+    if email_exists:
+        errors["email"] = USER_EXISTS_MESSAGE
+
+    if phone_exists:
+        errors["phone"] = USER_EXISTS_MESSAGE
+
+    if password:
+        try:
+            validate_password(password, user=user)
+        except ValidationError as exc:
+            errors["password"] = " ".join(exc.messages)
+
+    if errors:
+        return JsonResponse(
+            {
+                "success": False,
+                "message": next(iter(errors.values())),
+                "errors": errors,
+            },
+            status=400,
+        )
+
+    try:
+        with transaction.atomic():
+            user.username = email
+            user.email = email
+            user.first_name = name
+            user.is_active = is_active
+            if password:
+                user.set_password(password)
+            user.save()
+
+            profile, _ = UserProfile.objects.get_or_create(user=user)
+            profile.phone = phone
+            profile.save()
+
+            details, _ = UserDetails.objects.get_or_create(user=user)
+            details.name = name
+            details.email = email
+            details.phone = phone
+            details.save()
+    except IntegrityError:
+        return JsonResponse(
+            {
+                "success": False,
+                "message": USER_EXISTS_MESSAGE,
+                "errors": {"user": USER_EXISTS_MESSAGE},
+            },
+            status=409,
+        )
+    except (OperationalError, ProgrammingError):
+        return database_not_ready_response()
+
+    return JsonResponse(
+        {
+            "success": True,
+            "message": "User successfully updated.",
+        }
+    )
+
+
+@require_POST
+def admin_delete_user(request, user_id):
+    if not request.user.is_authenticated or not request.user.is_staff:
+        return JsonResponse({"success": False, "message": "Permission denied."}, status=403)
+    User = get_user_model()
+    user = User.objects.filter(id=user_id).first()
+    if not user:
+        return JsonResponse({"success": False, "message": "User not found."}, status=404)
+
+    try:
+        user.delete()
+    except (OperationalError, ProgrammingError):
+        return database_not_ready_response()
+
+    return JsonResponse(
+        {
+            "success": True,
+            "message": "User successfully deleted.",
+        }
+    )
+
+
+@require_POST
+def admin_toggle_status(request, user_id):
+    if not request.user.is_authenticated or not request.user.is_staff:
+        return JsonResponse({"success": False, "message": "Permission denied."}, status=403)
+    User = get_user_model()
+    user = User.objects.filter(id=user_id).first()
+    if not user:
+        return JsonResponse({"success": False, "message": "User not found."}, status=404)
+
+    try:
+        user.is_active = not user.is_active
+        user.save()
+    except (OperationalError, ProgrammingError):
+        return database_not_ready_response()
+
+    return JsonResponse(
+        {
+            "success": True,
+            "is_active": user.is_active,
+            "message": f"User status changed to {'Active' if user.is_active else 'Inactive'}.",
+        }
+    )
+
+
+def admin_login_activities(request, user_id):
+    if not request.user.is_authenticated or not request.user.is_staff:
+        return JsonResponse({"success": False, "message": "Permission denied."}, status=403)
+    User = get_user_model()
+    user = User.objects.filter(id=user_id).first()
+    if not user:
+        return JsonResponse({"success": False, "message": "User not found."}, status=404)
+
+    try:
+        activities = LoginActivity.objects.filter(email=user.email).order_by("-login_at")[:50]
+        data = []
+        for act in activities:
+            data.append({
+                "login_at": act.login_at.strftime("%Y-%m-%d %H:%M:%S") if act.login_at else "",
+                "success": act.success,
+                "failure_reason": act.failure_reason,
+                "ip_address": act.ip_address or "—",
+                "user_agent": act.user_agent or "—",
+            })
+    except (OperationalError, ProgrammingError):
+        return database_not_ready_response()
+
+    return JsonResponse(
+        {
+            "success": True,
+            "activities": data,
+        }
+    )
+

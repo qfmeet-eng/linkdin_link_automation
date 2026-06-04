@@ -17,8 +17,11 @@ Including another URLconf
 
 from django.contrib import admin
 from django.urls import include, path
+from django.views.generic import RedirectView
+from django.contrib.admin.views.decorators import staff_member_required
 
 urlpatterns = [
+    path("admin/", staff_member_required(RedirectView.as_view(url="/user-details/", permanent=False))),
     path("admin/", admin.site.urls),
     path("", include("accounts.urls")),
 ]

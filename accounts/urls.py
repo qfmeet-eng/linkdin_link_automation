@@ -1,10 +1,13 @@
-    from django.contrib.auth.decorators import login_required
+from django.contrib.auth.decorators import login_required
 from django.contrib.auth.views import PasswordResetCompleteView, PasswordResetConfirmView
 from django.urls import path
 from django.urls import reverse_lazy
 
 from .views import (
     chatbot_register_page,
+    chatbot_login_page,
+    chatbot_forgot_password_page,
+    chatbot_logout,
     favicon,
     forgot_password_user,
     home_view,
@@ -15,12 +18,20 @@ from .views import (
     register_chatbot_user,
     scrape_linkedin_view,
     user_details_view,
+    admin_create_user,
+    admin_update_user,
+    admin_delete_user,
+    admin_toggle_status,
+    admin_login_activities,
 )
 
 
 urlpatterns = [
     path("", chatbot_register_page, name="chatbot_register"),
+    path("login/", chatbot_login_page, name="chatbot_login"),
+    path("forgot-password/", chatbot_forgot_password_page, name="chatbot_forgot_password"),
     path("home/", home_view, name="home"),
+    path("logout/", chatbot_logout, name="chatbot_logout"),
     path("user-details/", user_details_view, name="user_details"),
     path("favicon.ico", favicon, name="favicon"),
     path("api/register/", register_chatbot_user, name="register_chatbot_user"),
@@ -30,6 +41,11 @@ urlpatterns = [
     path("auth/linkedin/", linkedin_oauth_start, name="linkedin_oauth_start"),
     path("auth/linkedin/callback/", linkedin_oauth_callback, name="linkedin_oauth_callback"),
     path("auth/linkedin/userinfo/", linkedin_userinfo_api, name="linkedin_userinfo_api"),
+    path("api/admin/users/create/", admin_create_user, name="admin_create_user"),
+    path("api/admin/users/<int:user_id>/update/", admin_update_user, name="admin_update_user"),
+    path("api/admin/users/<int:user_id>/delete/", admin_delete_user, name="admin_delete_user"),
+    path("api/admin/users/<int:user_id>/toggle-status/", admin_toggle_status, name="admin_toggle_status"),
+    path("api/admin/users/<int:user_id>/login-activities/", admin_login_activities, name="admin_login_activities"),
     path(
         "reset/<uidb64>/<token>/",
         PasswordResetConfirmView.as_view(

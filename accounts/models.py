@@ -60,6 +60,7 @@ class UserDetails(models.Model):
     name = models.CharField(max_length=150)
     email = models.EmailField(unique=True)
     phone = models.CharField(max_length=15)
+    profile_picture_url = models.URLField(max_length=500, blank=True, null=True)
     last_login = models.DateTimeField(null=True, blank=True)
     ip_address = models.GenericIPAddressField(null=True, blank=True)
     user_agent = models.TextField(blank=True)
