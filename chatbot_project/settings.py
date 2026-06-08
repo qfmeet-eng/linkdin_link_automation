@@ -103,25 +103,18 @@ WSGI_APPLICATION = "chatbot_project.wsgi.application"
 
 
 DATABASES = {
-    "default": (
-        {
-            "ENGINE": "django.db.backends.sqlite3",
-            "NAME": os.environ.get("SQLITE_DATABASE", BASE_DIR / "db.sqlite3"),
-        }
-        if os.environ.get("DJANGO_USE_SQLITE", "False").lower() == "true"
-        else {
-            "ENGINE": "django.db.backends.mysql",
-            "NAME": os.environ.get("MYSQL_DATABASE", "linkdin_automation"),
-            "USER": os.environ.get("MYSQL_USER", "root"),
-            "PASSWORD": os.environ.get("MYSQL_PASSWORD", ""),
-            "HOST": os.environ.get("MYSQL_HOST", "localhost"),
-            "PORT": os.environ.get("MYSQL_PORT", "3306"),
-            "OPTIONS": {
-                "charset": "utf8mb4",
-                "init_command": "SET sql_mode='STRICT_TRANS_TABLES'",
-            },
-        }
-    )
+    "default": {
+        "ENGINE": "django.db.backends.mysql",
+        "NAME": os.environ.get("MYSQL_DATABASE", "linkdin_automation"),
+        "USER": os.environ.get("MYSQL_USER", "root"),
+        "PASSWORD": os.environ.get("MYSQL_PASSWORD", ""),
+        "HOST": os.environ.get("MYSQL_HOST", "localhost"),
+        "PORT": os.environ.get("MYSQL_PORT", "3306"),
+        "OPTIONS": {
+            "charset": "utf8mb4",
+            "init_command": "SET sql_mode='STRICT_TRANS_TABLES'",
+        },
+    }
 }
 
 AUTH_USER_MODEL = "accounts.User"

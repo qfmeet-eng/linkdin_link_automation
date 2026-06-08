@@ -22,9 +22,8 @@ from django.views.decorators.http import require_POST
 from django.contrib.admin.views.decorators import staff_member_required
 from django.template.loader import render_to_string
 
-from .models import LoginActivity, UserProfile, UserDetails
+from .models import LoginActivity, UserProfile, UserDetails, ScrapedProfile, LinkedInConfig
 from django.utils import timezone
-
 
 PHONE_RE = re.compile(r"^\+?[0-9]{10,15}$")
 USER_EXISTS_MESSAGE = "User is already exist."
@@ -435,7 +434,11 @@ def user_details_view(request):
     if not request.user.is_authenticated or not request.user.is_staff:
         return redirect(f"{reverse('admin:login')}?next={request.path}")
     details_list = UserDetails.objects.all().order_by("-created_at")
-    return render(request, "accounts/user_details.html", {"details_list": details_list})
+    linkedin_config = LinkedInConfig.objects.first()
+    return render(request, "accounts/user_details.html", {
+        "details_list": details_list,
+        "linkedin_config": linkedin_config,
+    })
 
 
 @require_POST
@@ -872,4 +875,394 @@ def admin_login_activities(request, user_id):
             "activities": data,
         }
     )
+
+
+@require_POST
+def api_scrape_linkedin(request):
+    """
+    Accept a LinkedIn URL, run the automation scraper (with PDF download),
+    save the structured data in ScrapedProfile model, and return it.
+    """
+    if not request.user.is_authenticated:
+        return JsonResponse({"success": False, "message": "Log in required che."}, status=401)
+
+    data, error_response = parse_json_body(request)
+    if error_response:
+        return error_response
+
+    url = str(data.get("url", "")).strip()
+    if not url:
+        return JsonResponse(
+            {"success": False, "message": "LinkedIn profile URL required che."},
+            status=400,
+        )
+
+    if "linkedin.com" not in url.lower():
+        return JsonResponse(
+            {"success": False, "message": "Valid LinkedIn profile URL aapo (linkedin.com/in/...)."},
+            status=400,
+        )
+
+    from .linkedin_scraper import get_linkedin_profile_data
+
+    # Call scraper (will run selenium More -> Save to PDF logic)
+    result = get_linkedin_profile_data(url)
+
+    if result.get("error"):
+        return JsonResponse(
+            {"success": False, "message": result["error"]},
+            status=500,
+        )
+
+    try:
+        # Save into ScrapedProfile database model
+        profile = ScrapedProfile.objects.create(
+            user=request.user,
+            url=url,
+            name=result.get("name", ""),
+            headline=result.get("headline", ""),
+            location=result.get("location", ""),
+            about=result.get("about", ""),
+            experience=result.get("experience", []),
+            education=result.get("education", []),
+            skills=result.get("skills", []),
+            raw_pdf_text=result.get("raw_pdf_text", ""),
+        )
+
+        return JsonResponse({
+            "success": True,
+            "profile": {
+                "id": profile.id,
+                "url": profile.url,
+                "name": profile.name,
+                "headline": profile.headline,
+                "location": profile.location,
+                "about": profile.about,
+                "experience": profile.experience,
+                "education": profile.education,
+                "skills": profile.skills,
+                "created_at": profile.created_at.strftime("%d %b %Y, %H:%M"),
+            }
+        })
+    except (OperationalError, ProgrammingError):
+        return database_not_ready_response()
+    except Exception as e:
+        return JsonResponse({"success": False, "message": f"Database save error: {str(e)}"}, status=500)
+
+
+def linkedin_assistant_view(request):
+    """Render the LinkedIn Assistant chatbot interface (requires login)."""
+    if not request.user.is_authenticated:
+        return redirect("chatbot_login")
+    return render(request, "accounts/linkedin_assistant.html")
+
+
+def api_scraped_profiles_list(request):
+    """Get list of previously scraped profiles for the current user."""
+    if not request.user.is_authenticated:
+        return JsonResponse({"success": False, "message": "Unauthorized"}, status=401)
+
+    try:
+        profiles = ScrapedProfile.objects.filter(user=request.user).order_by("-created_at")
+        data = []
+        for p in profiles:
+            data.append({
+                "id": p.id,
+                "url": p.url,
+                "name": p.name or "Unknown",
+                "headline": p.headline or "No headline",
+                "location": p.location or "",
+                "created_at": p.created_at.strftime("%d %b %Y, %H:%M"),
+            })
+        return JsonResponse({"success": True, "profiles": data})
+    except (OperationalError, ProgrammingError):
+        return database_not_ready_response()
+
+
+@require_POST
+def api_delete_scraped_profile(request, profile_id):
+    """Delete a scraped profile."""
+    if not request.user.is_authenticated:
+        return JsonResponse({"success": False, "message": "Unauthorized"}, status=401)
+
+    try:
+        profile = ScrapedProfile.objects.filter(id=profile_id, user=request.user).first()
+        if not profile:
+            return JsonResponse({"success": False, "message": "Profile not found."}, status=404)
+        profile.delete()
+        return JsonResponse({"success": True, "message": "Profile successfully deleted."})
+    except (OperationalError, ProgrammingError):
+        return database_not_ready_response()
+
+
+def api_scraped_profile_detail(request, profile_id):
+    """Get full details of a specific scraped profile for the current user."""
+    if not request.user.is_authenticated:
+        return JsonResponse({"success": False, "message": "Unauthorized"}, status=401)
+
+    try:
+        profile = ScrapedProfile.objects.filter(id=profile_id, user=request.user).first()
+        if not profile:
+            return JsonResponse({"success": False, "message": "Profile not found."}, status=404)
+            
+        return JsonResponse({
+            "success": True,
+            "profile": {
+                "id": profile.id,
+                "url": profile.url,
+                "name": profile.name,
+                "headline": profile.headline,
+                "location": profile.location,
+                "about": profile.about,
+                "experience": profile.experience,
+                "education": profile.education,
+                "skills": profile.skills,
+                "created_at": profile.created_at.strftime("%d %b %Y, %H:%M"),
+            }
+        })
+    except (OperationalError, ProgrammingError):
+        return database_not_ready_response()
+
+
+@require_POST
+def api_update_linkedin_config(request):
+    """
+    Update the LinkedIn session cookie stored in the database.
+    POST /api/admin/config/update/
+    """
+    if not request.user.is_authenticated or not request.user.is_staff:
+        return JsonResponse({"success": False, "message": "Permission denied."}, status=403)
+
+    data, error_response = parse_json_body(request)
+    if error_response:
+        return error_response
+
+    cookie_val = str(data.get("li_at_cookie", "")).strip()
+
+    try:
+        config, created = LinkedInConfig.objects.get_or_create(id=1)
+        config.li_at_cookie = cookie_val
+        config.save()
+
+        last_updated = config.updated_at.strftime("%d %b %Y, %H:%M") if config.updated_at else "Now"
+
+        return JsonResponse({
+            "success": True,
+            "message": "LinkedIn configuration successfully updated.",
+            "last_updated": last_updated,
+            "is_set": bool(cookie_val)
+        })
+    except (OperationalError, ProgrammingError):
+        return database_not_ready_response()
+    except Exception as e:
+        return JsonResponse({"success": False, "message": f"Database error: {str(e)}"}, status=500)
+
+
+@require_POST
+def api_register_linkedin_scrape(request):
+    """
+    Scrape a LinkedIn profile URL for a new user registration.
+    Store the parsed details in request.session['linkedin_reg_data'].
+    POST /api/register/linkedin-scrape/
+    """
+    data, error_response = parse_json_body(request)
+    if error_response:
+        return error_response
+
+    url = str(data.get("url", "")).strip()
+    if not url:
+        return JsonResponse(
+            {"success": False, "message": "LinkedIn profile URL required che."},
+            status=400,
+        )
+
+    if "linkedin.com" not in url.lower():
+        return JsonResponse(
+            {"success": False, "message": "Valid LinkedIn profile URL aapo (linkedin.com/in/...)."},
+            status=400,
+        )
+
+    from .linkedin_scraper import get_linkedin_profile_data
+
+    # Call scraper (will run selenium More -> Save to PDF logic)
+    result = get_linkedin_profile_data(url)
+
+    if result.get("error"):
+        return JsonResponse(
+            {"success": False, "message": result["error"]},
+            status=500,
+        )
+
+    # Store in session for completing registration in the next step
+    request.session["linkedin_reg_data"] = result
+
+    # Return basic details to show in chatbot UI
+    return JsonResponse({
+        "success": True,
+        "profile": {
+            "url": url,
+            "name": result.get("name", ""),
+            "email": result.get("email", ""),
+            "phone": result.get("phone", ""),
+            "location": result.get("location", ""),
+        }
+    })
+
+
+@require_POST
+def api_register_linkedin_complete(request):
+    """
+    Complete registration using the scraped profile details from the session and user-supplied password.
+    POST /api/register/linkedin-complete/
+    """
+    # Get temporary registration data from session
+    reg_data = request.session.get("linkedin_reg_data")
+    if not reg_data:
+        return JsonResponse(
+            {"success": False, "message": "LinkedIn profile details session ma nathi. Pehla profile scrape karo."},
+            status=400,
+        )
+
+    data, error_response = parse_json_body(request)
+    if error_response:
+        return error_response
+
+    # User-supplied details (email/phone can be supplied if missing from scraping)
+    email = str(data.get("email", reg_data.get("email", ""))).strip().lower()
+    phone = str(data.get("phone", reg_data.get("phone", ""))).strip().replace(" ", "")
+    name = str(data.get("name", reg_data.get("name", ""))).strip()
+    password = str(data.get("password", ""))
+    confirm_password = str(data.get("confirm_password", ""))
+
+    errors = {}
+
+    if not name:
+        errors["name"] = "Naam required che."
+
+    if not phone:
+        errors["phone"] = "Mobile number required che."
+    elif not PHONE_RE.match(phone):
+        errors["phone"] = "Mobile number 10 thi 15 digits no hovo joiye."
+
+    if not email:
+        errors["email"] = "Email required che."
+    else:
+        try:
+            validate_email(email)
+        except ValidationError:
+            errors["email"] = "Email address valid nathi."
+
+    if not password:
+        errors["password"] = "Password required che."
+    elif password != confirm_password:
+        errors["confirm_password"] = "Password same nathi."
+
+    User = get_user_model()
+
+    try:
+        email_exists = email and (
+            User.objects.filter(email__iexact=email).exists()
+            or User.objects.filter(username__iexact=email).exists()
+        )
+        phone_exists = phone and UserProfile.objects.filter(phone=phone).exists()
+    except (OperationalError, ProgrammingError):
+        return database_not_ready_response()
+
+    if email_exists:
+        errors["email"] = USER_EXISTS_MESSAGE
+
+    if phone_exists:
+        errors["phone"] = USER_EXISTS_MESSAGE
+
+    if password and password == confirm_password:
+        try:
+            user_candidate = User(username=email, email=email, first_name=name)
+            validate_password(password, user=user_candidate)
+        except ValidationError as exc:
+            errors["password"] = " ".join(exc.messages)
+
+    if errors:
+        return JsonResponse(
+            {
+                "success": False,
+                "message": USER_EXISTS_MESSAGE if email_exists or phone_exists else next(iter(errors.values())),
+                "errors": errors,
+            },
+            status=409 if email_exists or phone_exists else 400,
+        )
+
+    try:
+        with transaction.atomic():
+            user = User.objects.create_user(
+                username=email,
+                email=email,
+                password=password,
+                first_name=name,
+            )
+            UserProfile.objects.create(user=user, phone=phone)
+            user_details = UserDetails.objects.create(
+                user=user,
+                name=name,
+                email=email,
+                phone=phone,
+            )
+            
+            # Save the full scraped profile data in ScrapedProfile model linked to this User!
+            ScrapedProfile.objects.create(
+                user=user,
+                url=reg_data.get("url", ""),
+                name=reg_data.get("name", name),
+                headline=reg_data.get("headline", ""),
+                location=reg_data.get("location", ""),
+                about=reg_data.get("about", ""),
+                experience=reg_data.get("experience", []),
+                education=reg_data.get("education", []),
+                skills=reg_data.get("skills", []),
+                raw_pdf_text=reg_data.get("raw_pdf_text", ""),
+            )
+            
+            # Log the user in directly
+            login(request, user)
+            
+            # Create login activity
+            create_login_activity(
+                request,
+                email=user.email,
+                user=user,
+                success=True,
+            )
+            
+            # Update last login info
+            user_details.last_login = timezone.now()
+            user_details.ip_address = get_client_ip(request)
+            user_details.user_agent = request.META.get("HTTP_USER_AGENT", "")[:1000]
+            user_details.save()
+            
+            # Clear the session data
+            request.session.pop("linkedin_reg_data", None)
+            
+    except IntegrityError:
+        return JsonResponse(
+            {
+                "success": False,
+                "message": USER_EXISTS_MESSAGE,
+                "errors": {"user": USER_EXISTS_MESSAGE},
+            },
+            status=409,
+        )
+    except (OperationalError, ProgrammingError):
+        return database_not_ready_response()
+
+    return JsonResponse(
+        {
+            "success": True,
+            "message": "Registration complete thai gayu. Tamari details save thai gai che.",
+            "redirect_url": "/home/",
+        },
+        status=201,
+    )
+
+
+
+
 

@@ -1,0 +1,1278 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>LinkedIn Scraper Assistant</title>
+  <!-- Google Fonts — Outfit -->
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    /* ── Dark Premium Theme Tokens ────────────────────────── */
+    :root {
+      --bg-color: #0f172a;
+      --panel-bg: rgba(30, 41, 59, 0.7);
+      --border-color: rgba(255, 255, 255, 0.08);
+      --primary: #0284c7;
+      --primary-hover: #0369a1;
+      --primary-glow: rgba(2, 132, 199, 0.35);
+      --text-main: #f8fafc;
+      --text-muted: #94a3b8;
+      --success: #10b981;
+      --error: #ef4444;
+      --warning: #f59e0b;
+      --radius-lg: 16px;
+      --radius-md: 12px;
+      --radius-sm: 8px;
+      --transition: 0.25s cubic-bezier(0.2, 0, 0, 1);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Outfit', sans-serif;
+      background-color: var(--bg-color);
+      color: var(--text-main);
+      min-height: 100vh;
+      overflow: hidden;
+      display: flex;
+      background-image: 
+        radial-gradient(circle at 10% 20%, rgba(2, 132, 199, 0.15) 0%, transparent 45%),
+        radial-gradient(circle at 90% 80%, rgba(16, 185, 129, 0.08) 0%, transparent 45%);
+    }
+
+    .app-container {
+      display: grid;
+      grid-template-columns: 320px 1fr;
+      width: 100%;
+      height: 100vh;
+      overflow: hidden;
+    }
+
+    /* ── Sidebar (Scrape History) ─────────────────────────── */
+    .sidebar {
+      background: rgba(15, 23, 42, 0.85);
+      border-right: 1px solid var(--border-color);
+      backdrop-filter: blur(20px);
+      display: flex;
+      flex-direction: column;
+      height: 100vh;
+      z-index: 10;
+    }
+
+    .sidebar-header {
+      padding: 24px 20px 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .brand-section {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .brand-icon {
+      width: 38px;
+      height: 38px;
+      background: linear-gradient(135deg, var(--primary), var(--success));
+      border-radius: var(--radius-sm);
+      display: grid;
+      place-items: center;
+      color: #fff;
+      font-weight: 700;
+      font-size: 16px;
+      box-shadow: 0 4px 12px var(--primary-glow);
+    }
+
+    .brand-title {
+      font-size: 18px;
+      font-weight: 600;
+      letter-spacing: -0.2px;
+    }
+
+    .search-box {
+      position: relative;
+    }
+
+    .search-box input {
+      width: 100%;
+      background: rgba(30, 41, 59, 0.5);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-sm);
+      height: 40px;
+      padding: 0 16px 0 36px;
+      color: var(--text-main);
+      font-family: inherit;
+      font-size: 14px;
+      transition: all var(--transition);
+    }
+
+    .search-box input:focus {
+      outline: none;
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px var(--primary-glow);
+    }
+
+    .search-icon {
+      position: absolute;
+      left: 12px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--text-muted);
+      pointer-events: none;
+      width: 16px;
+      height: 16px;
+    }
+
+    .history-list {
+      flex: 1;
+      overflow-y: auto;
+      padding: 0 12px 24px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .history-item {
+      background: rgba(30, 41, 59, 0.3);
+      border: 1px solid transparent;
+      border-radius: var(--radius-sm);
+      padding: 12px 14px;
+      cursor: pointer;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      transition: all var(--transition);
+      position: relative;
+    }
+
+    .history-item:hover {
+      background: rgba(30, 41, 59, 0.7);
+      border-color: var(--border-color);
+    }
+
+    .history-item.active {
+      background: rgba(2, 132, 199, 0.12);
+      border-color: var(--primary);
+      box-shadow: inset 3px 0 0 var(--primary);
+    }
+
+    .history-info {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .history-name {
+      font-weight: 500;
+      font-size: 14px;
+      color: var(--text-main);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .history-headline {
+      font-size: 12px;
+      color: var(--text-muted);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      margin-top: 2px;
+    }
+
+    .history-date {
+      font-size: 10px;
+      color: var(--text-muted);
+      margin-top: 4px;
+    }
+
+    .delete-profile-btn {
+      background: transparent;
+      border: none;
+      color: var(--text-muted);
+      cursor: pointer;
+      padding: 4px;
+      border-radius: 4px;
+      opacity: 0;
+      transition: all var(--transition);
+    }
+
+    .history-item:hover .delete-profile-btn {
+      opacity: 1;
+    }
+
+    .delete-profile-btn:hover {
+      color: var(--error);
+      background: rgba(239, 68, 68, 0.1);
+    }
+
+    .sidebar-footer {
+      padding: 16px;
+      border-top: 1px solid var(--border-color);
+      display: flex;
+      gap: 10px;
+    }
+
+    .sidebar-btn {
+      flex: 1;
+      height: 38px;
+      border-radius: var(--radius-sm);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 13px;
+      font-weight: 500;
+      text-decoration: none;
+      cursor: pointer;
+      transition: all var(--transition);
+    }
+
+    .sidebar-btn.secondary {
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid var(--border-color);
+      color: var(--text-main);
+    }
+
+    .sidebar-btn.secondary:hover {
+      background: rgba(255, 255, 255, 0.1);
+    }
+
+    /* ── Main Chat/Viewer Container ─────────────────────── */
+    .main-viewport {
+      display: flex;
+      flex-direction: column;
+      height: 100vh;
+      overflow: hidden;
+      position: relative;
+    }
+
+    /* Header */
+    .main-header {
+      height: 64px;
+      background: var(--panel-bg);
+      border-bottom: 1px solid var(--border-color);
+      backdrop-filter: blur(10px);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 24px;
+      z-index: 5;
+    }
+
+    .view-selector {
+      display: flex;
+      background: rgba(15, 23, 42, 0.6);
+      padding: 4px;
+      border-radius: var(--radius-sm);
+      border: 1px solid var(--border-color);
+    }
+
+    .tab-btn {
+      background: transparent;
+      border: none;
+      color: var(--text-muted);
+      padding: 6px 16px;
+      border-radius: 4px;
+      font-size: 13px;
+      font-weight: 500;
+      font-family: inherit;
+      cursor: pointer;
+      transition: all var(--transition);
+    }
+
+    .tab-btn.active {
+      background: var(--primary);
+      color: #fff;
+    }
+
+    /* Content Area */
+    .viewport-content {
+      flex: 1;
+      overflow: hidden;
+      position: relative;
+    }
+
+    /* ── View 1: Chat Pane ───────────────────────────────── */
+    .pane-chat {
+      display: flex;
+      flex-direction: column;
+      height: 100%;
+    }
+
+    .chat-messages {
+      flex: 1;
+      overflow-y: auto;
+      padding: 24px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .chat-bubble-row {
+      display: flex;
+      width: 100%;
+    }
+
+    .chat-bubble-row.bot {
+      justify-content: flex-start;
+    }
+
+    .chat-bubble-row.user {
+      justify-content: flex-end;
+    }
+
+    .chat-bubble {
+      max-width: min(720px, 85%);
+      padding: 14px 18px;
+      border-radius: var(--radius-lg);
+      font-size: 14.5px;
+      line-height: 1.5;
+      word-break: break-word;
+      animation: fadeInUp 0.3s cubic-bezier(0.2, 0, 0, 1) forwards;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    }
+
+    @keyframes fadeInUp {
+      from {
+        opacity: 0;
+        transform: translateY(12px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .bot .chat-bubble {
+      background: rgba(30, 41, 59, 0.9);
+      border: 1px solid var(--border-color);
+      color: var(--text-main);
+      border-bottom-left-radius: 4px;
+    }
+
+    .user .chat-bubble {
+      background: var(--primary);
+      color: #fff;
+      border-bottom-right-radius: 4px;
+    }
+
+    /* Progress Steps layout */
+    .scrape-status-card {
+      margin-top: 10px;
+      background: rgba(15, 23, 42, 0.4);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-md);
+      padding: 16px 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      min-width: 280px;
+    }
+
+    .status-step {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-size: 13px;
+      color: var(--text-muted);
+    }
+
+    .status-step.active {
+      color: var(--primary);
+      font-weight: 500;
+    }
+
+    .status-step.done {
+      color: var(--success);
+    }
+
+    .status-indicator {
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      border: 2px solid var(--border-color);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 10px;
+      flex-shrink: 0;
+    }
+
+    .active .status-indicator {
+      border-color: var(--primary);
+      border-top-color: transparent;
+      animation: spin 0.8s linear infinite;
+    }
+
+    .done .status-indicator {
+      background: var(--success);
+      border-color: var(--success);
+      color: #fff;
+    }
+
+    .done .status-indicator::after {
+      content: "✓";
+      font-weight: 700;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    /* Composer */
+    .chat-composer {
+      background: var(--panel-bg);
+      border-top: 1px solid var(--border-color);
+      padding: 16px 24px;
+      backdrop-filter: blur(10px);
+    }
+
+    .composer-form {
+      display: flex;
+      align-items: center;
+      background: rgba(15, 23, 42, 0.6);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-lg);
+      padding: 6px 6px 6px 18px;
+      height: 52px;
+      transition: all var(--transition);
+    }
+
+    .composer-form:focus-within {
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px var(--primary-glow);
+    }
+
+    .composer-form input {
+      flex: 1;
+      border: none;
+      background: transparent;
+      outline: none;
+      font-family: inherit;
+      color: var(--text-main);
+      font-size: 14.5px;
+      height: 100%;
+    }
+
+    .composer-form input::placeholder {
+      color: var(--text-muted);
+    }
+
+    .composer-btn {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      background: var(--primary);
+      color: #fff;
+      border: none;
+      display: grid;
+      place-items: center;
+      cursor: pointer;
+      transition: all var(--transition);
+      flex-shrink: 0;
+    }
+
+    .composer-btn:hover {
+      background: var(--primary-hover);
+      transform: scale(1.05);
+    }
+
+    .composer-btn:active {
+      transform: scale(0.95);
+    }
+
+    .composer-btn:disabled {
+      background: rgba(30, 41, 59, 0.6);
+      color: var(--text-muted);
+      cursor: wait;
+    }
+
+    /* ── View 2: Profile Viewer Pane ─────────────────────── */
+    .pane-viewer {
+      height: 100%;
+      overflow-y: auto;
+      padding: 32px 24px;
+      display: none;
+    }
+
+    .viewer-card {
+      width: min(840px, 100%);
+      margin: 0 auto;
+      background: rgba(30, 41, 59, 0.4);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-lg);
+      padding: 32px;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+    }
+
+    .viewer-header {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      padding-bottom: 24px;
+      border-bottom: 1px solid var(--border-color);
+      text-align: left;
+    }
+
+    .profile-title-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 20px;
+    }
+
+    .profile-main-info h2 {
+      font-size: 26px;
+      font-weight: 700;
+      color: var(--text-main);
+      letter-spacing: -0.5px;
+    }
+
+    .profile-headline {
+      font-size: 16px;
+      color: var(--text-muted);
+      margin-top: 4px;
+      line-height: 1.4;
+    }
+
+    .profile-location {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      margin-top: 8px;
+      font-size: 13.5px;
+      color: var(--primary);
+      background: rgba(2, 132, 199, 0.1);
+      padding: 4px 12px;
+      border-radius: var(--radius-sm);
+      font-weight: 500;
+    }
+
+    .viewer-section {
+      margin-top: 28px;
+      text-align: left;
+    }
+
+    .viewer-section-title {
+      font-size: 15px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 1.5px;
+      color: var(--primary);
+      border-bottom: 2px solid rgba(2, 132, 199, 0.25);
+      padding-bottom: 8px;
+      margin-bottom: 16px;
+    }
+
+    .profile-about-content {
+      font-size: 14.5px;
+      line-height: 1.6;
+      color: var(--text-muted);
+      white-space: pre-wrap;
+    }
+
+    /* Experience Timeline */
+    .timeline {
+      display: flex;
+      flex-direction: column;
+      gap: 24px;
+      position: relative;
+      padding-left: 20px;
+    }
+
+    .timeline::before {
+      content: "";
+      position: absolute;
+      left: 6px;
+      top: 6px;
+      bottom: 6px;
+      width: 2px;
+      background: var(--border-color);
+    }
+
+    .timeline-item {
+      position: relative;
+    }
+
+    .timeline-dot {
+      position: absolute;
+      left: -20px;
+      top: 6px;
+      width: 14px;
+      height: 14px;
+      border-radius: 50%;
+      background: var(--bg-color);
+      border: 3px solid var(--primary);
+    }
+
+    .timeline-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 12px;
+    }
+
+    .timeline-title {
+      font-size: 15px;
+      font-weight: 600;
+      color: var(--text-main);
+    }
+
+    .timeline-company {
+      font-size: 13.5px;
+      color: var(--text-muted);
+      margin-top: 2px;
+      font-weight: 500;
+    }
+
+    .timeline-duration {
+      font-size: 12px;
+      color: var(--text-muted);
+      background: rgba(255, 255, 255, 0.05);
+      padding: 2px 8px;
+      border-radius: 4px;
+      white-space: nowrap;
+    }
+
+    .timeline-description {
+      font-size: 13.5px;
+      line-height: 1.5;
+      color: var(--text-muted);
+      margin-top: 6px;
+      white-space: pre-wrap;
+    }
+
+    /* Education Items */
+    .education-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 16px;
+    }
+
+    .education-card {
+      background: rgba(255, 255, 255, 0.02);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-sm);
+      padding: 16px;
+    }
+
+    .edu-school {
+      font-size: 15px;
+      font-weight: 600;
+      color: var(--text-main);
+    }
+
+    .edu-degree {
+      font-size: 13.5px;
+      color: var(--text-muted);
+      margin-top: 4px;
+    }
+
+    .edu-year {
+      font-size: 12px;
+      color: var(--primary);
+      margin-top: 6px;
+      font-weight: 500;
+    }
+
+    /* Skills layout */
+    .skills-flex {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .skill-chip {
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid var(--border-color);
+      color: var(--text-main);
+      padding: 6px 14px;
+      border-radius: 20px;
+      font-size: 13px;
+      font-weight: 500;
+      transition: all var(--transition);
+    }
+
+    .skill-chip:hover {
+      background: rgba(2, 132, 199, 0.15);
+      border-color: var(--primary);
+      transform: translateY(-1px);
+    }
+
+    /* Empty state */
+    .empty-viewer {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100%;
+      color: var(--text-muted);
+      gap: 16px;
+    }
+
+    .empty-viewer-icon {
+      font-size: 48px;
+      opacity: 0.5;
+    }
+
+    /* ── Responsive adjustments ──────────────────────────── */
+    @media (max-width: 768px) {
+      .app-container {
+        grid-template-columns: 1fr;
+      }
+      .sidebar {
+        display: none; /* Mobile navigation would require toggling */
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <div class="app-container">
+    <!-- Sidebar / Scrape History -->
+    <aside class="sidebar">
+      <div class="sidebar-header">
+        <div class="brand-section">
+          <div class="brand-icon">LA</div>
+          <div>
+            <h1 class="brand-title">LinkedIn Assistant</h1>
+          </div>
+        </div>
+        <div class="search-box">
+          <svg class="search-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+          </svg>
+          <input type="text" id="historySearch" placeholder="Profiles search karo...">
+        </div>
+      </div>
+
+      <!-- Historical list of profiles -->
+      <div class="history-list" id="historyList">
+        <!-- Javascript populated -->
+      </div>
+
+      <div class="sidebar-footer">
+        <a href="{% url 'home' %}" class="sidebar-btn secondary">Home</a>
+        <a href="{% url 'chatbot_logout' %}" class="sidebar-btn secondary" style="color: var(--error);">Logout</a>
+      </div>
+    </aside>
+
+    <!-- Main Content Area -->
+    <main class="main-viewport">
+      <!-- Toolbar -->
+      <header class="main-header">
+        <div class="view-selector">
+          <button class="tab-btn active" id="btnChatView" onclick="switchView('chat')">Assistant Chat</button>
+          <button class="tab-btn" id="btnProfileView" onclick="switchView('profile')">Profile Details</button>
+        </div>
+        <div>
+          <span id="activeProfileName" style="font-size:13.5px; font-weight:500; color:var(--text-muted);">Koi profile selected nathi</span>
+        </div>
+      </header>
+
+      <div class="viewport-content">
+        <!-- View 1: Chat Pane -->
+        <div class="pane-chat" id="chatPane">
+          <div class="chat-messages" id="chatMessages">
+            <div class="chat-bubble-row bot">
+              <div class="chat-bubble">
+                👋 Kem cho! LinkedIn Scraper Assistant માં આપનું સ્વાગત છે.
+                
+                અહીં તમે કોઈ પણ LinkedIn Profile ની લિંક (દા.ત. <code>https://www.linkedin.com/in/username/</code>) આપી શકો છો.
+                પ્રોગ્રામ જાતે જ LinkedIn માં જઈને <strong>More → Save to PDF</strong> કરશે, અને તેમાંથી બધી માહિતી કાઢીને ડેટાબેઝમાં સેવ કરી લેશે!
+              </div>
+            </div>
+          </div>
+
+          <!-- Composer -->
+          <div class="chat-composer">
+            <form class="composer-form" id="composerForm" autocomplete="off">
+              <input type="text" id="composerInput" placeholder="LinkedIn profile link અહીં પેસ્ટ કરો..." required>
+              <button class="composer-btn" type="submit" id="composerBtn" aria-label="Send">
+                <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor">
+                  <path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z" />
+                </svg>
+              </button>
+            </form>
+          </div>
+        </div>
+
+        <!-- View 2: Profile Details Viewer -->
+        <div class="pane-viewer" id="viewerPane">
+          <div class="empty-viewer" id="emptyViewer">
+            <div class="empty-viewer-icon">📄</div>
+            <p>જ્યારે તમે કોઈ લિંક સ્ક્રેપ કરશો અથવા સાઇડબારમાંથી પ્રોફાઇલ પસંદ કરશો ત્યારે તેની વિગતો અહીં દેખાશે.</p>
+          </div>
+          
+          <div class="viewer-card" id="viewerCard" style="display: none;">
+            <div class="viewer-header">
+              <div class="profile-title-row">
+                <div class="profile-main-info">
+                  <h2 id="viewName">Full Name</h2>
+                  <div class="profile-headline" id="viewHeadline">Professional Headline</div>
+                  <div class="profile-location" id="viewLocation">Location</div>
+                </div>
+                <div>
+                  <a href="#" id="viewLinkedInLink" target="_blank" class="sidebar-btn secondary" style="font-size:12px; padding:6px 12px; height:auto; display:inline-flex;">LinkedIn Profile</a>
+                </div>
+              </div>
+            </div>
+
+            <!-- About Section -->
+            <div class="viewer-section" id="sectionAbout">
+              <h3 class="viewer-section-title">About</h3>
+              <div class="profile-about-content" id="viewAbout">No summary provided.</div>
+            </div>
+
+            <!-- Experience Section -->
+            <div class="viewer-section" id="sectionExperience">
+              <h3 class="viewer-section-title">Experience</h3>
+              <div class="timeline" id="viewExperienceList">
+                <!-- Javascript populated -->
+              </div>
+            </div>
+
+            <!-- Education Section -->
+            <div class="viewer-section" id="sectionEducation">
+              <h3 class="viewer-section-title">Education</h3>
+              <div class="education-grid" id="viewEducationList">
+                <!-- Javascript populated -->
+              </div>
+            </div>
+
+            <!-- Skills Section -->
+            <div class="viewer-section" id="sectionSkills">
+              <h3 class="viewer-section-title">Skills</h3>
+              <div class="skills-flex" id="viewSkillsList">
+                <!-- Javascript populated -->
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <script>
+    let activeProfile = null;
+    let profilesList = [];
+
+    // Switch tabs
+    function switchView(view) {
+      const chatPane = document.getElementById("chatPane");
+      const viewerPane = document.getElementById("viewerPane");
+      const btnChat = document.getElementById("btnChatView");
+      const btnProfile = document.getElementById("btnProfileView");
+
+      if (view === "chat") {
+        chatPane.style.display = "flex";
+        viewerPane.style.display = "none";
+        btnChat.classList.add("active");
+        btnProfile.classList.remove("active");
+      } else {
+        chatPane.style.display = "none";
+        viewerPane.style.display = "block";
+        btnChat.classList.remove("active");
+        btnProfile.classList.add("active");
+      }
+    }
+
+    // CSRF cookie helper
+    function getCsrf() {
+      for (const cookie of document.cookie.split(";")) {
+        const [name, val] = cookie.trim().split("=");
+        if (name === "csrftoken") return decodeURIComponent(val);
+      }
+      return "";
+    }
+
+    // Load profiles from backend
+    async function loadHistory() {
+      try {
+        const response = await fetch("/api/assistant/profiles/");
+        const data = await response.json();
+        if (data.success) {
+          profilesList = data.profiles;
+          renderHistory(profilesList);
+        }
+      } catch (err) {
+        console.error("Failed to load history:", err);
+      }
+    }
+
+    // Render historical profiles list
+    function renderHistory(list) {
+      const historyList = document.getElementById("historyList");
+      historyList.innerHTML = "";
+      
+      if (list.length === 0) {
+        historyList.innerHTML = `<div style="text-align:center; padding:20px; color:var(--text-muted); font-size:13px;">કોઈ પ્રોફાઇલ સેવ નથી</div>`;
+        return;
+      }
+
+      list.forEach(item => {
+        const div = document.createElement("div");
+        div.className = `history-item${activeProfile && activeProfile.id === item.id ? " active" : ""}`;
+        div.onclick = () => loadProfileDetails(item.id);
+        
+        div.innerHTML = `
+          <div class="history-info">
+            <div class="history-name">${esc(item.name)}</div>
+            <div class="history-headline">${esc(item.headline)}</div>
+            <div class="history-date">${item.created_at}</div>
+          </div>
+          <button class="delete-profile-btn" onclick="deleteProfile(event, ${item.id})" title="Delete profile">
+            <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor">
+              <path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/>
+            </svg>
+          </button>
+        `;
+        historyList.appendChild(div);
+      });
+    }
+
+    // Esc HTML
+    function esc(s) {
+      return String(s || "")
+        .replaceAll("&", "&amp;").replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;").replaceAll('"', "&quot;");
+    }
+
+    // Search profiles in history
+    document.getElementById("historySearch").addEventListener("input", (e) => {
+      const q = e.target.value.toLowerCase().trim();
+      const filtered = profilesList.filter(p => 
+        p.name.toLowerCase().includes(q) || 
+        p.headline.toLowerCase().includes(q)
+      );
+      renderHistory(filtered);
+    });
+
+    // Delete a profile
+    async function deleteProfile(event, id) {
+      event.stopPropagation(); // prevent loading details
+      if (!confirm("શું તમે ખરેખર આ સેવ કરેલી પ્રોફાઇલ ડિલીટ કરવા માંગો છો?")) return;
+
+      try {
+        const response = await fetch(`/api/assistant/profiles/${id}/delete/`, {
+          method: "POST",
+          headers: { "X-CSRFToken": getCsrf() }
+        });
+        const data = await response.json();
+        if (data.success) {
+          if (activeProfile && activeProfile.id === id) {
+            activeProfile = null;
+            document.getElementById("activeProfileName").textContent = "Koi profile selected nathi";
+            document.getElementById("viewerCard").style.display = "none";
+            document.getElementById("emptyViewer").style.display = "flex";
+          }
+          loadHistory();
+        } else {
+          alert("Delete failed: " + data.message);
+        }
+      } catch (err) {
+        alert("Server error.");
+      }
+    }
+
+    // Load profile details (either click from sidebar, or newly scraped)
+    async function loadProfileDetails(id) {
+      try {
+        // Find profile details if already loaded in client list (need detail from database though, so let's hit scrape details API or retrieve list API)
+        // Wait, for full experience, we can fetch all details. Let's make an API call or just send the profile back in the response
+        // Wait, list api returns id, name, headline, location, url, created_at. But we want experience, education, skills, about too.
+        // We can just fetch it by scraping or let's see. Wait, is there a details endpoint?
+        // Ah, let's create a details endpoint, or we can just fetch all fields in the history response.
+        // Since sqlite is fast and details are JSON/Text, let's look at `api_scraped_profiles_list` view we wrote:
+        // Oh! In `api_scraped_profiles_list`, we only returned basic details to keep the list response small.
+        // So we need a details API! Let's verify if we need it. Yes, `/api/assistant/profiles/<int:profile_id>/`
+        // Wait! Let's check if we can write a quick view for detail fetch, or just hit database directly.
+        // Let's add that details view or fetch the details from an endpoint. Yes, let's fetch details!
+        // Wait, let's define a details view in python or edit `views.py` to add `api_scraped_profile_detail`.
+        // Let's create the javascript function to load it from an endpoint: `/api/assistant/profiles/${id}/`.
+        const response = await fetch(`/api/assistant/profiles/${id}/detail/`);
+        const data = await response.json();
+        if (data.success && data.profile) {
+          showProfileOnViewer(data.profile);
+        }
+      } catch (err) {
+        console.error("Failed to load details:", err);
+      }
+    }
+
+    function showProfileOnViewer(profile) {
+      activeProfile = profile;
+      
+      // Update sidebar list items active status
+      loadHistory(); // refresh lists active class
+
+      document.getElementById("activeProfileName").textContent = profile.name;
+      document.getElementById("emptyViewer").style.display = "none";
+      document.getElementById("viewerCard").style.display = "block";
+
+      // Bind basic info
+      document.getElementById("viewName").textContent = profile.name || "Unknown";
+      document.getElementById("viewHeadline").textContent = profile.headline || "No headline";
+      document.getElementById("viewLocation").textContent = profile.location || "No location";
+      document.getElementById("viewLinkedInLink").href = profile.url;
+
+      // About
+      if (profile.about && profile.about.trim()) {
+        document.getElementById("sectionAbout").style.display = "block";
+        document.getElementById("viewAbout").textContent = profile.about;
+      } else {
+        document.getElementById("sectionAbout").style.display = "none";
+      }
+
+      // Experience timeline
+      const expList = document.getElementById("viewExperienceList");
+      expList.innerHTML = "";
+      if (profile.experience && profile.experience.length > 0) {
+        document.getElementById("sectionExperience").style.display = "block";
+        profile.experience.forEach(exp => {
+          const item = document.createElement("div");
+          item.className = "timeline-item";
+          item.innerHTML = `
+            <div class="timeline-dot"></div>
+            <div class="timeline-header">
+              <div>
+                <div class="timeline-title">${esc(exp.title)}</div>
+                <div class="timeline-company">${esc(exp.company)}</div>
+              </div>
+              <div class="timeline-duration">${esc(exp.duration)}</div>
+            </div>
+            ${exp.description ? `<div class="timeline-description">${esc(exp.description)}</div>` : ""}
+          `;
+          expList.appendChild(item);
+        });
+      } else {
+        document.getElementById("sectionExperience").style.display = "none";
+      }
+
+      // Education cards
+      const eduList = document.getElementById("viewEducationList");
+      eduList.innerHTML = "";
+      if (profile.education && profile.education.length > 0) {
+        document.getElementById("sectionEducation").style.display = "block";
+        profile.education.forEach(edu => {
+          const card = document.createElement("div");
+          card.className = "education-card";
+          card.innerHTML = `
+            <div class="edu-school">${esc(edu.school)}</div>
+            <div class="edu-degree">${esc(edu.degree)}</div>
+            <div class="edu-year">${esc(edu.year)}</div>
+          `;
+          eduList.appendChild(card);
+        });
+      } else {
+        document.getElementById("sectionEducation").style.display = "none";
+      }
+
+      // Skills chips
+      const skillsList = document.getElementById("viewSkillsList");
+      skillsList.innerHTML = "";
+      if (profile.skills && profile.skills.length > 0) {
+        document.getElementById("sectionSkills").style.display = "block";
+        profile.skills.forEach(skill => {
+          const chip = document.createElement("span");
+          chip.className = "skill-chip";
+          chip.textContent = skill;
+          skillsList.appendChild(chip);
+        });
+      } else {
+        document.getElementById("sectionSkills").style.display = "none";
+      }
+
+      switchView("profile");
+    }
+
+    // Submit composer (scrape action)
+    const form = document.getElementById("composerForm");
+    const input = document.getElementById("composerInput");
+    const chatMessages = document.getElementById("chatMessages");
+    const composerBtn = document.getElementById("composerBtn");
+
+    form.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const url = input.value.trim();
+      if (!url) return;
+
+      // Reset input
+      input.value = "";
+      input.disabled = true;
+      composerBtn.disabled = true;
+
+      // Add user message to chat
+      addMessage(url, "user");
+
+      // Add bot message with loading indicators
+      const statusId = "status_" + Date.now();
+      const botMsgRow = document.createElement("div");
+      botMsgRow.className = "chat-bubble-row bot";
+      
+      const bub = document.createElement("div");
+      bub.className = "chat-bubble";
+      bub.innerHTML = `
+        <div>🔍 LinkedIn profile URL ડિટેક્ટ થઈ છે: <code>${esc(url)}</code></div>
+        <div class="scrape-status-card" id="${statusId}">
+          <div class="status-step active" id="${statusId}_step1">
+            <span class="status-indicator"></span>
+            <span>🌐 Browser launch કરી રહ્યું છે...</span>
+          </div>
+          <div class="status-step" id="${statusId}_step2">
+            <span class="status-indicator"></span>
+            <span>🔑 LinkedIn login અને authentication ચકાસી રહ્યું છે...</span>
+          </div>
+          <div class="status-step" id="${statusId}_step3">
+            <span class="status-indicator"></span>
+            <span>📄 LinkedIn profile પેજ લોડ કરી રહ્યું છે...</span>
+          </div>
+          <div class="status-step" id="${statusId}_step4">
+            <span class="status-indicator"></span>
+            <span>📥 'Save to PDF' ઓપ્શન દ્વારા ડેટા ડાઉનલોડ કરે છે...</span>
+          </div>
+          <div class="status-step" id="${statusId}_step5">
+            <span class="status-indicator"></span>
+            <span>🤖 Gemini AI દ્વારા ડેટા સેક્શન વાઈઝ કમ્પાઈલ કરે છે...</span>
+          </div>
+          <div class="status-step" id="${statusId}_step6">
+            <span class="status-indicator"></span>
+            <span>💾 ડેટાબેઝમાં સેવ કરી રહ્યું છે...</span>
+          </div>
+        </div>
+      `;
+      botMsgRow.appendChild(bub);
+      chatMessages.appendChild(botMsgRow);
+      chatMessages.scrollTop = chatMessages.scrollHeight;
+
+      // Simulate step progress in frontend
+      let currentStep = 1;
+      const stepInterval = setInterval(() => {
+        if (currentStep < 5) {
+          markStepDone(statusId, currentStep);
+          currentStep++;
+          markStepActive(statusId, currentStep);
+        }
+      }, 3500); // progressive steps
+
+      try {
+        const response = await fetch("/api/assistant/scrape/", {
+          method: "POST",
+          headers: { "Content-Type": "application/json", "X-CSRFToken": getCsrf() },
+          body: JSON.stringify({ url: url })
+        });
+        
+        clearInterval(stepInterval);
+        
+        const data = await response.json();
+        if (data.success && data.profile) {
+          // Mark all steps as complete
+          for (let i = currentStep; i <= 6; i++) {
+            markStepDone(statusId, i);
+          }
+          
+          setTimeout(() => {
+            // Success response message
+            const finalBub = document.createElement("div");
+            finalBub.className = "chat-bubble-row bot";
+            finalBub.innerHTML = `
+              <div class="chat-bubble" style="border-color: var(--success); background: rgba(16, 185, 129, 0.08);">
+                ✅ <strong>${esc(data.profile.name)}</strong> ની પ્રોફાઇલ સફળતાપૂર્વક સ્ક્રેપ અને સેવ કરી લીધી છે!<br>
+                નીચે આપેલી લિંક દ્વારા અથવા ઉપર "Profile Details" ટેબ પર ક્લિક કરીને પૂરી વિગતો જુઓ.
+                <div style="margin-top:12px;">
+                  <button class="sidebar-btn" onclick="showProfileOnViewerById(${data.profile.id})" style="background:var(--success); color:#fff; display:inline-flex; border:none; width:auto; padding:6px 16px;">વિગતો જુઓ</button>
+                </div>
+              </div>
+            `;
+            chatMessages.appendChild(finalBub);
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+            
+            // Reload history list
+            loadHistory();
+          }, 1000);
+
+        } else {
+          failAllSteps(statusId, data.message || "Scraping failed.");
+        }
+      } catch (err) {
+        clearInterval(stepInterval);
+        failAllSteps(statusId, "નેટવર્ક અથવા સર્વર કનેક્શન પ્રોબ્લેમ.");
+      } finally {
+        input.disabled = false;
+        composerBtn.disabled = false;
+        input.focus();
+      }
+    });
+
+    function showProfileOnViewerById(id) {
+      loadProfileDetails(id);
+    }
+
+    function addMessage(text, who) {
+      const row = document.createElement("div");
+      row.className = `chat-bubble-row ${who}`;
+      const bub = document.createElement("div");
+      bub.className = "chat-bubble";
+      bub.textContent = text;
+      row.appendChild(bub);
+      chatMessages.appendChild(row);
+      chatMessages.scrollTop = chatMessages.scrollHeight;
+    }
+
+    function markStepActive(statusId, stepNum) {
+      const step = document.getElementById(`${statusId}_step${stepNum}`);
+      if (step) {
+        step.className = "status-step active";
+      }
+    }
+
+    function markStepDone(statusId, stepNum) {
+      const step = document.getElementById(`${statusId}_step${stepNum}`);
+      if (step) {
+        step.className = "status-step done";
+      }
+    }
+
+    function failAllSteps(statusId, errorMsg) {
+      // Find current active step and mark as error
+      const steps = document.querySelectorAll(`#${statusId} .status-step`);
+      steps.forEach(step => {
+        if (step.classList.contains("active")) {
+          step.className = "status-step";
+          step.style.color = "var(--error)";
+          const indicator = step.querySelector(".status-indicator");
+          indicator.style.borderColor = "var(--error)";
+          indicator.style.background = "var(--error)";
+          indicator.textContent = "✕";
+          indicator.style.color = "#fff";
+        }
+      });
+
+      // Add failure bubble
+      const failBub = document.createElement("div");
+      failBub.className = "chat-bubble-row bot";
+      failBub.innerHTML = `
+        <div class="chat-bubble" style="border-color: var(--error); background: rgba(239, 68, 68, 0.08);">
+          ❌ <strong>ભૂલ આવી!</strong> સ્ક્રેપિંગ કમ્પ્લીટ નથી થયું.<br>
+          સંદેશો: <span style="color:var(--error);">${esc(errorMsg)}</span>
+        </div>
+      `;
+      chatMessages.appendChild(failBub);
+      chatMessages.scrollTop = chatMessages.scrollHeight;
+    }
+
+    // Load initial history
+    window.addEventListener("DOMContentLoaded", () => {
+      loadHistory();
+    });
+  </script>
+</body>
+
+</html>

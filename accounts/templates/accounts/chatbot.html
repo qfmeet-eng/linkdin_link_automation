@@ -409,10 +409,27 @@
             <h1>Registration Chatbot</h1>
           </div>
         </div>
-        <div style="display: flex; align-items: center; gap: 16px; flex-wrap: wrap;">
-          <a href="{% url 'user_details' %}" class="admin-link">
-            Admin Panel
-          </a>
+        <div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
+          {% if user.is_authenticated %}
+            <a href="{% url 'home' %}" class="admin-link">
+              Dashboard
+            </a>
+            <a href="{% url 'linkedin_assistant' %}" class="admin-link">
+              LinkedIn Assistant
+            </a>
+            {% if user.is_staff %}
+              <a href="{% url 'user_details' %}" class="admin-link">
+                Admin Panel
+              </a>
+            {% endif %}
+          {% else %}
+            <a href="{% url 'chatbot_login' %}" class="admin-link">
+              Login
+            </a>
+            <a href="{% url 'linkedin_assistant' %}" class="admin-link">
+              LinkedIn Assistant
+            </a>
+          {% endif %}
           <div class="progress" aria-live="polite">
             <span id="progressLabel">Start</span>
             <div class="progress-track">
@@ -424,9 +441,16 @@
 
       <div class="messages" id="messages" aria-live="polite"></div>
 
-      <div style="display: flex; justify-content: space-between; align-items: center; padding: 14px 24px; background: var(--md-surface-2); border-top: 1px solid var(--md-outline-variant); font-size: 14px;">
-        <a href="{% url 'chatbot_login' %}" style="color: var(--md-primary); text-decoration: none; font-weight: 600; transition: color var(--transition);" onmouseover="this.style.color='#004d7a'" onmouseout="this.style.color='var(--md-primary)'">Pehle thi account che? Login karo</a>
-        <a href="{% url 'chatbot_forgot_password' %}" style="color: var(--md-on-surface-variant); text-decoration: none; transition: color var(--transition);" onmouseover="this.style.color='var(--md-primary)'" onmouseout="this.style.color='var(--md-on-surface-variant)'">Forgot Password?</a>
+      <div
+        style="display: flex; justify-content: space-between; align-items: center; padding: 14px 24px; background: var(--md-surface-2); border-top: 1px solid var(--md-outline-variant); font-size: 14px;">
+        <a href="{% url 'chatbot_login' %}"
+          style="color: var(--md-primary); text-decoration: none; font-weight: 600; transition: color var(--transition);"
+          onmouseover="this.style.color='#004d7a'" onmouseout="this.style.color='var(--md-primary)'">Pehle thi account
+          che? Login karo</a>
+        <a href="{% url 'chatbot_forgot_password' %}"
+          style="color: var(--md-on-surface-variant); text-decoration: none; transition: color var(--transition);"
+          onmouseover="this.style.color='var(--md-primary)'"
+          onmouseout="this.style.color='var(--md-on-surface-variant)'">Forgot Password?</a>
       </div>
 
       <form class="composer" id="chatForm" autocomplete="off">

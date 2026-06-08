@@ -73,3 +73,40 @@ class UserDetails(models.Model):
     def __str__(self):
         return f"{self.name} ({self.email})"
 
+
+class ScrapedProfile(models.Model):
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name="scraped_profiles",
+        null=True,
+        blank=True,
+    )
+    url = models.URLField(max_length=500)
+    name = models.CharField(max_length=255, blank=True)
+    headline = models.TextField(blank=True)
+    location = models.CharField(max_length=255, blank=True)
+    about = models.TextField(blank=True)
+    experience = models.JSONField(default=list, blank=True)
+    education = models.JSONField(default=list, blank=True)
+    skills = models.JSONField(default=list, blank=True)
+    raw_pdf_text = models.TextField(blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"{self.name or 'Unknown'} - {self.url}"
+
+
+class LinkedInConfig(models.Model):
+    li_at_cookie = models.TextField(blank=True, help_text="LinkedIn li_at cookie value")
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        verbose_name = "LinkedIn Configuration"
+        verbose_name_plural = "LinkedIn Configuration"
+
+    def __str__(self):
+        return f"LinkedIn Config (Updated: {self.updated_at.strftime('%Y-%m-%d %H:%M')})"
+
+
+

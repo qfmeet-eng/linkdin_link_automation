@@ -23,6 +23,12 @@ from .views import (
     admin_delete_user,
     admin_toggle_status,
     admin_login_activities,
+    linkedin_assistant_view,
+    api_scrape_linkedin,
+    api_scraped_profiles_list,
+    api_delete_scraped_profile,
+    api_scraped_profile_detail,
+    api_update_linkedin_config,
 )
 
 
@@ -38,6 +44,11 @@ urlpatterns = [
     path("api/login/", login_chatbot_user, name="login_chatbot_user"),
     path("api/forgot-password/", forgot_password_user, name="forgot_password_user"),
     path("api/linkedin-scrape/", scrape_linkedin_view, name="linkedin_scrape"),
+    path("assistant/", linkedin_assistant_view, name="linkedin_assistant"),
+    path("api/assistant/scrape/", api_scrape_linkedin, name="api_scrape_linkedin"),
+    path("api/assistant/profiles/", api_scraped_profiles_list, name="api_scraped_profiles_list"),
+    path("api/assistant/profiles/<int:profile_id>/delete/", api_delete_scraped_profile, name="api_delete_scraped_profile"),
+    path("api/assistant/profiles/<int:profile_id>/detail/", api_scraped_profile_detail, name="api_scraped_profile_detail"),
     path("auth/linkedin/", linkedin_oauth_start, name="linkedin_oauth_start"),
     path("auth/linkedin/callback/", linkedin_oauth_callback, name="linkedin_oauth_callback"),
     path("auth/linkedin/userinfo/", linkedin_userinfo_api, name="linkedin_userinfo_api"),
@@ -46,6 +57,7 @@ urlpatterns = [
     path("api/admin/users/<int:user_id>/delete/", admin_delete_user, name="admin_delete_user"),
     path("api/admin/users/<int:user_id>/toggle-status/", admin_toggle_status, name="admin_toggle_status"),
     path("api/admin/users/<int:user_id>/login-activities/", admin_login_activities, name="admin_login_activities"),
+    path("api/admin/config/update/", api_update_linkedin_config, name="api_update_linkedin_config"),
     path(
         "reset/<uidb64>/<token>/",
         PasswordResetConfirmView.as_view(
