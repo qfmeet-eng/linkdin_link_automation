@@ -29,6 +29,8 @@ from .views import (
     api_delete_scraped_profile,
     api_scraped_profile_detail,
     api_update_linkedin_config,
+    admin_scraped_profile_detail,
+    admin_delete_scraped_profile,
 )
 
 
@@ -58,6 +60,8 @@ urlpatterns = [
     path("api/admin/users/<int:user_id>/toggle-status/", admin_toggle_status, name="admin_toggle_status"),
     path("api/admin/users/<int:user_id>/login-activities/", admin_login_activities, name="admin_login_activities"),
     path("api/admin/config/update/", api_update_linkedin_config, name="api_update_linkedin_config"),
+    path("api/admin/scraped-profiles/<int:profile_id>/detail/", admin_scraped_profile_detail, name="admin_scraped_profile_detail"),
+    path("api/admin/scraped-profiles/<int:profile_id>/delete/", admin_delete_scraped_profile, name="admin_delete_scraped_profile"),
     path(
         "reset/<uidb64>/<token>/",
         PasswordResetConfirmView.as_view(

@@ -435,9 +435,11 @@ def user_details_view(request):
         return redirect(f"{reverse('admin:login')}?next={request.path}")
     details_list = UserDetails.objects.all().order_by("-created_at")
     linkedin_config = LinkedInConfig.objects.first()
+    scraped_profiles = ScrapedProfile.objects.all().order_by("-created_at")
     return render(request, "accounts/user_details.html", {
         "details_list": details_list,
         "linkedin_config": linkedin_config,
+        "scraped_profiles": scraped_profiles,
     })
 
 
@@ -1261,6 +1263,57 @@ def api_register_linkedin_complete(request):
         },
         status=201,
     )
+
+
+def admin_scraped_profile_detail(request, profile_id):
+    """Get full details of a specific scraped profile (admin view)."""
+    if not request.user.is_authenticated or not request.user.is_staff:
+        return JsonResponse({"success": False, "message": "Permission denied."}, status=403)
+
+    try:
+        profile = ScrapedProfile.objects.filter(id=profile_id).first()
+        if not profile:
+            return JsonResponse({"success": False, "message": "Profile not found."}, status=404)
+            
+        return JsonResponse({
+            "success": True,
+            "profile": {
+                "id": profile.id,
+                "url": profile.url,
+                "name": profile.name,
+                "headline": profile.headline,
+                "location": profile.location,
+                "about": profile.about,
+                "experience": profile.experience,
+                "education": profile.education,
+                "skills": profile.skills,
+                "raw_pdf_text": profile.raw_pdf_text,
+                "created_at": profile.created_at.strftime("%d %b %Y, %H:%M"),
+                "scraped_by": profile.user.email if profile.user else "System",
+            }
+        })
+    except (OperationalError, ProgrammingError):
+        return database_not_ready_response()
+    except Exception as e:
+        return JsonResponse({"success": False, "message": f"Database error: {str(e)}"}, status=500)
+
+
+@require_POST
+def admin_delete_scraped_profile(request, profile_id):
+    """Delete a scraped profile (admin view)."""
+    if not request.user.is_authenticated or not request.user.is_staff:
+        return JsonResponse({"success": False, "message": "Permission denied."}, status=403)
+
+    try:
+        profile = ScrapedProfile.objects.filter(id=profile_id).first()
+        if not profile:
+            return JsonResponse({"success": False, "message": "Profile not found."}, status=404)
+        profile.delete()
+        return JsonResponse({"success": True, "message": "Profile successfully deleted."})
+    except (OperationalError, ProgrammingError):
+        return database_not_ready_response()
+    except Exception as e:
+        return JsonResponse({"success": False, "message": f"Database error: {str(e)}"}, status=500)
 
 
 

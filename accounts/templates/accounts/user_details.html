@@ -809,6 +809,164 @@
         opacity: 0;
       }
     }
+
+    /* ── Tabs Navigation ───────────────────────────────────── */
+    .tabs-container {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 24px;
+      border-bottom: 1px solid var(--md-outline);
+      padding-bottom: 8px;
+    }
+
+    .tab-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 10px 20px;
+      border-radius: var(--md-radius-full);
+      font-family: 'Roboto', sans-serif;
+      font-size: 14px;
+      font-weight: 500;
+      color: var(--md-on-surface-var);
+      background: transparent;
+      border: none;
+      cursor: pointer;
+      transition: background var(--md-transition), color var(--md-transition);
+    }
+
+    .tab-btn:hover {
+      background: var(--md-surface-2);
+      color: var(--md-on-surface);
+    }
+
+    .tab-btn.active {
+      background: var(--md-primary-container);
+      color: var(--md-on-primary-cont);
+    }
+
+    .tab-btn .material-symbols-rounded {
+      font-size: 20px;
+    }
+
+    .tab-content {
+      display: none;
+    }
+
+    .tab-content.active {
+      display: block;
+      animation: fadeIn var(--md-transition);
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* ── Profile Detail UI ─────────────────────────────────── */
+    .profile-details-grid {
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+
+    .profile-section-title {
+      font-size: 15px;
+      font-weight: 500;
+      color: var(--md-primary);
+      margin-bottom: 8px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      border-bottom: 1px solid var(--md-outline);
+      padding-bottom: 4px;
+    }
+
+    .profile-meta-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px 16px;
+      margin-bottom: 12px;
+      background: var(--md-surface-2);
+      padding: 12px;
+      border-radius: var(--md-radius-md);
+    }
+
+    .profile-meta-item {
+      font-size: 13px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      color: var(--md-on-surface-var);
+    }
+
+    .profile-meta-item strong {
+      color: var(--md-on-surface);
+    }
+
+    .card-list {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .card-item {
+      background: var(--md-surface-2);
+      padding: 12px 16px;
+      border-radius: var(--md-radius-md);
+      border-left: 3px solid var(--md-primary);
+    }
+
+    .card-item-title {
+      font-weight: 500;
+      font-size: 14px;
+      color: var(--md-on-surface);
+    }
+
+    .card-item-subtitle {
+      font-size: 12px;
+      color: var(--md-on-surface-var);
+      margin-top: 2px;
+    }
+
+    .card-item-desc {
+      font-size: 13px;
+      color: var(--md-on-surface);
+      margin-top: 6px;
+      white-space: pre-line;
+    }
+
+    .skills-chips {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+    }
+
+    .skill-chip {
+      background: var(--md-secondary-cont);
+      color: var(--md-on-surface);
+      padding: 4px 10px;
+      border-radius: var(--md-radius-full);
+      font-size: 12px;
+      font-weight: 500;
+    }
+
+    .raw-text-box {
+      font-family: 'Roboto Mono', monospace;
+      font-size: 11px;
+      background: #1e1e1e;
+      color: #d4d4d4;
+      padding: 12px;
+      border-radius: var(--md-radius-md);
+      max-height: 150px;
+      overflow-y: auto;
+      white-space: pre-wrap;
+    }
+
+    @keyframes spin {
+      from { transform: rotate(0deg); }
+      to { transform: rotate(360deg); }
+    }
   </style>
 </head>
 
@@ -834,7 +992,22 @@
   <!-- ── Page ── -->
   <main class="page">
 
-    <!-- Stat Cards -->
+    <!-- Tabs Navigation -->
+    <div class="tabs-container">
+      <button class="tab-btn active" onclick="switchTab(this, 'users-tab')">
+        <span class="material-symbols-rounded">manage_accounts</span>
+        Users & Config
+      </button>
+      <button class="tab-btn" onclick="switchTab(this, 'scraped-tab')">
+        <span class="material-symbols-rounded">database</span>
+        Scraped Profiles
+      </button>
+    </div>
+
+    <!-- Tab 1: Users & Config -->
+    <div id="users-tab" class="tab-content active">
+
+      <!-- Stat Cards -->
     <div class="stat-row">
       <div class="stat-card blue">
         <div class="stat-icon-wrap">
@@ -1060,6 +1233,127 @@
       </div>
 
     </div>
+    </div><!-- End of Users & Config tab-content -->
+
+    <!-- Tab 2: Scraped Profiles -->
+    <div id="scraped-tab" class="tab-content">
+      <!-- Table Card for Scraped Profiles -->
+      <div class="table-card">
+        <!-- Toolbar -->
+        <div class="table-toolbar">
+          <span class="toolbar-title">Scraped LinkedIn Profiles</span>
+          <div class="toolbar-right">
+            <div class="search-field">
+              <span class="material-symbols-rounded">search</span>
+              <input type="text" id="searchScrapedInput" placeholder="Search name, headline, location, user…" aria-label="Search profiles">
+            </div>
+            <span id="scrapedRowCounter" style="font-size:13px; color:var(--md-on-surface-var); white-space:nowrap;">
+              <span id="visibleScrapedCount">{{ scraped_profiles|length }}</span> / {{ scraped_profiles|length }} profiles
+            </span>
+          </div>
+        </div>
+
+        <!-- Table -->
+        <div style="overflow-x:auto;">
+          <table class="data-table" id="scrapedTable">
+            <thead>
+              <tr>
+                <th>Profile Info</th>
+                <th>LinkedIn URL</th>
+                <th>Scraped By</th>
+                <th>Scraped Date</th>
+                <th style="text-align: center;">Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for p in scraped_profiles %}
+              <tr class="scraped-row" id="scraped-row-{{ p.id }}"
+                data-profile-id="{{ p.id }}"
+                data-name="{{ p.name }}"
+                data-headline="{{ p.headline }}"
+                data-location="{{ p.location }}"
+                data-scraped-by="{% if p.user %}{{ p.user.email }}{% else %}System{% endif %}"
+                data-search-name="{{ p.name|lower }}"
+                data-search-headline="{{ p.headline|lower }}"
+                data-search-location="{{ p.location|lower }}"
+                data-search-by="{% if p.user %}{{ p.user.email|lower }}{% else %}system{% endif %}">
+                
+                <!-- Profile Info -->
+                <td>
+                  <div class="user-cell">
+                    <div class="avatar" style="background:#0a66c2; color:#ffffff;" title="LinkedIn Scraped Profile">
+                      {{ p.name|slice:":1"|default:"L" }}
+                    </div>
+                    <div>
+                      <div class="user-name">{{ p.name|default:"Unknown Name" }}</div>
+                      <div class="user-email" style="max-width: 300px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;" title="{{ p.headline }}">{{ p.headline|default:"No headline" }}</div>
+                    </div>
+                  </div>
+                </td>
+
+                <!-- LinkedIn URL -->
+                <td>
+                  <a href="{% if not p.url|slice:':4' == 'http' %}https://{% endif %}{{ p.url }}" target="_blank" style="color: var(--md-primary); text-decoration: none; display: inline-flex; align-items: center; gap: 4px;">
+                    <span class="material-symbols-rounded" style="font-size: 16px;">open_in_new</span>
+                    Link
+                  </a>
+                </td>
+
+                <!-- Scraped By -->
+                <td>
+                  {% if p.user %}
+                  <span class="chip chip-phone" style="background: var(--md-info-cont); color: var(--md-primary); border-color: var(--md-outline);">
+                    <span class="material-symbols-rounded" style="font-size:14px; margin-right:4px;">account_circle</span>
+                    {{ p.user.first_name|default:p.user.email }}
+                  </span>
+                  {% else %}
+                  <span class="chip chip-empty">System</span>
+                  {% endif %}
+                </td>
+
+                <!-- Scraped Date -->
+                <td>
+                  <div class="ts-date">{{ p.created_at|date:"M d, Y" }}</div>
+                  <div class="ts-time">{{ p.created_at|date:"H:i:s" }}</div>
+                </td>
+
+                <!-- Actions -->
+                <td>
+                  <div style="display: flex; gap: 4px; justify-content: center; align-items: center;">
+                    <button class="action-btn" onclick="openScrapedDetailModal({{ p.id }})" title="View Details">
+                      <span class="material-symbols-rounded" style="font-size:18px;">visibility</span>
+                    </button>
+                    <button class="action-btn delete-btn" onclick="openScrapedDeleteModal({{ p.id }}, '{{ p.name|escapejs }}')" title="Delete Profile">
+                      <span class="material-symbols-rounded" style="font-size:18px;">delete</span>
+                    </button>
+                  </div>
+                </td>
+              </tr>
+              {% empty %}
+              <tr>
+                <td colspan="5" style="text-align:center; padding:56px; color:var(--md-on-surface-var);">
+                  <span class="material-symbols-rounded" style="font-size:48px; display:block; margin-bottom:12px;">database</span>
+                  <div style="font-size:15px; font-weight:500;">No profiles scraped yet</div>
+                  <div style="font-size:13px; margin-top:4px;">LinkedIn assistant dwara scrape thayelaa profiles yahan dikhse.</div>
+                </td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+
+          <!-- JS Empty State for Scraped Profiles -->
+          <div class="empty-state" id="scrapedEmptyState">
+            <span class="material-symbols-rounded">search_off</span>
+            <p>No profiles match your search.</p>
+          </div>
+        </div>
+
+        <!-- Footer -->
+        <div class="table-footer">
+          <span>Showing <strong id="scrapedFooterVisible">{{ scraped_profiles|length }}</strong> of <strong>{{ scraped_profiles|length }}</strong> records</span>
+        </div>
+      </div>
+    </div>
   </main>
 
   <!-- Toast Container -->
@@ -1169,6 +1463,47 @@
       </div>
       <div class="modal-footer">
         <button type="button" class="btn btn-tonal" onclick="closeLogsModal()">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Scraped Profile Detail Modal -->
+  <div class="modal-backdrop" id="scrapedDetailModal">
+    <div class="modal-window" style="max-width: 700px; width: 95%;">
+      <div class="modal-header">
+        <h2 class="modal-title">Scraped Profile Details</h2>
+        <button class="modal-close" onclick="closeScrapedDetailModal()">
+          <span class="material-symbols-rounded">close</span>
+        </button>
+      </div>
+      <div class="modal-body" id="scrapedDetailModalBody">
+        <!-- Will be dynamically populated via fetch -->
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-tonal" onclick="closeScrapedDetailModal()">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Delete Scraped Profile Confirmation Modal -->
+  <div class="modal-backdrop" id="scrapedDeleteModal">
+    <div class="modal-window" style="max-width: 400px;">
+      <div class="modal-header">
+        <h2 class="modal-title">Delete Scraped Profile</h2>
+        <button class="modal-close" onclick="closeScrapedDeleteModal()">
+          <span class="material-symbols-rounded">close</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <p>Are you sure you want to delete scraped profile of <strong id="deleteScrapedName"></strong>?</p>
+        <p style="color: var(--md-error); font-size: 13px; margin-top: 8px;">
+          <span class="material-symbols-rounded" style="font-size: 16px; vertical-align: text-bottom;">warning</span>
+          This action is permanent and cannot be undone.
+        </p>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-outlined" onclick="closeScrapedDeleteModal()">Cancel</button>
+        <button type="button" class="btn btn-filled" style="background: var(--md-error); color: white;" onclick="confirmDeleteScraped()">Delete</button>
       </div>
     </div>
   </div>
@@ -1553,6 +1888,227 @@
           btn.innerHTML = originalText;
           showToast('An unexpected error occurred.', 'error');
         });
+      });
+    }
+
+    // ── Tabs Switching Logic ─────────────────────────────────
+    function switchTab(btn, tabId) {
+      document.querySelectorAll('.tab-content').forEach(content => {
+        content.classList.remove('active');
+      });
+      document.querySelectorAll('.tab-btn').forEach(b => {
+        b.classList.remove('active');
+      });
+      document.getElementById(tabId).classList.add('active');
+      btn.classList.add('active');
+    }
+
+    // ── Scraped Profiles Search ──────────────────────────────
+    const scrapedRows = document.querySelectorAll(".scraped-row");
+    const searchScrapedIn = document.getElementById("searchScrapedInput");
+    const visScrapedCount = document.getElementById("visibleScrapedCount");
+    const footScrapedVis = document.getElementById("scrapedFooterVisible");
+    const scrapedEmptyState = document.getElementById("scrapedEmptyState");
+    const scrapedTbody = document.querySelector("#scrapedTable tbody");
+
+    if (searchScrapedIn) {
+      searchScrapedIn.addEventListener("input", () => {
+        const q = searchScrapedIn.value.toLowerCase().trim();
+        let vis = 0;
+
+        scrapedRows.forEach(r => {
+          const match = !q ||
+            r.dataset.searchName.includes(q) ||
+            r.dataset.searchHeadline.includes(q) ||
+            r.dataset.searchLocation.includes(q) ||
+            r.dataset.searchBy.includes(q);
+
+          r.style.display = match ? "" : "none";
+          if (match) vis++;
+        });
+
+        visScrapedCount.textContent = vis;
+        footScrapedVis.textContent = vis;
+
+        if (vis === 0 && scrapedRows.length > 0) {
+          scrapedEmptyState.style.display = "block";
+          scrapedTbody.style.display = "none";
+        } else {
+          scrapedEmptyState.style.display = "none";
+          scrapedTbody.style.display = "";
+        }
+      });
+    }
+
+    // ── Scraped Profile Detail Modal ─────────────────────────
+    function openScrapedDetailModal(profileId) {
+      const body = document.getElementById('scrapedDetailModalBody');
+      body.innerHTML = '<div style="text-align:center; padding: 48px;"><span class="material-symbols-rounded" style="font-size:40px; animation: spin 1s infinite linear;">hourglass_empty</span><p style="margin-top:12px;">Loading profile details...</p></div>';
+      openModal('scrapedDetailModal');
+
+      fetch(`/api/admin/scraped-profiles/${profileId}/detail/`)
+        .then(res => res.json())
+        .then(data => {
+          if (data.success) {
+            const p = data.profile;
+            
+            let experienceHtml = '<p style="color:var(--md-on-surface-var); font-style:italic;">No experience added</p>';
+            if (p.experience && p.experience.length > 0) {
+              experienceHtml = `<div class="card-list">` + p.experience.map(exp => `
+                <div class="card-item">
+                  <div class="card-item-title">${exp.title || 'Role'}</div>
+                  <div class="card-item-subtitle">${exp.company || 'Company'} • ${exp.duration || 'Duration'}</div>
+                  ${exp.description ? `<div class="card-item-desc">${exp.description}</div>` : ''}
+                </div>
+              `).join('') + `</div>`;
+            }
+
+            let educationHtml = '<p style="color:var(--md-on-surface-var); font-style:italic;">No education added</p>';
+            if (p.education && p.education.length > 0) {
+              educationHtml = `<div class="card-list">` + p.education.map(edu => `
+                <div class="card-item" style="border-left-color: var(--md-secondary);">
+                  <div class="card-item-title">${edu.school || 'School'}</div>
+                  <div class="card-item-subtitle">${edu.degree || 'Degree'} ${edu.field_of_study ? `in ${edu.field_of_study}` : ''} • ${edu.duration || ''}</div>
+                </div>
+              `).join('') + `</div>`;
+            }
+
+            let skillsHtml = '<p style="color:var(--md-on-surface-var); font-style:italic;">No skills added</p>';
+            if (p.skills && p.skills.length > 0) {
+              skillsHtml = `<div class="skills-chips">` + p.skills.map(skill => `
+                <span class="skill-chip">${skill}</span>
+              `).join('') + `</div>`;
+            }
+
+            body.innerHTML = `
+              <div class="profile-details-grid">
+                <div>
+                  <h3 style="font-size:22px; font-weight:500; color:var(--md-on-surface);">${p.name || 'Unknown Name'}</h3>
+                  <p style="font-size:14px; color:var(--md-on-surface-var); margin-top:4px;">${p.headline || 'No headline'}</p>
+                </div>
+                
+                <div class="profile-meta-row">
+                  <div class="profile-meta-item">
+                    <span class="material-symbols-rounded" style="font-size:16px;">pin_drop</span>
+                    <strong>Location:</strong> ${p.location || 'N/A'}
+                  </div>
+                  <div class="profile-meta-item">
+                    <span class="material-symbols-rounded" style="font-size:16px;">link</span>
+                    <strong>LinkedIn:</strong> <a href="${p.url.startsWith('http') ? p.url : 'https://' + p.url}" target="_blank" style="color:var(--md-primary); text-decoration:none;">Open URL</a>
+                  </div>
+                  <div class="profile-meta-item">
+                    <span class="material-symbols-rounded" style="font-size:16px;">person_search</span>
+                    <strong>Scraped By:</strong> ${p.scraped_by}
+                  </div>
+                  <div class="profile-meta-item">
+                    <span class="material-symbols-rounded" style="font-size:16px;">calendar_today</span>
+                    <strong>Date:</strong> ${p.created_at}
+                  </div>
+                </div>
+
+                ${p.about ? `
+                  <div>
+                    <div class="profile-section-title">
+                      <span class="material-symbols-rounded" style="font-size:18px;">info</span>
+                      About
+                    </div>
+                    <div style="font-size:14px; white-space:pre-line; color:var(--md-on-surface); background:var(--md-surface-2); padding:16px; border-radius:var(--md-radius-md);">${p.about}</div>
+                  </div>
+                ` : ''}
+
+                <div>
+                  <div class="profile-section-title">
+                    <span class="material-symbols-rounded" style="font-size:18px;">work</span>
+                    Experience
+                  </div>
+                  ${experienceHtml}
+                </div>
+
+                <div>
+                  <div class="profile-section-title">
+                    <span class="material-symbols-rounded" style="font-size:18px;">school</span>
+                    Education
+                  </div>
+                  ${educationHtml}
+                </div>
+
+                <div>
+                  <div class="profile-section-title">
+                    <span class="material-symbols-rounded" style="font-size:18px;">award_star</span>
+                    Skills
+                  </div>
+                  ${skillsHtml}
+                </div>
+
+                ${p.raw_pdf_text ? `
+                  <div>
+                    <div class="profile-section-title">
+                      <span class="material-symbols-rounded" style="font-size:18px;">description</span>
+                      Raw Text (Scraped PDF Source)
+                    </div>
+                    <div class="raw-text-box">${p.raw_pdf_text}</div>
+                  </div>
+                ` : ''}
+              </div>
+            `;
+          } else {
+            body.innerHTML = `<div style="text-align:center; padding: 48px; color:var(--md-error);"><span class="material-symbols-rounded" style="font-size:40px;">error</span><p style="margin-top:12px;">${data.message}</p></div>`;
+          }
+        })
+        .catch(err => {
+          body.innerHTML = '<div style="text-align:center; padding: 48px; color:var(--md-error);"><span class="material-symbols-rounded" style="font-size:40px;">error</span><p style="margin-top:12px;">Failed to fetch profile details.</p></div>';
+        });
+    }
+
+    function closeScrapedDetailModal() {
+      closeModal('scrapedDetailModal');
+    }
+
+    // ── Scraped Profile Delete ───────────────────────────────
+    let scrapedIdToDelete = null;
+    function openScrapedDeleteModal(profileId, name) {
+      scrapedIdToDelete = profileId;
+      document.getElementById('deleteScrapedName').textContent = name || 'Unknown Name';
+      openModal('scrapedDeleteModal');
+    }
+
+    function closeScrapedDeleteModal() {
+      scrapedIdToDelete = null;
+      closeModal('scrapedDeleteModal');
+    }
+
+    function confirmDeleteScraped() {
+      if (!scrapedIdToDelete) return;
+
+      fetch(`/api/admin/scraped-profiles/${scrapedIdToDelete}/delete/`, {
+        method: 'POST',
+        headers: {
+          'X-CSRFToken': csrftoken
+        }
+      })
+      .then(res => res.json())
+      .then(data => {
+        closeScrapedDeleteModal();
+        if (data.success) {
+          showToast(data.message, 'success');
+          const row = document.getElementById(`scraped-row-${scrapedIdToDelete}`);
+          if (row) {
+            row.remove();
+            const currentCount = document.querySelectorAll('.scraped-row').length;
+            document.getElementById('visibleScrapedCount').textContent = currentCount;
+            document.getElementById('scrapedFooterVisible').textContent = currentCount;
+            const rowCounter = document.getElementById('scrapedRowCounter');
+            if (rowCounter) {
+              rowCounter.innerHTML = `<span id="visibleScrapedCount">${currentCount}</span> / ${currentCount} profiles`;
+            }
+          }
+        } else {
+          showToast(data.message, 'error');
+        }
+      })
+      .catch(err => {
+        closeScrapedDeleteModal();
+        showToast('An unexpected error occurred.', 'error');
       });
     }
   </script>
