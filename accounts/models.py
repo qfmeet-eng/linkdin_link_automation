@@ -109,4 +109,41 @@ class LinkedInConfig(models.Model):
         return f"LinkedIn Config (Updated: {self.updated_at.strftime('%Y-%m-%d %H:%M')})"
 
 
+class LeadActivity(models.Model):
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name="lead_activities"
+    )
+    search_url = models.URLField(max_length=1000, blank=True)
+    profile_url = models.URLField(max_length=500)
+    name = models.CharField(max_length=255, blank=True)
+    headline = models.TextField(blank=True)
+    location = models.CharField(max_length=255, blank=True)
+    last_activity_date = models.CharField(max_length=100, blank=True)
+    posts_count = models.IntegerField(default=0)
+    comments_count = models.IntegerField(default=0)
+    reposts_count = models.IntegerField(default=0)
+    activity_score = models.CharField(
+        max_length=50,
+        choices=[
+            ("Active", "Active"),
+            ("Moderately Active", "Moderately Active"),
+            ("Inactive", "Inactive")
+        ],
+        default="Inactive"
+    )
+    summary = models.TextField(blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        verbose_name = "Lead Activity"
+        verbose_name_plural = "Lead Activities"
+        ordering = ["-created_at"]
+
+    def __str__(self):
+        return f"{self.name or 'Unknown'} - {self.activity_score} ({self.created_at.strftime('%Y-%m-%d')})"
+
+
+
 

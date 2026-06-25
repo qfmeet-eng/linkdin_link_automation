@@ -31,6 +31,16 @@ from .views import (
     api_update_linkedin_config,
     admin_scraped_profile_detail,
     admin_delete_scraped_profile,
+    # Lead Activity Analyzer
+    lead_dashboard_view,
+    api_start_lead_analysis,
+    api_search_linkedin_profiles,
+    api_analyze_selected_profiles,
+    api_analyze_progress,
+    api_leads_list,
+    api_lead_detail,
+    api_delete_lead,
+    download_lead_pdf,
 )
 
 
@@ -62,6 +72,16 @@ urlpatterns = [
     path("api/admin/config/update/", api_update_linkedin_config, name="api_update_linkedin_config"),
     path("api/admin/scraped-profiles/<int:profile_id>/detail/", admin_scraped_profile_detail, name="admin_scraped_profile_detail"),
     path("api/admin/scraped-profiles/<int:profile_id>/delete/", admin_delete_scraped_profile, name="admin_delete_scraped_profile"),
+    # ── Lead Activity Analyzer ──────────────────────────────────────────────
+    path("leads/", lead_dashboard_view, name="lead_dashboard"),
+    path("leads/<int:lead_id>/pdf/", download_lead_pdf, name="download_lead_pdf"),
+    path("api/leads/analyze/", api_start_lead_analysis, name="api_start_lead_analysis"),
+    path("api/leads/search/", api_search_linkedin_profiles, name="api_search_linkedin_profiles"),
+    path("api/leads/analyze-selected/", api_analyze_selected_profiles, name="api_analyze_selected_profiles"),
+    path("api/leads/progress/", api_analyze_progress, name="api_analyze_progress"),
+    path("api/leads/", api_leads_list, name="api_leads_list"),
+    path("api/leads/<int:lead_id>/", api_lead_detail, name="api_lead_detail"),
+    path("api/leads/<int:lead_id>/delete/", api_delete_lead, name="api_delete_lead"),
     path(
         "reset/<uidb64>/<token>/",
         PasswordResetConfirmView.as_view(

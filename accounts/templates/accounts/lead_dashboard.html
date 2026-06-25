@@ -1,0 +1,1029 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Lead Activity Analyzer</title>
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@24,400,1,0"
+        rel="stylesheet">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&family=Roboto+Mono:wght@400;500&display=swap"
+        rel="stylesheet">
+    <style>
+        :root {
+            --primary: #1a73e8;
+            --on-primary: #fff;
+            --primary-cont: #d3e3fd;
+            --surface: #f8f9fa;
+            --s1: #fff;
+            --s2: #f1f3f4;
+            --on-s: #202124;
+            --on-sv: #5f6368;
+            --outline: #dadce0;
+            --success: #137333;
+            --sbg: #e6f4ea;
+            --warning: #b06000;
+            --wbg: #fef7e0;
+            --error: #d93025;
+            --ebg: #fce8e6;
+            --e1: 0 1px 2px rgba(0, 0, 0, .1), 0 1px 3px 1px rgba(0, 0, 0, .07);
+            --e2: 0 1px 2px rgba(0, 0, 0, .12), 0 2px 6px 2px rgba(0, 0, 0, .08);
+            --r: 999px;
+            --t: .2s cubic-bezier(.2, 0, 0, 1)
+        }
+
+        *,
+        *::before,
+        *::after {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0
+        }
+
+        body {
+            font-family: 'Roboto', sans-serif;
+            background: var(--surface);
+            color: var(--on-s);
+            min-height: 100vh
+        }
+
+        /* App Bar */
+        .app-bar {
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            height: 64px;
+            background: var(--s1);
+            border-bottom: 1px solid var(--outline);
+            display: flex;
+            align-items: center;
+            padding: 0 24px;
+            gap: 12px;
+            box-shadow: var(--e1)
+        }
+
+        .ab-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 8px;
+            background: var(--primary-cont);
+            color: var(--primary);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0
+        }
+
+        .ab-title {
+            font-size: 20px;
+            font-weight: 500
+        }
+
+        .ab-sub {
+            font-size: 12px;
+            color: var(--on-sv);
+            margin-top: 1px
+        }
+
+        .ab-actions {
+            margin-left: auto;
+            display: flex;
+            gap: 8px
+        }
+
+        /* Buttons */
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 0 20px;
+            height: 40px;
+            border-radius: var(--r);
+            font-family: 'Roboto', sans-serif;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            border: none;
+            text-decoration: none;
+            transition: box-shadow var(--t), background var(--t);
+            white-space: nowrap
+        }
+
+        .btn-filled {
+            background: var(--primary);
+            color: #fff;
+            box-shadow: var(--e1)
+        }
+
+        .btn-filled:hover {
+            box-shadow: var(--e2)
+        }
+
+        .btn-tonal {
+            background: var(--primary-cont);
+            color: #041e49
+        }
+
+        .btn-outlined {
+            background: transparent;
+            color: var(--primary);
+            border: 1px solid var(--outline)
+        }
+
+        .btn:disabled {
+            opacity: .5;
+            cursor: not-allowed
+        }
+
+        /* Page */
+        .page {
+            max-width: 1280px;
+            margin: 0 auto;
+            padding: 24px
+        }
+
+        /* Steps */
+        .steps {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 24px;
+            flex-wrap: wrap
+        }
+
+        .step-chip {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            padding: 6px 14px;
+            border-radius: var(--r);
+            font-size: 13px;
+            font-weight: 500;
+            background: var(--s2);
+            color: var(--on-sv);
+            border: 1px solid var(--outline)
+        }
+
+        .step-chip.active {
+            background: var(--primary-cont);
+            color: var(--primary);
+            border-color: var(--primary)
+        }
+
+        .step-chip.done {
+            background: var(--sbg);
+            color: var(--success);
+            border-color: #c8e6c9
+        }
+
+        /* Cards */
+        .card {
+            background: var(--s1);
+            border: 1px solid var(--outline);
+            border-radius: 16px;
+            padding: 24px;
+            box-shadow: var(--e1);
+            margin-bottom: 20px
+        }
+
+        .card-title {
+            font-size: 16px;
+            font-weight: 500;
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            gap: 8px
+        }
+
+        /* Search row */
+        .search-row {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap
+        }
+
+        .tf {
+            flex: 1;
+            min-width: 240px;
+            height: 48px;
+            padding: 0 16px;
+            border: 1px solid var(--outline);
+            border-radius: var(--r);
+            font-family: 'Roboto', sans-serif;
+            font-size: 14px;
+            color: var(--on-s);
+            background: var(--s2);
+            outline: none;
+            transition: border-color var(--t)
+        }
+
+        .tf:focus {
+            border-color: var(--primary);
+            background: var(--s1);
+            box-shadow: 0 0 0 2px rgba(26, 115, 232, .2)
+        }
+
+        /* Profile list */
+        .profile-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 12px;
+            margin-top: 16px
+        }
+
+        .profile-card {
+            border: 2px solid var(--outline);
+            border-radius: 12px;
+            padding: 14px 16px;
+            cursor: pointer;
+            transition: border-color var(--t), background var(--t);
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+            position: relative
+        }
+
+        .profile-card:hover {
+            border-color: var(--primary);
+            background: #f0f6ff
+        }
+
+        .profile-card.selected {
+            border-color: var(--primary);
+            background: var(--primary-cont)
+        }
+
+        .profile-card .check {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            border: 2px solid var(--outline);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            margin-top: 2px;
+            transition: all var(--t)
+        }
+
+        .profile-card.selected .check {
+            background: var(--primary);
+            border-color: var(--primary);
+            color: #fff
+        }
+
+        .p-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: var(--primary-cont);
+            color: var(--primary);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 16px;
+            flex-shrink: 0;
+            text-transform: uppercase
+        }
+
+        .p-name {
+            font-weight: 500;
+            font-size: 14px;
+            color: var(--on-s)
+        }
+
+        .p-sub {
+            font-size: 12px;
+            color: var(--on-sv);
+            margin-top: 2px;
+            line-height: 1.4
+        }
+
+        /* Progress */
+        .progress-wrap {
+            display: none;
+            margin-top: 12px
+        }
+
+        .progress-bar {
+            height: 8px;
+            background: var(--outline);
+            border-radius: var(--r);
+            overflow: hidden;
+            position: relative;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: var(--primary);
+            border-radius: var(--r);
+            width: 0%;
+            transition: width 0.5s ease;
+        }
+
+        .progress-fill.indeterminate {
+            animation: prog 2s linear infinite;
+        }
+
+        @keyframes prog {
+            0% {
+                width: 10%;
+                margin-left: 0;
+            }
+
+            50% {
+                width: 40%;
+                margin-left: 30%;
+            }
+
+            100% {
+                width: 10%;
+                margin-left: 90%;
+            }
+        }
+
+        .progress-label {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 6px;
+            font-size: 12px;
+            color: var(--on-sv);
+        }
+
+        .status-msg {
+            margin-top: 8px;
+            font-size: 13px;
+            color: var(--on-sv)
+        }
+
+        /* Results table */
+        .results-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 14px
+        }
+
+        .results-table thead {
+            background: var(--s2);
+            border-bottom: 1px solid var(--outline)
+        }
+
+        .results-table th {
+            padding: 12px 16px;
+            font-size: 11px;
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: .4px;
+            color: var(--on-sv);
+            text-align: left
+        }
+
+        .results-table tbody tr {
+            border-bottom: 1px solid var(--s2);
+            transition: background var(--t)
+        }
+
+        .results-table tbody tr:hover {
+            background: rgba(26, 115, 232, .04)
+        }
+
+        .results-table td {
+            padding: 14px 16px;
+            vertical-align: middle
+        }
+
+        .chip {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            padding: 4px 10px;
+            border-radius: var(--r);
+            font-size: 12px;
+            font-weight: 500
+        }
+
+        .chip-active {
+            background: var(--sbg);
+            color: var(--success)
+        }
+
+        .chip-moderate {
+            background: var(--wbg);
+            color: var(--warning)
+        }
+
+        .chip-inactive {
+            background: var(--ebg);
+            color: var(--error)
+        }
+
+        .chip-count {
+            background: #e8f0fe;
+            color: var(--primary)
+        }
+
+        .stat-row {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 12px;
+            margin-bottom: 20px
+        }
+
+        .stat-card {
+            background: var(--s1);
+            border: 1px solid var(--outline);
+            border-radius: 12px;
+            padding: 16px 20px;
+            display: flex;
+            align-items: center;
+            gap: 12px
+        }
+
+        .stat-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0
+        }
+
+        .si-blue {
+            background: #e8f0fe;
+            color: var(--primary)
+        }
+
+        .si-green {
+            background: var(--sbg);
+            color: var(--success)
+        }
+
+        .si-amber {
+            background: var(--wbg);
+            color: var(--warning)
+        }
+
+        .si-red {
+            background: var(--ebg);
+            color: var(--error)
+        }
+
+        .stat-value {
+            font-size: 24px;
+            font-weight: 700
+        }
+
+        .stat-label {
+            font-size: 12px;
+            color: var(--on-sv);
+            margin-top: 1px
+        }
+
+        .action-btns {
+            display: flex;
+            gap: 4px
+        }
+
+        .icon-btn {
+            width: 32px;
+            height: 32px;
+            border-radius: var(--r);
+            border: none;
+            background: transparent;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--on-sv);
+            transition: background var(--t)
+        }
+
+        .icon-btn:hover {
+            background: var(--s2)
+        }
+
+        .icon-btn.danger:hover {
+            background: var(--ebg);
+            color: var(--error)
+        }
+
+        .sel-bar {
+            display: none;
+            align-items: center;
+            gap: 12px;
+            padding: 10px 0;
+            margin-top: 8px;
+            border-top: 1px solid var(--outline)
+        }
+
+        .sel-bar.show {
+            display: flex
+        }
+
+        .sel-count {
+            font-size: 14px;
+            font-weight: 500;
+            color: var(--primary)
+        }
+
+        @media(max-width:768px) {
+            .page {
+                padding: 12px
+            }
+
+            .search-row {
+                flex-direction: column
+            }
+
+            .profile-grid {
+                grid-template-columns: 1fr
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <header class="app-bar">
+        <div class="ab-icon"><span class="material-symbols-rounded">person_search</span></div>
+        <div>
+            <div class="ab-title">Lead Activity Analyzer</div>
+            <div class="ab-sub">Keyword → Profiles → Activity Analysis</div>
+        </div>
+        <div class="ab-actions">
+            <a href="{% url 'user_details' %}" class="btn btn-tonal"><span class="material-symbols-rounded"
+                    style="font-size:18px">manage_accounts</span>Users</a>
+            <a href="{% url 'chatbot_register' %}" class="btn btn-outlined"><span class="material-symbols-rounded"
+                    style="font-size:18px">arrow_back</span>Back</a>
+        </div>
+    </header>
+
+    <main class="page">
+
+        <!-- Step indicators -->
+        <div class="steps">
+            <div class="step-chip active" id="chip1"><span class="material-symbols-rounded"
+                    style="font-size:16px">search</span>Step 1: Search</div>
+            <div class="step-chip" id="chip2"><span class="material-symbols-rounded"
+                    style="font-size:16px">checklist</span>Step 2: Select Profiles</div>
+            <div class="step-chip" id="chip3"><span class="material-symbols-rounded"
+                    style="font-size:16px">analytics</span>Step 3: Analyze</div>
+        </div>
+
+        <!-- Step 1: Keyword Search -->
+        <div class="card" id="step1Card">
+            <div class="card-title"><span class="material-symbols-rounded"
+                    style="color:var(--primary)">manage_search</span>Search LinkedIn Profiles by Keyword</div>
+            <div class="search-row">
+                <input type="text" id="keywordInput" class="tf" style="flex: 2;"
+                    placeholder="e.g. Python Developer Ahmedabad, HR Manager Mumbai..."
+                    onkeydown="if(event.key==='Enter') searchProfiles()">
+                <input type="number" id="maxResultsInput" class="tf" style="flex: 0.5; min-width: 120px;"
+                    placeholder="Max Profiles" value="50" min="1" max="100">
+                <button class="btn btn-filled" id="searchBtn" onclick="searchProfiles()">
+                    <span class="material-symbols-rounded" style="font-size:18px">search</span>Search
+                </button>
+            </div>
+            <div class="progress-wrap" id="searchProgress">
+                <div class="progress-bar">
+                    <div class="progress-fill"></div>
+                </div>
+                <div class="status-msg" id="searchMsg">Searching LinkedIn...</div>
+            </div>
+        </div>
+
+        <!-- Step 2: Profile Selection -->
+        <div class="card" id="step2Card" style="display:none">
+            <div class="card-title" style="justify-content:space-between">
+                <span><span class="material-symbols-rounded"
+                        style="color:var(--primary);vertical-align:middle">checklist</span> Select Profiles to
+                    Analyze</span>
+                <span style="font-size:13px;color:var(--on-sv)" id="profileCount">0 profiles found</span>
+            </div>
+            <div style="display:flex;gap:8px;margin-bottom:12px">
+                <button class="btn btn-tonal" style="height:32px;padding:0 14px;font-size:13px"
+                    onclick="selectAll()">Select All</button>
+                <button class="btn btn-outlined" style="height:32px;padding:0 14px;font-size:13px"
+                    onclick="selectNone()">Deselect All</button>
+            </div>
+            <div class="profile-grid" id="profileGrid"></div>
+            <div id="paginationControls" style="display:none; justify-content:center; gap:8px; margin-top:16px;">
+                <button class="btn btn-outlined" id="prevPageBtn" onclick="changeProfilePage(-1)"
+                    style="height:32px;padding:0 14px;font-size:13px">Previous</button>
+                <span id="pageIndicator" style="font-size:14px; margin:auto 0; color:var(--on-sv)">Page 1 of 1</span>
+                <button class="btn btn-outlined" id="nextPageBtn" onclick="changeProfilePage(1)"
+                    style="height:32px;padding:0 14px;font-size:13px">Next</button>
+            </div>
+            <div class="sel-bar" id="selBar">
+                <span class="sel-count" id="selCount">0 selected</span>
+                <button class="btn btn-filled" id="analyzeBtn" onclick="analyzeSelected()">
+                    <span class="material-symbols-rounded" style="font-size:18px">analytics</span>Analyze Selected
+                </button>
+            </div>
+            <div class="progress-wrap" id="analyzeProgress">
+                <div class="progress-bar">
+                    <div class="progress-fill indeterminate" id="analyzeProgressFill"></div>
+                </div>
+                <div class="progress-label">
+                    <span class="status-msg" id="analyzeMsg">Analyzing profiles...</span>
+                    <span id="analyzePercent">0%</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Step 3: Results -->
+        <div id="step3Card" style="display:none">
+            <!-- Stat Cards -->
+            <div class="stat-row" id="resultStats"></div>
+            <!-- Active Results as Cards only -->
+            <div class="card">
+                <div class="card-title" style="justify-content:space-between">
+                    <span><span class="material-symbols-rounded"
+                            style="color:var(--success);vertical-align:middle">trending_up</span> Active Leads</span>
+                    <span style="font-size:13px;color:var(--on-sv)" id="activeCountLabel">0 active found</span>
+                </div>
+                <div class="profile-grid" id="activeResultsGrid">
+                    <div style="grid-column:1/-1;text-align:center;padding:32px;color:var(--on-sv);font-size:14px"
+                        id="noActiveMsg">
+                        Koi active user nathi malyo. Alag keyword try karo.
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Previous Leads -->
+        {% if leads %}
+        <div class="card" style="padding:0;overflow:hidden;margin-top:24px">
+            <div
+                style="padding:16px 20px;border-bottom:1px solid var(--outline);display:flex;justify-content:space-between;align-items:center">
+                <span style="font-size:16px;font-weight:500">Previous Analyses ({{ leads|length }})</span>
+                <div style="display:flex;align-items:center;gap:16px">
+                    <select id="prevFilter" class="tf" style="height:32px;font-size:13px;padding:0 8px;min-width:140px" onchange="filterPreviousLeads()">
+                        <option value="All">All Leads</option>
+                        <option value="Active" selected>Active & Moderate</option>
+                        <option value="Inactive">Inactive</option>
+                    </select>
+                    <div class="stat-row" style="margin:0;display:flex;gap:8px">
+                        <span class="chip chip-active">Active: {{ active_count }}</span>
+                        <span class="chip chip-moderate">Moderate: {{ moderate_count }}</span>
+                        <span class="chip chip-inactive">Inactive: {{ inactive_count }}</span>
+                    </div>
+                </div>
+            </div>
+            <div style="overflow-x:auto">
+                <table class="results-table">
+                    <thead>
+                        <tr>
+                            <th>Profile</th>
+                            <th>Score</th>
+                            <th>Posts</th>
+                            <th>Comments</th>
+                            <th>Reposts</th>
+                            <th>Date</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for lead in leads %}
+                        <tr class="prev-lead-row" data-score="{{ lead.activity_score }}">
+                            <td>
+                                <div style="display:flex;align-items:center;gap:10px">
+                                    <div class="p-avatar">{{ lead.name|slice:":1"|upper|default:"?" }}</div>
+                                    <div>
+                                        <div class="p-name">{{ lead.name|default:"Unknown" }}</div>
+                                        <div class="p-sub">{{ lead.headline|truncatechars:45|default:"—" }}</div>
+                                    </div>
+                                </div>
+                            </td>
+                            <td>
+                                {% if lead.activity_score == "Active" %}<span class="chip chip-active">Active</span>
+                                {% elif lead.activity_score == "Moderately Active" %}<span
+                                    class="chip chip-moderate">Moderate</span>
+                                {% else %}<span class="chip chip-inactive">Inactive</span>{% endif %}
+                            </td>
+                            <td><span class="chip chip-count">{{ lead.posts_count }}</span></td>
+                            <td><span class="chip chip-count">{{ lead.comments_count }}</span></td>
+                            <td><span class="chip chip-count">{{ lead.reposts_count }}</span></td>
+                            <td style="font-size:12px">{{ lead.created_at|date:"M d, Y" }}</td>
+                            <td>
+                                <div class="action-btns">
+                                    <a href="{% url 'download_lead_pdf' lead.id %}" class="icon-btn"
+                                        title="Download PDF"><span class="material-symbols-rounded"
+                                            style="font-size:18px">picture_as_pdf</span></a>
+                                    <button class="icon-btn danger" onclick="deleteLead('{{ lead.id }}', this)"
+                                        title="Delete"><span class="material-symbols-rounded"
+                                            style="font-size:18px">delete</span></button>
+                                </div>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        {% endif %}
+
+    </main>
+
+    <script>
+        function csrf() { return document.cookie.split('; ').find(row => row.startsWith('csrftoken='))?.split('=')[1] || ''; }
+
+        let foundProfiles = [];
+        let selectedUrls = new Set();
+        let currentKeyword = '';
+
+        let currentProfilePage = 1;
+        const PROFILES_PER_PAGE = 12;
+
+        document.addEventListener('DOMContentLoaded', () => {
+            if (document.getElementById('prevFilter')) {
+                filterPreviousLeads();
+            }
+        });
+
+        function filterPreviousLeads() {
+            const filter = document.getElementById('prevFilter').value;
+            const rows = document.querySelectorAll('.prev-lead-row');
+            rows.forEach(r => {
+                const score = r.dataset.score;
+                let show = false;
+                if (filter === 'All') show = true;
+                else if (filter === 'Active') show = (score === 'Active' || score === 'Moderately Active');
+                else if (filter === 'Inactive') show = (score === 'Inactive' || score === 'Error');
+                
+                r.style.display = show ? '' : 'none';
+            });
+        }
+
+        // ── Step 1: Search ────────────────────────────────────────
+        async function searchProfiles() {
+            const kw = document.getElementById('keywordInput').value.trim();
+            if (!kw) { alert('Keyword nakho please.'); return; }
+            currentKeyword = kw;
+
+            let maxResults = 50;
+            const maxInput = document.getElementById('maxResultsInput');
+            if (maxInput && maxInput.value) {
+                maxResults = parseInt(maxInput.value, 10);
+            }
+
+            const btn = document.getElementById('searchBtn');
+            const prog = document.getElementById('searchProgress');
+            const msg = document.getElementById('searchMsg');
+
+            btn.disabled = true;
+            prog.style.display = 'block';
+            msg.textContent = `"${kw}" mate LinkedIn search kari rahyo chu...`;
+            msg.style.color = 'var(--on-sv)';
+
+            try {
+                const res = await fetch("{% url 'api_search_linkedin_profiles' %}", {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'X-CSRFToken': csrf() },
+                    body: JSON.stringify({ keyword: kw, max_results: maxResults }),
+                });
+                const data = await res.json();
+
+                if (data.success && data.profiles.length > 0) {
+                    foundProfiles = data.profiles;
+                    msg.style.color = 'var(--success)';
+                    msg.textContent = `✅ ${data.count} profiles collect`;
+                    showProfileSelection(data.profiles);
+                } else {
+                    msg.style.color = 'var(--error)';
+                    msg.textContent = data.message || 'Koi profiles na malya. Alag keyword try karo.';
+                }
+            } catch (e) {
+                msg.style.color = 'var(--error)';
+                msg.textContent = 'Server error. Thodi vaar pachi try karo.';
+            } finally {
+                btn.disabled = false;
+            }
+        }
+
+        function showProfileSelection(profiles) {
+                    foundProfiles = profiles;
+                    selectedUrls.clear();
+                    currentProfilePage = 1;
+                    document.getElementById('profileCount').textContent = `${profiles.length} profiles found`;
+                    updateSelBar();
+
+                    renderProfilePage();
+
+                    document.getElementById('step2Card').style.display = 'block';
+                    document.getElementById('chip2').className = 'step-chip active';
+                    document.getElementById('step2Card').scrollIntoView({ behavior: 'smooth', block: 'start' });
+                }
+
+                function renderProfilePage() {
+                    const grid = document.getElementById('profileGrid');
+                    grid.innerHTML = '';
+
+                    const totalPages = Math.ceil(foundProfiles.length / PROFILES_PER_PAGE) || 1;
+                    if (currentProfilePage > totalPages) currentProfilePage = totalPages;
+                    if (currentProfilePage < 1) currentProfilePage = 1;
+
+                    const startIdx = (currentProfilePage - 1) * PROFILES_PER_PAGE;
+                    const endIdx = startIdx + PROFILES_PER_PAGE;
+                    const pageProfiles = foundProfiles.slice(startIdx, endIdx);
+
+                    pageProfiles.forEach((p, idx) => {
+                        const i = startIdx + idx;
+                        const card = document.createElement('div');
+                        card.className = 'profile-card';
+                        if (selectedUrls.has(p.url)) card.classList.add('selected');
+                        card.dataset.url = p.url;
+                        card.innerHTML = `
+      <div class="check" id="chk${i}"><span class="material-symbols-rounded" style="font-size:14px;display:${selectedUrls.has(p.url) ? '' : 'none'}">check</span></div>
+      <div class="p-avatar">${(p.name || '?').charAt(0).toUpperCase()}</div>
+      <div style="min-width:0">
+        <div class="p-name">${esc(p.name || 'Unknown')}</div>
+        <div class="p-sub">${esc(p.headline || '')}${p.location ? '<br>📍 ' + esc(p.location) : ''}</div>
+        <a href="${p.url}" target="_blank" style="font-size:11px;color:var(--primary);word-break:break-all">${p.url}</a>
+      </div>`;
+                        card.addEventListener('click', () => toggleProfile(p.url, card, i));
+                        grid.appendChild(card);
+                    });
+
+                    document.getElementById('pageIndicator').textContent = `Page ${currentProfilePage} of ${totalPages}`;
+                    document.getElementById('prevPageBtn').disabled = currentProfilePage === 1;
+                    document.getElementById('nextPageBtn').disabled = currentProfilePage === totalPages;
+                    document.getElementById('paginationControls').style.display = totalPages > 1 ? 'flex' : 'none';
+                }
+
+                function changeProfilePage(delta) {
+                    currentProfilePage += delta;
+                    renderProfilePage();
+                }
+
+                function toggleProfile(url, card, i) {
+                    if (selectedUrls.has(url)) {
+                        selectedUrls.delete(url);
+                        card.classList.remove('selected');
+                        const chk = document.querySelector(`#chk${i} span`);
+                        if (chk) chk.style.display = 'none';
+                    } else {
+                        selectedUrls.add(url);
+                        card.classList.add('selected');
+                        const chk = document.querySelector(`#chk${i} span`);
+                        if (chk) chk.style.display = '';
+                    }
+                    updateSelBar();
+                }
+
+                function updateSelBar() {
+                    const bar = document.getElementById('selBar');
+                    document.getElementById('selCount').textContent = `${selectedUrls.size} selected`;
+                    bar.className = selectedUrls.size > 0 ? 'sel-bar show' : 'sel-bar';
+                }
+
+                function selectAll() { foundProfiles.forEach(p => selectedUrls.add(p.url)); renderProfilePage(); updateSelBar(); }
+                function selectNone() { selectedUrls.clear(); renderProfilePage(); updateSelBar(); }
+
+            // ── Step 3: Analyze ───────────────────────────────────────
+            async function analyzeSelected() {
+                if (selectedUrls.size === 0) { alert('Pehla profiles select karo.'); return; }
+
+                const btn = document.getElementById('analyzeBtn');
+                const prog = document.getElementById('analyzeProgress');
+                const msg = document.getElementById('analyzeMsg');
+                const fill = document.getElementById('analyzeProgressFill');
+                const pct = document.getElementById('analyzePercent');
+                const total = selectedUrls.size;
+
+                btn.disabled = true;
+                prog.style.display = 'block';
+                msg.style.color = 'var(--on-sv)';
+                msg.textContent = `⏳ Analysis sharu kari rahyo chu... (${total} profiles)`;
+                fill.className = 'progress-fill indeterminate';
+                fill.style.width = '';
+                if (pct) pct.textContent = '0%';
+
+                // Start polling for progress
+                let pollInterval = setInterval(async () => {
+                    try {
+                        const pr = await fetch('/api/leads/progress/');
+                        const pd = await pr.json();
+                        if (pd.total > 0) {
+                            const done = pd.done;
+                            const tot = pd.total;
+                            const percent = Math.round((done / tot) * 100);
+                            fill.className = 'progress-fill';
+                            fill.style.width = percent + '%';
+                            if (pct) pct.textContent = percent + '%';
+                            const cur = pd.current ? ` — ${pd.current}` : '';
+                            msg.textContent = `⏳ ${done} / ${tot} analyzed${cur}`;
+                        }
+                    } catch (e) { }
+                }, 2000);
+
+                try {
+                    const res = await fetch("{% url 'api_analyze_selected_profiles' %}", {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json', 'X-CSRFToken': csrf() },
+                        body: JSON.stringify({ profile_urls: [...selectedUrls], keyword: currentKeyword }),
+                    });
+                    const data = await res.json();
+
+                    clearInterval(pollInterval);
+                    fill.className = 'progress-fill';
+                    fill.style.width = '100%';
+                    if (pct) pct.textContent = '100%';
+
+                    if (data.success) {
+                        msg.style.color = 'var(--success)';
+                        msg.textContent = `✅ ${data.analyzed} / ${total} profiles analyzed!`;
+                        document.getElementById('chip3').className = 'step-chip done';
+                        showResults(data.results);
+                    } else {
+                        msg.style.color = 'var(--error)';
+                        msg.textContent = `❌ ${data.message}`;
+                    }
+                } catch (e) {
+                    clearInterval(pollInterval);
+                    msg.style.color = 'var(--error)';
+                    msg.textContent = 'Server error. Thodi vaar pachi try karo.';
+                } finally {
+                    btn.disabled = false;
+                }
+            }
+
+            // ── Show Results ──────────────────────────────────────────
+            function showResults(results) {
+                const grid = document.getElementById('activeResultsGrid');
+                const noMsg = document.getElementById('noActiveMsg');
+                const label = document.getElementById('activeCountLabel');
+                grid.innerHTML = '';
+
+                let active = 0, moderate = 0, inactive = 0;
+                let activeCards = [];
+
+                results.forEach(r => {
+                    if (r.error) { inactive++; return; }
+
+                    if (r.activity_score === 'Active') active++;
+                    else if (r.activity_score === 'Moderately Active') moderate++;
+                    else { inactive++; return; } // skip inactive — don't show card
+
+                    // Build card for Active + Moderately Active only
+                    const chipClass = r.activity_score === 'Active' ? 'chip-active' : 'chip-moderate';
+                    const icon = r.activity_score === 'Active' ? 'trending_up' : 'pulse_alert';
+                    const card = document.createElement('div');
+                    card.className = 'profile-card selected';
+                    card.style.cursor = 'default';
+                    card.innerHTML = `
+                  <div class="p-avatar">${esc((r.name || '?').charAt(0).toUpperCase())}</div>
+                  <div style="min-width:0;flex:1">
+                    <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:6px">
+                      <span class="p-name">${esc(r.name || 'Unknown')}</span>
+                      <span class="chip ${chipClass}"><span class="material-symbols-rounded" style="font-size:13px">${icon}</span>${r.activity_score}</span>
+                    </div>
+                    <div style="display:flex;gap:8px;margin:8px 0;flex-wrap:wrap">
+                      <span class="chip chip-count"><span class="material-symbols-rounded" style="font-size:13px">edit_note</span>${r.posts_count} posts</span>
+                      <span class="chip chip-count"><span class="material-symbols-rounded" style="font-size:13px">comment</span>${r.comments_count} comments</span>
+                      <span class="chip chip-count"><span class="material-symbols-rounded" style="font-size:13px">repeat</span>${r.reposts_count} reposts</span>
+                    </div>
+                    <div style="display:flex;gap:8px;margin-top:4px">
+                      <a href="${r.url}" target="_blank" style="font-size:11px;color:var(--primary)">View Profile</a>
+                      <span style="color:var(--outline)">|</span>
+                      <a href="/leads/${r.lead_id}/pdf/" style="font-size:11px;color:var(--primary)">Download PDF</a>
+                    </div>
+                  </div>`;
+                    activeCards.push(card);
+                });
+
+                // Show active cards
+                if (activeCards.length > 0) {
+                    noMsg.style.display = 'none';
+                    activeCards.forEach(c => grid.appendChild(c));
+                } else {
+                    noMsg.style.display = 'block';
+                    grid.appendChild(noMsg);
+                }
+                label.textContent = `${active + moderate} active found (${inactive} inactive hidden)`;
+
+                // Stat cards
+                document.getElementById('resultStats').innerHTML = `
+              <div class="stat-card"><div class="stat-icon si-blue"><span class="material-symbols-rounded">group</span></div><div><div class="stat-value">${results.length}</div><div class="stat-label">Analyzed</div></div></div>
+              <div class="stat-card"><div class="stat-icon si-green"><span class="material-symbols-rounded">trending_up</span></div><div><div class="stat-value">${active}</div><div class="stat-label">Active</div></div></div>
+              <div class="stat-card"><div class="stat-icon si-amber"><span class="material-symbols-rounded">pulse_alert</span></div><div><div class="stat-value">${moderate}</div><div class="stat-label">Moderate</div></div></div>
+              <div class="stat-card"><div class="stat-icon si-red"><span class="material-symbols-rounded">trending_down</span></div><div><div class="stat-value">${inactive}</div><div class="stat-label">Inactive (hidden)</div></div></div>`;
+
+                document.getElementById('step3Card').style.display = 'block';
+                document.getElementById('step3Card').scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }
+
+            async function deleteLead(id, btn) {
+                if (!confirm('You want to delete?')) return;
+                const res = await fetch(`/api/leads/${id}/delete/`, { method: 'POST', headers: { 'X-CSRFToken': csrf() } });
+                const data = await res.json();
+                if (data.success) btn.closest('tr').remove();
+                else alert(data.message || 'Delete fail thayo.');
+            }
+
+            function esc(s) { return String(s || '').replaceAll('&', '&amp;').replaceAll('<', '&lt;').replaceAll('>', '&gt;').replaceAll('"', '&quot;'); }
+    </script>
+</body>
+
+</html>
