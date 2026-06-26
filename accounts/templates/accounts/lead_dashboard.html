@@ -599,6 +599,17 @@
                 <span><span class="material-symbols-rounded"
                         style="color:var(--primary);vertical-align:middle">checklist</span> Select Profiles to
                     Analyze</span>
+
+                <div id="paginationControls" style="display:none; justify-content:center; gap:8px; margin-top:16px;">
+                    <button class="btn btn-outlined" id="prevPageBtn" onclick="changeProfilePage(-1)"
+                        style="height:32px;padding:0 14px;font-size:13px">Previous</button>
+                    <span id="pageIndicator" style="font-size:14px; margin:auto 0; color:var(--on-sv)">Page 1 of
+                        1</span>
+                    <button class="btn btn-outlined" id="nextPageBtn" onclick="changeProfilePage(1)"
+                        style="height:32px;padding:0 14px;font-size:13px">Next</button>
+                </div>
+
+
                 <span style="font-size:13px;color:var(--on-sv)" id="profileCount">0 profiles found</span>
             </div>
             <div style="display:flex;gap:8px;margin-bottom:12px">
@@ -606,6 +617,8 @@
                     onclick="selectAll()">Select All</button>
                 <button class="btn btn-outlined" style="height:32px;padding:0 14px;font-size:13px"
                     onclick="selectNone()">Deselect All</button>
+
+
             </div>
             <div class="profile-grid" id="profileGrid"></div>
             <div id="paginationControls" style="display:none; justify-content:center; gap:8px; margin-top:16px;">
@@ -659,7 +672,8 @@
                 style="padding:16px 20px;border-bottom:1px solid var(--outline);display:flex;justify-content:space-between;align-items:center">
                 <span style="font-size:16px;font-weight:500">Previous Analyses ({{ leads|length }})</span>
                 <div style="display:flex;align-items:center;gap:16px">
-                    <select id="prevFilter" class="tf" style="height:32px;font-size:13px;padding:0 8px;min-width:140px" onchange="filterPreviousLeads()">
+                    <select id="prevFilter" class="tf" style="height:32px;font-size:13px;padding:0 8px;min-width:140px"
+                        onchange="filterPreviousLeads()">
                         <option value="All">All Leads</option>
                         <option value="Active" selected>Active & Moderate</option>
                         <option value="Inactive">Inactive</option>
@@ -751,7 +765,7 @@
                 if (filter === 'All') show = true;
                 else if (filter === 'Active') show = (score === 'Active' || score === 'Moderately Active');
                 else if (filter === 'Inactive') show = (score === 'Inactive' || score === 'Error');
-                
+
                 r.style.display = show ? '' : 'none';
             });
         }
@@ -803,38 +817,38 @@
         }
 
         function showProfileSelection(profiles) {
-                    foundProfiles = profiles;
-                    selectedUrls.clear();
-                    currentProfilePage = 1;
-                    document.getElementById('profileCount').textContent = `${profiles.length} profiles found`;
-                    updateSelBar();
+            foundProfiles = profiles;
+            selectedUrls.clear();
+            currentProfilePage = 1;
+            document.getElementById('profileCount').textContent = `${profiles.length} profiles found`;
+            updateSelBar();
 
-                    renderProfilePage();
+            renderProfilePage();
 
-                    document.getElementById('step2Card').style.display = 'block';
-                    document.getElementById('chip2').className = 'step-chip active';
-                    document.getElementById('step2Card').scrollIntoView({ behavior: 'smooth', block: 'start' });
-                }
+            document.getElementById('step2Card').style.display = 'block';
+            document.getElementById('chip2').className = 'step-chip active';
+            document.getElementById('step2Card').scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
 
-                function renderProfilePage() {
-                    const grid = document.getElementById('profileGrid');
-                    grid.innerHTML = '';
+        function renderProfilePage() {
+            const grid = document.getElementById('profileGrid');
+            grid.innerHTML = '';
 
-                    const totalPages = Math.ceil(foundProfiles.length / PROFILES_PER_PAGE) || 1;
-                    if (currentProfilePage > totalPages) currentProfilePage = totalPages;
-                    if (currentProfilePage < 1) currentProfilePage = 1;
+            const totalPages = Math.ceil(foundProfiles.length / PROFILES_PER_PAGE) || 1;
+            if (currentProfilePage > totalPages) currentProfilePage = totalPages;
+            if (currentProfilePage < 1) currentProfilePage = 1;
 
-                    const startIdx = (currentProfilePage - 1) * PROFILES_PER_PAGE;
-                    const endIdx = startIdx + PROFILES_PER_PAGE;
-                    const pageProfiles = foundProfiles.slice(startIdx, endIdx);
+            const startIdx = (currentProfilePage - 1) * PROFILES_PER_PAGE;
+            const endIdx = startIdx + PROFILES_PER_PAGE;
+            const pageProfiles = foundProfiles.slice(startIdx, endIdx);
 
-                    pageProfiles.forEach((p, idx) => {
-                        const i = startIdx + idx;
-                        const card = document.createElement('div');
-                        card.className = 'profile-card';
-                        if (selectedUrls.has(p.url)) card.classList.add('selected');
-                        card.dataset.url = p.url;
-                        card.innerHTML = `
+            pageProfiles.forEach((p, idx) => {
+                const i = startIdx + idx;
+                const card = document.createElement('div');
+                card.className = 'profile-card';
+                if (selectedUrls.has(p.url)) card.classList.add('selected');
+                card.dataset.url = p.url;
+                card.innerHTML = `
       <div class="check" id="chk${i}"><span class="material-symbols-rounded" style="font-size:14px;display:${selectedUrls.has(p.url) ? '' : 'none'}">check</span></div>
       <div class="p-avatar">${(p.name || '?').charAt(0).toUpperCase()}</div>
       <div style="min-width:0">
@@ -842,137 +856,137 @@
         <div class="p-sub">${esc(p.headline || '')}${p.location ? '<br>📍 ' + esc(p.location) : ''}</div>
         <a href="${p.url}" target="_blank" style="font-size:11px;color:var(--primary);word-break:break-all">${p.url}</a>
       </div>`;
-                        card.addEventListener('click', () => toggleProfile(p.url, card, i));
-                        grid.appendChild(card);
-                    });
+                card.addEventListener('click', () => toggleProfile(p.url, card, i));
+                grid.appendChild(card);
+            });
 
-                    document.getElementById('pageIndicator').textContent = `Page ${currentProfilePage} of ${totalPages}`;
-                    document.getElementById('prevPageBtn').disabled = currentProfilePage === 1;
-                    document.getElementById('nextPageBtn').disabled = currentProfilePage === totalPages;
-                    document.getElementById('paginationControls').style.display = totalPages > 1 ? 'flex' : 'none';
-                }
+            document.getElementById('pageIndicator').textContent = `Page ${currentProfilePage} of ${totalPages}`;
+            document.getElementById('prevPageBtn').disabled = currentProfilePage === 1;
+            document.getElementById('nextPageBtn').disabled = currentProfilePage === totalPages;
+            document.getElementById('paginationControls').style.display = totalPages > 1 ? 'flex' : 'none';
+        }
 
-                function changeProfilePage(delta) {
-                    currentProfilePage += delta;
-                    renderProfilePage();
-                }
+        function changeProfilePage(delta) {
+            currentProfilePage += delta;
+            renderProfilePage();
+        }
 
-                function toggleProfile(url, card, i) {
-                    if (selectedUrls.has(url)) {
-                        selectedUrls.delete(url);
-                        card.classList.remove('selected');
-                        const chk = document.querySelector(`#chk${i} span`);
-                        if (chk) chk.style.display = 'none';
-                    } else {
-                        selectedUrls.add(url);
-                        card.classList.add('selected');
-                        const chk = document.querySelector(`#chk${i} span`);
-                        if (chk) chk.style.display = '';
-                    }
-                    updateSelBar();
-                }
-
-                function updateSelBar() {
-                    const bar = document.getElementById('selBar');
-                    document.getElementById('selCount').textContent = `${selectedUrls.size} selected`;
-                    bar.className = selectedUrls.size > 0 ? 'sel-bar show' : 'sel-bar';
-                }
-
-                function selectAll() { foundProfiles.forEach(p => selectedUrls.add(p.url)); renderProfilePage(); updateSelBar(); }
-                function selectNone() { selectedUrls.clear(); renderProfilePage(); updateSelBar(); }
-
-            // ── Step 3: Analyze ───────────────────────────────────────
-            async function analyzeSelected() {
-                if (selectedUrls.size === 0) { alert('Pehla profiles select karo.'); return; }
-
-                const btn = document.getElementById('analyzeBtn');
-                const prog = document.getElementById('analyzeProgress');
-                const msg = document.getElementById('analyzeMsg');
-                const fill = document.getElementById('analyzeProgressFill');
-                const pct = document.getElementById('analyzePercent');
-                const total = selectedUrls.size;
-
-                btn.disabled = true;
-                prog.style.display = 'block';
-                msg.style.color = 'var(--on-sv)';
-                msg.textContent = `⏳ Analysis sharu kari rahyo chu... (${total} profiles)`;
-                fill.className = 'progress-fill indeterminate';
-                fill.style.width = '';
-                if (pct) pct.textContent = '0%';
-
-                // Start polling for progress
-                let pollInterval = setInterval(async () => {
-                    try {
-                        const pr = await fetch('/api/leads/progress/');
-                        const pd = await pr.json();
-                        if (pd.total > 0) {
-                            const done = pd.done;
-                            const tot = pd.total;
-                            const percent = Math.round((done / tot) * 100);
-                            fill.className = 'progress-fill';
-                            fill.style.width = percent + '%';
-                            if (pct) pct.textContent = percent + '%';
-                            const cur = pd.current ? ` — ${pd.current}` : '';
-                            msg.textContent = `⏳ ${done} / ${tot} analyzed${cur}`;
-                        }
-                    } catch (e) { }
-                }, 2000);
-
-                try {
-                    const res = await fetch("{% url 'api_analyze_selected_profiles' %}", {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json', 'X-CSRFToken': csrf() },
-                        body: JSON.stringify({ profile_urls: [...selectedUrls], keyword: currentKeyword }),
-                    });
-                    const data = await res.json();
-
-                    clearInterval(pollInterval);
-                    fill.className = 'progress-fill';
-                    fill.style.width = '100%';
-                    if (pct) pct.textContent = '100%';
-
-                    if (data.success) {
-                        msg.style.color = 'var(--success)';
-                        msg.textContent = `✅ ${data.analyzed} / ${total} profiles analyzed!`;
-                        document.getElementById('chip3').className = 'step-chip done';
-                        showResults(data.results);
-                    } else {
-                        msg.style.color = 'var(--error)';
-                        msg.textContent = `❌ ${data.message}`;
-                    }
-                } catch (e) {
-                    clearInterval(pollInterval);
-                    msg.style.color = 'var(--error)';
-                    msg.textContent = 'Server error. Thodi vaar pachi try karo.';
-                } finally {
-                    btn.disabled = false;
-                }
+        function toggleProfile(url, card, i) {
+            if (selectedUrls.has(url)) {
+                selectedUrls.delete(url);
+                card.classList.remove('selected');
+                const chk = document.querySelector(`#chk${i} span`);
+                if (chk) chk.style.display = 'none';
+            } else {
+                selectedUrls.add(url);
+                card.classList.add('selected');
+                const chk = document.querySelector(`#chk${i} span`);
+                if (chk) chk.style.display = '';
             }
+            updateSelBar();
+        }
 
-            // ── Show Results ──────────────────────────────────────────
-            function showResults(results) {
-                const grid = document.getElementById('activeResultsGrid');
-                const noMsg = document.getElementById('noActiveMsg');
-                const label = document.getElementById('activeCountLabel');
-                grid.innerHTML = '';
+        function updateSelBar() {
+            const bar = document.getElementById('selBar');
+            document.getElementById('selCount').textContent = `${selectedUrls.size} selected`;
+            bar.className = selectedUrls.size > 0 ? 'sel-bar show' : 'sel-bar';
+        }
 
-                let active = 0, moderate = 0, inactive = 0;
-                let activeCards = [];
+        function selectAll() { foundProfiles.forEach(p => selectedUrls.add(p.url)); renderProfilePage(); updateSelBar(); }
+        function selectNone() { selectedUrls.clear(); renderProfilePage(); updateSelBar(); }
 
-                results.forEach(r => {
-                    if (r.error) { inactive++; return; }
+        // ── Step 3: Analyze ───────────────────────────────────────
+        async function analyzeSelected() {
+            if (selectedUrls.size === 0) { alert('Pehla profiles select karo.'); return; }
 
-                    if (r.activity_score === 'Active') active++;
-                    else if (r.activity_score === 'Moderately Active') moderate++;
-                    else { inactive++; return; } // skip inactive — don't show card
+            const btn = document.getElementById('analyzeBtn');
+            const prog = document.getElementById('analyzeProgress');
+            const msg = document.getElementById('analyzeMsg');
+            const fill = document.getElementById('analyzeProgressFill');
+            const pct = document.getElementById('analyzePercent');
+            const total = selectedUrls.size;
 
-                    // Build card for Active + Moderately Active only
-                    const chipClass = r.activity_score === 'Active' ? 'chip-active' : 'chip-moderate';
-                    const icon = r.activity_score === 'Active' ? 'trending_up' : 'pulse_alert';
-                    const card = document.createElement('div');
-                    card.className = 'profile-card selected';
-                    card.style.cursor = 'default';
-                    card.innerHTML = `
+            btn.disabled = true;
+            prog.style.display = 'block';
+            msg.style.color = 'var(--on-sv)';
+            msg.textContent = `⏳ Analysis sharu kari rahyo chu... (${total} profiles)`;
+            fill.className = 'progress-fill indeterminate';
+            fill.style.width = '';
+            if (pct) pct.textContent = '0%';
+
+            // Start polling for progress
+            let pollInterval = setInterval(async () => {
+                try {
+                    const pr = await fetch('/api/leads/progress/');
+                    const pd = await pr.json();
+                    if (pd.total > 0) {
+                        const done = pd.done;
+                        const tot = pd.total;
+                        const percent = Math.round((done / tot) * 100);
+                        fill.className = 'progress-fill';
+                        fill.style.width = percent + '%';
+                        if (pct) pct.textContent = percent + '%';
+                        const cur = pd.current ? ` — ${pd.current}` : '';
+                        msg.textContent = `⏳ ${done} / ${tot} analyzed${cur}`;
+                    }
+                } catch (e) { }
+            }, 2000);
+
+            try {
+                const res = await fetch("{% url 'api_analyze_selected_profiles' %}", {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'X-CSRFToken': csrf() },
+                    body: JSON.stringify({ profile_urls: [...selectedUrls], keyword: currentKeyword }),
+                });
+                const data = await res.json();
+
+                clearInterval(pollInterval);
+                fill.className = 'progress-fill';
+                fill.style.width = '100%';
+                if (pct) pct.textContent = '100%';
+
+                if (data.success) {
+                    msg.style.color = 'var(--success)';
+                    msg.textContent = `✅ ${data.analyzed} / ${total} profiles analyzed!`;
+                    document.getElementById('chip3').className = 'step-chip done';
+                    showResults(data.results);
+                } else {
+                    msg.style.color = 'var(--error)';
+                    msg.textContent = `❌ ${data.message}`;
+                }
+            } catch (e) {
+                clearInterval(pollInterval);
+                msg.style.color = 'var(--error)';
+                msg.textContent = 'Server error. Thodi vaar pachi try karo.';
+            } finally {
+                btn.disabled = false;
+            }
+        }
+
+        // ── Show Results ──────────────────────────────────────────
+        function showResults(results) {
+            const grid = document.getElementById('activeResultsGrid');
+            const noMsg = document.getElementById('noActiveMsg');
+            const label = document.getElementById('activeCountLabel');
+            grid.innerHTML = '';
+
+            let active = 0, moderate = 0, inactive = 0;
+            let activeCards = [];
+
+            results.forEach(r => {
+                if (r.error) { inactive++; return; }
+
+                if (r.activity_score === 'Active') active++;
+                else if (r.activity_score === 'Moderately Active') moderate++;
+                else { inactive++; return; } // skip inactive — don't show card
+
+                // Build card for Active + Moderately Active only
+                const chipClass = r.activity_score === 'Active' ? 'chip-active' : 'chip-moderate';
+                const icon = r.activity_score === 'Active' ? 'trending_up' : 'pulse_alert';
+                const card = document.createElement('div');
+                card.className = 'profile-card selected';
+                card.style.cursor = 'default';
+                card.innerHTML = `
                   <div class="p-avatar">${esc((r.name || '?').charAt(0).toUpperCase())}</div>
                   <div style="min-width:0;flex:1">
                     <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:6px">
@@ -990,39 +1004,39 @@
                       <a href="/leads/${r.lead_id}/pdf/" style="font-size:11px;color:var(--primary)">Download PDF</a>
                     </div>
                   </div>`;
-                    activeCards.push(card);
-                });
+                activeCards.push(card);
+            });
 
-                // Show active cards
-                if (activeCards.length > 0) {
-                    noMsg.style.display = 'none';
-                    activeCards.forEach(c => grid.appendChild(c));
-                } else {
-                    noMsg.style.display = 'block';
-                    grid.appendChild(noMsg);
-                }
-                label.textContent = `${active + moderate} active found (${inactive} inactive hidden)`;
+            // Show active cards
+            if (activeCards.length > 0) {
+                noMsg.style.display = 'none';
+                activeCards.forEach(c => grid.appendChild(c));
+            } else {
+                noMsg.style.display = 'block';
+                grid.appendChild(noMsg);
+            }
+            label.textContent = `${active + moderate} active found (${inactive} inactive hidden)`;
 
-                // Stat cards
-                document.getElementById('resultStats').innerHTML = `
+            // Stat cards
+            document.getElementById('resultStats').innerHTML = `
               <div class="stat-card"><div class="stat-icon si-blue"><span class="material-symbols-rounded">group</span></div><div><div class="stat-value">${results.length}</div><div class="stat-label">Analyzed</div></div></div>
               <div class="stat-card"><div class="stat-icon si-green"><span class="material-symbols-rounded">trending_up</span></div><div><div class="stat-value">${active}</div><div class="stat-label">Active</div></div></div>
               <div class="stat-card"><div class="stat-icon si-amber"><span class="material-symbols-rounded">pulse_alert</span></div><div><div class="stat-value">${moderate}</div><div class="stat-label">Moderate</div></div></div>
               <div class="stat-card"><div class="stat-icon si-red"><span class="material-symbols-rounded">trending_down</span></div><div><div class="stat-value">${inactive}</div><div class="stat-label">Inactive (hidden)</div></div></div>`;
 
-                document.getElementById('step3Card').style.display = 'block';
-                document.getElementById('step3Card').scrollIntoView({ behavior: 'smooth', block: 'start' });
-            }
+            document.getElementById('step3Card').style.display = 'block';
+            document.getElementById('step3Card').scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
 
-            async function deleteLead(id, btn) {
-                if (!confirm('You want to delete?')) return;
-                const res = await fetch(`/api/leads/${id}/delete/`, { method: 'POST', headers: { 'X-CSRFToken': csrf() } });
-                const data = await res.json();
-                if (data.success) btn.closest('tr').remove();
-                else alert(data.message || 'Delete fail thayo.');
-            }
+        async function deleteLead(id, btn) {
+            if (!confirm('You want to delete?')) return;
+            const res = await fetch(`/api/leads/${id}/delete/`, { method: 'POST', headers: { 'X-CSRFToken': csrf() } });
+            const data = await res.json();
+            if (data.success) btn.closest('tr').remove();
+            else alert(data.message || 'Delete fail thayo.');
+        }
 
-            function esc(s) { return String(s || '').replaceAll('&', '&amp;').replaceAll('<', '&lt;').replaceAll('>', '&gt;').replaceAll('"', '&quot;'); }
+        function esc(s) { return String(s || '').replaceAll('&', '&amp;').replaceAll('<', '&lt;').replaceAll('>', '&gt;').replaceAll('"', '&quot;'); }
     </script>
 </body>
 

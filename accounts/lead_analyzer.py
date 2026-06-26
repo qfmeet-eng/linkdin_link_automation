@@ -310,7 +310,10 @@ Keep it professional and actionable. Plain text only.
             last_error = str(e)
             print(f"[Gemini Lead] Key {idx+1} failed: {last_error}")
 
-    return f"Summary generation failed: {last_error}"
+    if "429" in last_error or "quota" in last_error.lower():
+        return "AI Summary is temporarily unavailable due to API quota limits. Please try again later."
+        
+    return "Summary generation failed due to an internal error."
 
 
 # ── Full Pipeline for One Profile ───────────────────────────────────────────
