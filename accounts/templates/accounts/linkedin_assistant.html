@@ -8,18 +8,18 @@
   <!-- Google Fonts — Outfit -->
   <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <style>
-    /* ── Dark Premium Theme Tokens ────────────────────────── */
+    /* ── Light Theme Tokens ────────────────────────── */
     :root {
-      --bg-color: #0f172a;
-      --panel-bg: rgba(30, 41, 59, 0.7);
-      --border-color: rgba(255, 255, 255, 0.08);
-      --primary: #0284c7;
-      --primary-hover: #0369a1;
-      --primary-glow: rgba(2, 132, 199, 0.35);
-      --text-main: #f8fafc;
-      --text-muted: #94a3b8;
-      --success: #10b981;
-      --error: #ef4444;
+      --bg-color: #f8f9ff;
+      --panel-bg: #ffffff;
+      --border-color: #e1e2ec;
+      --primary: #00639b;
+      --primary-hover: #004a77;
+      --primary-glow: rgba(0, 99, 155, 0.15);
+      --text-main: #1a1c1e;
+      --text-muted: #44474f;
+      --success: #006e33;
+      --error: #ba1a1a;
       --warning: #f59e0b;
       --radius-lg: 16px;
       --radius-md: 12px;
@@ -40,9 +40,9 @@
       min-height: 100vh;
       overflow: hidden;
       display: flex;
-      background-image: 
-        radial-gradient(circle at 10% 20%, rgba(2, 132, 199, 0.15) 0%, transparent 45%),
-        radial-gradient(circle at 90% 80%, rgba(16, 185, 129, 0.08) 0%, transparent 45%);
+      background-image:
+        radial-gradient(circle at 10% 20%, rgba(0, 99, 155, 0.05) 0%, transparent 45%),
+        radial-gradient(circle at 90% 80%, rgba(0, 110, 51, 0.03) 0%, transparent 45%);
     }
 
     .app-container {
@@ -55,7 +55,7 @@
 
     /* ── Sidebar (Scrape History) ─────────────────────────── */
     .sidebar {
-      background: rgba(15, 23, 42, 0.85);
+      background: var(--panel-bg);
       border-right: 1px solid var(--border-color);
       backdrop-filter: blur(20px);
       display: flex;
@@ -102,7 +102,7 @@
 
     .search-box input {
       width: 100%;
-      background: rgba(30, 41, 59, 0.5);
+      background: #f1f3f9;
       border: 1px solid var(--border-color);
       border-radius: var(--radius-sm);
       height: 40px;
@@ -140,7 +140,7 @@
     }
 
     .history-item {
-      background: rgba(30, 41, 59, 0.3);
+      background: #ffffff;
       border: 1px solid transparent;
       border-radius: var(--radius-sm);
       padding: 12px 14px;
@@ -154,12 +154,12 @@
     }
 
     .history-item:hover {
-      background: rgba(30, 41, 59, 0.7);
+      background: #f1f3f9;
       border-color: var(--border-color);
     }
 
     .history-item.active {
-      background: rgba(2, 132, 199, 0.12);
+      background: var(--primary-glow);
       border-color: var(--primary);
       box-shadow: inset 3px 0 0 var(--primary);
     }
@@ -235,13 +235,13 @@
     }
 
     .sidebar-btn.secondary {
-      background: rgba(255, 255, 255, 0.05);
+      background: #ffffff;
       border: 1px solid var(--border-color);
       color: var(--text-main);
     }
 
     .sidebar-btn.secondary:hover {
-      background: rgba(255, 255, 255, 0.1);
+      background: #f1f3f9;
     }
 
     /* ── Main Chat/Viewer Container ─────────────────────── */
@@ -268,7 +268,7 @@
 
     .view-selector {
       display: flex;
-      background: rgba(15, 23, 42, 0.6);
+      background: #f1f3f9;
       padding: 4px;
       border-radius: var(--radius-sm);
       border: 1px solid var(--border-color);
@@ -344,6 +344,7 @@
         opacity: 0;
         transform: translateY(12px);
       }
+
       to {
         opacity: 1;
         transform: translateY(0);
@@ -351,7 +352,7 @@
     }
 
     .bot .chat-bubble {
-      background: rgba(30, 41, 59, 0.9);
+      background: #f1f3f9;
       border: 1px solid var(--border-color);
       color: var(--text-main);
       border-bottom-left-radius: 4px;
@@ -366,7 +367,7 @@
     /* Progress Steps layout */
     .scrape-status-card {
       margin-top: 10px;
-      background: rgba(15, 23, 42, 0.4);
+      background: #ffffff;
       border: 1px solid var(--border-color);
       border-radius: var(--radius-md);
       padding: 16px 20px;
@@ -423,7 +424,9 @@
     }
 
     @keyframes spin {
-      to { transform: rotate(360deg); }
+      to {
+        transform: rotate(360deg);
+      }
     }
 
     /* Composer */
@@ -437,7 +440,7 @@
     .composer-form {
       display: flex;
       align-items: center;
-      background: rgba(15, 23, 42, 0.6);
+      background: #ffffff;
       border: 1px solid var(--border-color);
       border-radius: var(--radius-lg);
       padding: 6px 6px 6px 18px;
@@ -489,7 +492,7 @@
     }
 
     .composer-btn:disabled {
-      background: rgba(30, 41, 59, 0.6);
+      background: #e1e2ec;
       color: var(--text-muted);
       cursor: wait;
     }
@@ -505,7 +508,7 @@
     .viewer-card {
       width: min(840px, 100%);
       margin: 0 auto;
-      background: rgba(30, 41, 59, 0.4);
+      background: #ffffff;
       border: 1px solid var(--border-color);
       border-radius: var(--radius-lg);
       padding: 32px;
@@ -549,7 +552,7 @@
       margin-top: 8px;
       font-size: 13.5px;
       color: var(--primary);
-      background: rgba(2, 132, 199, 0.1);
+      background: var(--primary-glow);
       padding: 4px 12px;
       border-radius: var(--radius-sm);
       font-weight: 500;
@@ -566,7 +569,7 @@
       text-transform: uppercase;
       letter-spacing: 1.5px;
       color: var(--primary);
-      border-bottom: 2px solid rgba(2, 132, 199, 0.25);
+      border-bottom: 2px solid rgba(0, 99, 155, 0.25);
       padding-bottom: 8px;
       margin-bottom: 16px;
     }
@@ -635,7 +638,7 @@
     .timeline-duration {
       font-size: 12px;
       color: var(--text-muted);
-      background: rgba(255, 255, 255, 0.05);
+      background: #f1f3f9;
       padding: 2px 8px;
       border-radius: 4px;
       white-space: nowrap;
@@ -657,7 +660,7 @@
     }
 
     .education-card {
-      background: rgba(255, 255, 255, 0.02);
+      background: #ffffff;
       border: 1px solid var(--border-color);
       border-radius: var(--radius-sm);
       padding: 16px;
@@ -690,7 +693,7 @@
     }
 
     .skill-chip {
-      background: rgba(255, 255, 255, 0.05);
+      background: #ffffff;
       border: 1px solid var(--border-color);
       color: var(--text-main);
       padding: 6px 14px;
@@ -701,7 +704,7 @@
     }
 
     .skill-chip:hover {
-      background: rgba(2, 132, 199, 0.15);
+      background: var(--primary-glow);
       border-color: var(--primary);
       transform: translateY(-1px);
     }
@@ -727,14 +730,17 @@
       .app-container {
         grid-template-columns: 1fr;
       }
+
       .sidebar {
-        display: none; /* Mobile navigation would require toggling */
+        display: none;
+        /* Mobile navigation would require toggling */
       }
     }
   </style>
 </head>
 
 <body>
+  {% include 'accounts/app_sidebar.html' %}
   <div class="app-container">
     <!-- Sidebar / Scrape History -->
     <aside class="sidebar">
@@ -747,20 +753,15 @@
         </div>
         <div class="search-box">
           <svg class="search-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"
+              d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
           </svg>
           <input type="text" id="historySearch" placeholder="Profiles search karo...">
         </div>
       </div>
 
-      <!-- Historical list of profiles -->
       <div class="history-list" id="historyList">
         <!-- Javascript populated -->
-      </div>
-
-      <div class="sidebar-footer">
-        <a href="{% url 'home' %}" class="sidebar-btn secondary">Home</a>
-        <a href="{% url 'chatbot_logout' %}" class="sidebar-btn secondary" style="color: var(--error);">Logout</a>
       </div>
     </aside>
 
@@ -773,7 +774,8 @@
           <button class="tab-btn" id="btnProfileView" onclick="switchView('profile')">Profile Details</button>
         </div>
         <div>
-          <span id="activeProfileName" style="font-size:13.5px; font-weight:500; color:var(--text-muted);">Koi profile selected nathi</span>
+          <span id="activeProfileName" style="font-size:13.5px; font-weight:500; color:var(--text-muted);">Koi profile
+            selected nathi</span>
         </div>
       </header>
 
@@ -784,9 +786,11 @@
             <div class="chat-bubble-row bot">
               <div class="chat-bubble">
                 👋 Kem cho! LinkedIn Scraper Assistant માં આપનું સ્વાગત છે.
-                
-                અહીં તમે કોઈ પણ LinkedIn Profile ની લિંક (દા.ત. <code>https://www.linkedin.com/in/username/</code>) આપી શકો છો.
-                પ્રોગ્રામ જાતે જ LinkedIn માં જઈને <strong>More → Save to PDF</strong> કરશે, અને તેમાંથી બધી માહિતી કાઢીને ડેટાબેઝમાં સેવ કરી લેશે!
+
+                અહીં તમે કોઈ પણ LinkedIn Profile ની લિંક (દા.ત. <code>https://www.linkedin.com/in/username/</code>) આપી
+                શકો છો.
+                પ્રોગ્રામ જાતે જ LinkedIn માં જઈને <strong>More → Save to PDF</strong> કરશે, અને તેમાંથી બધી માહિતી
+                કાઢીને ડેટાબેઝમાં સેવ કરી લેશે!
               </div>
             </div>
           </div>
@@ -810,7 +814,7 @@
             <div class="empty-viewer-icon">📄</div>
             <p>જ્યારે તમે કોઈ લિંક સ્ક્રેપ કરશો અથવા સાઇડબારમાંથી પ્રોફાઇલ પસંદ કરશો ત્યારે તેની વિગતો અહીં દેખાશે.</p>
           </div>
-          
+
           <div class="viewer-card" id="viewerCard" style="display: none;">
             <div class="viewer-header">
               <div class="profile-title-row">
@@ -820,7 +824,8 @@
                   <div class="profile-location" id="viewLocation">Location</div>
                 </div>
                 <div>
-                  <a href="#" id="viewLinkedInLink" target="_blank" class="sidebar-btn secondary" style="font-size:12px; padding:6px 12px; height:auto; display:inline-flex;">LinkedIn Profile</a>
+                  <a href="#" id="viewLinkedInLink" target="_blank" class="sidebar-btn secondary"
+                    style="font-size:12px; padding:6px 12px; height:auto; display:inline-flex;">LinkedIn Profile</a>
                 </div>
               </div>
             </div>
@@ -911,7 +916,7 @@
     function renderHistory(list) {
       const historyList = document.getElementById("historyList");
       historyList.innerHTML = "";
-      
+
       if (list.length === 0) {
         historyList.innerHTML = `<div style="text-align:center; padding:20px; color:var(--text-muted); font-size:13px;">કોઈ પ્રોફાઇલ સેવ નથી</div>`;
         return;
@@ -921,7 +926,7 @@
         const div = document.createElement("div");
         div.className = `history-item${activeProfile && activeProfile.id === item.id ? " active" : ""}`;
         div.onclick = () => loadProfileDetails(item.id);
-        
+
         div.innerHTML = `
           <div class="history-info">
             <div class="history-name">${esc(item.name)}</div>
@@ -948,8 +953,8 @@
     // Search profiles in history
     document.getElementById("historySearch").addEventListener("input", (e) => {
       const q = e.target.value.toLowerCase().trim();
-      const filtered = profilesList.filter(p => 
-        p.name.toLowerCase().includes(q) || 
+      const filtered = profilesList.filter(p =>
+        p.name.toLowerCase().includes(q) ||
         p.headline.toLowerCase().includes(q)
       );
       renderHistory(filtered);
@@ -1009,7 +1014,7 @@
 
     function showProfileOnViewer(profile) {
       activeProfile = profile;
-      
+
       // Update sidebar list items active status
       loadHistory(); // refresh lists active class
 
@@ -1116,7 +1121,7 @@
       const statusId = "status_" + Date.now();
       const botMsgRow = document.createElement("div");
       botMsgRow.className = "chat-bubble-row bot";
-      
+
       const bub = document.createElement("div");
       bub.className = "chat-bubble";
       bub.innerHTML = `
@@ -1168,16 +1173,16 @@
           headers: { "Content-Type": "application/json", "X-CSRFToken": getCsrf() },
           body: JSON.stringify({ url: url })
         });
-        
+
         clearInterval(stepInterval);
-        
+
         const data = await response.json();
         if (data.success && data.profile) {
           // Mark all steps as complete
           for (let i = currentStep; i <= 6; i++) {
             markStepDone(statusId, i);
           }
-          
+
           setTimeout(() => {
             // Success response message
             const finalBub = document.createElement("div");
@@ -1193,7 +1198,7 @@
             `;
             chatMessages.appendChild(finalBub);
             chatMessages.scrollTop = chatMessages.scrollHeight;
-            
+
             // Reload history list
             loadHistory();
           }, 1000);
@@ -1273,6 +1278,7 @@
       loadHistory();
     });
   </script>
+  {% include 'accounts/app_sidebar_footer.html' %}
 </body>
 
 </html>

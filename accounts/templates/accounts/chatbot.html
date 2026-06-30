@@ -400,6 +400,7 @@
 </head>
 
 <body>
+  {% include 'accounts/app_sidebar.html' %}
   <main>
     <section class="chat-shell" aria-label="Registration chatbot">
       <header class="chat-header">
@@ -410,26 +411,6 @@
           </div>
         </div>
         <div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
-          {% if user.is_authenticated %}
-            <a href="{% url 'home' %}" class="admin-link">
-              Dashboard
-            </a>
-            <a href="{% url 'linkedin_assistant' %}" class="admin-link">
-              LinkedIn Assistant
-            </a>
-            {% if user.is_staff %}
-              <a href="{% url 'user_details' %}" class="admin-link">
-                Admin Panel
-              </a>
-            {% endif %}
-          {% else %}
-            <a href="{% url 'chatbot_login' %}" class="admin-link">
-              Login
-            </a>
-            <a href="{% url 'linkedin_assistant' %}" class="admin-link">
-              LinkedIn Assistant
-            </a>
-          {% endif %}
           <div class="progress" aria-live="polite">
             <span id="progressLabel">Start</span>
             <div class="progress-track">
@@ -742,6 +723,7 @@
 
     init();
   </script>
+  {% include 'accounts/app_sidebar_footer.html' %}
 </body>
 
 </html>

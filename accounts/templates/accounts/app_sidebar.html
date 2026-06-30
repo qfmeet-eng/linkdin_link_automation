@@ -1,0 +1,165 @@
+
+<!-- Load Google Fonts and Material Symbols for icons -->
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@24,400,1,0" rel="stylesheet">
+
+<style>
+    #appSidebar {
+        --sb-primary: var(--md-primary, var(--primary, #00639b));
+        --sb-primary-cont: var(--md-primary-container, var(--primary-cont, #d1e4ff));
+        --sb-surface-1: var(--md-surface-1, var(--s1, #ffffff));
+        --sb-surface-2: var(--md-surface-2, var(--s2, #f1f3f9));
+        --sb-outline: var(--md-outline-variant, var(--outline, #e1e2ec));
+        --sb-on-surface: var(--md-on-surface, var(--on-s, #1a1c1e));
+        --sb-on-surface-variant: var(--md-on-surface-variant, var(--on-sv, #44474f));
+        --sb-error: var(--md-error, var(--error, #ba1a1a));
+        --sb-transition: var(--transition, var(--t, 0.2s cubic-bezier(0.2, 0, 0, 1)));
+
+        width: 260px;
+        background: var(--sb-surface-1);
+        border-right: 1px solid var(--sb-outline);
+        display: flex;
+        flex-direction: column;
+        flex-shrink: 0;
+        transition: transform var(--sb-transition);
+        z-index: 200;
+        height: 100vh;
+        position: fixed;
+        top: 0;
+        left: 0;
+    }
+
+    /* Apply layout padding to body for screens larger than 768px */
+    @media(min-width: 769px) {
+        body {
+            padding-left: 260px !important;
+            margin: 0;
+            box-sizing: border-box;
+        }
+    }
+
+    #appSidebar .sidebar-header {
+        height: 64px;
+        display: flex;
+        align-items: center;
+        padding: 0 20px;
+        border-bottom: 1px solid var(--sb-outline);
+        gap: 12px;
+    }
+
+    #appSidebar .ab-icon {
+        width: 40px;
+        height: 40px;
+        border-radius: 8px;
+        background: var(--sb-primary-cont);
+        color: var(--sb-primary);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+    }
+
+    #appSidebar .sidebar-brand {
+        font-size: 18px;
+        font-weight: 700;
+        color: var(--sb-primary);
+        font-family: sans-serif;
+    }
+
+    #appSidebar .sidebar-nav {
+        flex: 1;
+        padding: 16px 12px;
+        overflow-y: auto;
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+    }
+
+    #appSidebar .nav-item {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 12px 16px;
+        border-radius: 8px;
+        color: var(--sb-on-surface);
+        text-decoration: none;
+        font-size: 14px;
+        font-weight: 500;
+        font-family: sans-serif;
+        transition: background var(--sb-transition), color var(--sb-transition);
+    }
+
+    #appSidebar .nav-item:hover {
+        background: var(--sb-surface-2);
+        color: var(--sb-primary);
+    }
+
+    #appSidebar .nav-item.active {
+        background: var(--sb-primary-cont);
+        color: var(--sb-primary);
+    }
+
+    #appSidebar .nav-item .material-symbols-rounded {
+        font-size: 20px;
+    }
+
+    /* Sidebar backdrop and mobile layout */
+    #sidebarBackdrop {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(0, 0, 0, 0.5);
+        z-index: 150;
+    }
+
+    @media(max-width:768px) {
+        #appSidebar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            height: 100vh;
+            transform: translateX(-100%);
+        }
+
+        #appSidebar.open {
+            transform: translateX(0);
+        }
+
+        #sidebarBackdrop.open {
+            display: block;
+        }
+    }
+</style>
+
+<aside class="sidebar" id="appSidebar">
+    <div class="sidebar-header">
+        <div class="ab-icon"><span class="material-symbols-rounded">person_search</span></div>
+        <div class="sidebar-brand">Automate X</div>
+    </div>
+    <nav class="sidebar-nav">
+        <a href="{% url 'lead_dashboard' %}" class="nav-item {% if request.resolver_match.url_name == 'lead_dashboard' %}active{% endif %}">
+            <span class="material-symbols-rounded">analytics</span> Lead Analyzer
+        </a>
+        <a href="{% url 'linkedin_assistant' %}" class="nav-item {% if request.resolver_match.url_name == 'linkedin_assistant' %}active{% endif %}">
+            <span class="material-symbols-rounded">assistant</span> LinkedIn Assistant
+        </a>
+        <a href="{% url 'home' %}" class="nav-item {% if request.resolver_match.url_name == 'home' %}active{% endif %}">
+            <span class="material-symbols-rounded">person</span> Profile Dashboard
+        </a>
+        {% if user.is_staff %}
+        <a href="{% url 'user_details' %}" class="nav-item {% if request.resolver_match.url_name == 'user_details' %}active{% endif %}">
+            <span class="material-symbols-rounded">admin_panel_settings</span> Admin Panel
+        </a>
+        {% endif %}
+        <a href="{% url 'chatbot_register' %}" class="nav-item {% if request.resolver_match.url_name == 'chatbot_register' %}active{% endif %}">
+            <span class="material-symbols-rounded">smart_toy</span> Chatbot Register
+        </a>
+        <div style="flex: 1"></div>
+        <a href="{% url 'chatbot_logout' %}" class="nav-item" style="color: var(--sb-error);">
+            <span class="material-symbols-rounded">logout</span> Logout
+        </a>
+    </nav>
+</aside>
+<div class="backdrop" id="sidebarBackdrop" onclick="toggleSidebar()"></div>

@@ -7,7 +7,10 @@ import time
 import json
 import re
 from django.conf import settings
+import tempfile
+import threading
 
+driver_lock = threading.Lock()
 
 def _get_driver(download_dir=None):
     """Create and return a headless Chrome WebDriver using undetected-chromedriver."""
@@ -18,11 +21,22 @@ def _get_driver(download_dir=None):
     options.add_argument("--no-sandbox")
     options.add_argument("--disable-dev-shm-usage")
     options.add_argument("--window-size=1280,900")
+    
+    # Memory optimization flags
+    options.add_argument("--disable-gpu")
+    options.add_argument("--disable-extensions")
+    options.add_argument("--blink-settings=imagesEnabled=false")
+    options.add_argument("--disable-infobars")
+    options.add_argument("--disable-notifications")
+    options.add_argument("--disable-site-isolation-trials")
+    
     options.add_argument(
         "--user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
         "AppleWebKit/537.36 (KHTML, like Gecko) "
         "Chrome/137.0.0.0 Safari/537.36"
     )
+    user_data_dir = tempfile.mkdtemp()
+    options.add_argument(f"--user-data-dir={user_data_dir}")
     if download_dir:
         prefs = {
             "download.default_directory": download_dir,
@@ -32,7 +46,11 @@ def _get_driver(download_dir=None):
         }
         options.add_experimental_option("prefs", prefs)
 
-    driver = uc.Chrome(options=options, version_main=137, use_subprocess=True)
+    with driver_lock:
+        driver = uc.Chrome(options=options, version_main=137)
+        
+    # Attach user_data_dir to driver so we can clean it up later
+    driver.custom_user_data_dir = user_data_dir
     return driver
 
 
@@ -349,7 +367,19 @@ def scrape_linkedin_profile(profile_url: str) -> dict:
     finally:
         if driver:
             try:
+                driver.close()
+            except Exception:
+                pass
+            try:
                 driver.quit()
+            except Exception:
+                pass
+            
+            # Clean up the temporary user-data-dir
+            try:
+                import shutil
+                if hasattr(driver, 'custom_user_data_dir') and driver.custom_user_data_dir:
+                    shutil.rmtree(driver.custom_user_data_dir, ignore_errors=True)
             except Exception:
                 pass
 

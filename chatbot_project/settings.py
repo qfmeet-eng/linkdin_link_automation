@@ -50,11 +50,16 @@ DEBUG = os.environ.get("DJANGO_DEBUG", "True").lower() == "true"
 
 ALLOWED_HOSTS = [
     host.strip()
-    for host in os.environ.get("DJANGO_ALLOWED_HOSTS", "localhost,127.0.0.1").split(",")
+    for host in os.environ.get(
+        "DJANGO_ALLOWED_HOSTS",
+        "localhost,127.0.0.1,host.docker.internal"
+    ).split(",")
     if host.strip()
 ]
 
-
+CSRF_TRUSTED_ORIGINS = [
+    "http://host.docker.internal:8000",
+]
 # Application definition
 
 INSTALLED_APPS = [
@@ -65,6 +70,7 @@ INSTALLED_APPS = [
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
+    'rest_framework',
 ]
 
 MIDDLEWARE = [

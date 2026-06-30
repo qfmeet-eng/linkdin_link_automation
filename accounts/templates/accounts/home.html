@@ -359,7 +359,9 @@
 </head>
 
 <body>
-  <div class="card">
+  {% include 'accounts/app_sidebar.html' %}
+  <div style="display: flex; justify-content: center; align-items: center; width: 100%; height: 100%; overflow: auto; padding: 24px; box-sizing: border-box;">
+    <div class="card">
 
     {% if user.is_authenticated %}
     <!-- Avatar Wrapper -->
@@ -540,6 +542,8 @@
     {% endif %}
 
   </div>
+  </div>
+  {% include 'accounts/app_sidebar_footer.html' %}
 </body>
 
 </html>

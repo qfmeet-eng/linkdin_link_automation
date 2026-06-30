@@ -226,7 +226,7 @@
         /* Profile list */
         .profile-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            grid-template-columns: repeat(4, 1fr);
             gap: 12px;
             margin-top: 16px
         }
@@ -528,7 +528,134 @@
             color: var(--primary)
         }
 
+        /* Layout */
+        .layout-wrapper {
+            display: flex;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        /* Sidebar */
+        .sidebar {
+            width: 260px;
+            background: var(--s1);
+            border-right: 1px solid var(--outline);
+            display: flex;
+            flex-direction: column;
+            flex-shrink: 0;
+            transition: transform var(--t);
+            z-index: 200;
+        }
+
+        .sidebar-header {
+            height: 64px;
+            display: flex;
+            align-items: center;
+            padding: 0 20px;
+            border-bottom: 1px solid var(--outline);
+            gap: 12px;
+        }
+
+        .sidebar-brand {
+            font-size: 18px;
+            font-weight: 700;
+            color: var(--primary);
+        }
+
+        .sidebar-nav {
+            flex: 1;
+            padding: 16px 12px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .nav-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px 16px;
+            border-radius: 8px;
+            color: var(--on-s);
+            text-decoration: none;
+            font-size: 14px;
+            font-weight: 500;
+            transition: background var(--t), color var(--t);
+        }
+
+        .nav-item:hover {
+            background: var(--s2);
+        }
+
+        .nav-item.active {
+            background: var(--primary-cont);
+            color: var(--primary);
+        }
+
+        .nav-item .material-symbols-rounded {
+            font-size: 20px;
+        }
+
+        /* Main Content */
+        .main-content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            overflow-y: auto;
+            background: var(--surface);
+            position: relative;
+        }
+
+        .menu-btn {
+            display: none;
+            background: transparent;
+            border: none;
+            color: var(--on-sv);
+            cursor: pointer;
+            padding: 8px;
+        }
+
+        .backdrop {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 150;
+        }
+
+        @media(max-width:1200px) {
+            .profile-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
         @media(max-width:768px) {
+            .sidebar {
+                position: fixed;
+                top: 0;
+                left: 0;
+                height: 100vh;
+                transform: translateX(-100%);
+            }
+
+            .sidebar.open {
+                transform: translateX(0);
+            }
+
+            .menu-btn {
+                display: flex;
+                align-items: center;
+                justify-content: center;
+            }
+
+            .backdrop.open {
+                display: block;
+            }
+
             .page {
                 padding: 12px
             }
@@ -545,200 +672,213 @@
 </head>
 
 <body>
-    <header class="app-bar">
-        <div class="ab-icon"><span class="material-symbols-rounded">person_search</span></div>
-        <div>
-            <div class="ab-title">Lead Activity Analyzer</div>
-            <div class="ab-sub">Keyword → Profiles → Activity Analysis</div>
-        </div>
-        <div class="ab-actions">
-            <a href="{% url 'user_details' %}" class="btn btn-tonal"><span class="material-symbols-rounded"
-                    style="font-size:18px">manage_accounts</span>Users</a>
-            <a href="{% url 'chatbot_register' %}" class="btn btn-outlined"><span class="material-symbols-rounded"
-                    style="font-size:18px">arrow_back</span>Back</a>
-        </div>
-    </header>
-
-    <main class="page">
-
-        <!-- Step indicators -->
-        <div class="steps">
-            <div class="step-chip active" id="chip1"><span class="material-symbols-rounded"
-                    style="font-size:16px">search</span>Step 1: Search</div>
-            <div class="step-chip" id="chip2"><span class="material-symbols-rounded"
-                    style="font-size:16px">checklist</span>Step 2: Select Profiles</div>
-            <div class="step-chip" id="chip3"><span class="material-symbols-rounded"
-                    style="font-size:16px">analytics</span>Step 3: Analyze</div>
-        </div>
-
-        <!-- Step 1: Keyword Search -->
-        <div class="card" id="step1Card">
-            <div class="card-title"><span class="material-symbols-rounded"
-                    style="color:var(--primary)">manage_search</span>Search LinkedIn Profiles by Keyword</div>
-            <div class="search-row">
-                <input type="text" id="keywordInput" class="tf" style="flex: 2;"
-                    placeholder="e.g. Python Developer Ahmedabad, HR Manager Mumbai..."
-                    onkeydown="if(event.key==='Enter') searchProfiles()">
-                <input type="number" id="maxResultsInput" class="tf" style="flex: 0.5; min-width: 120px;"
-                    placeholder="Max Profiles" value="50" min="1" max="100">
-                <button class="btn btn-filled" id="searchBtn" onclick="searchProfiles()">
-                    <span class="material-symbols-rounded" style="font-size:18px">search</span>Search
-                </button>
-            </div>
-            <div class="progress-wrap" id="searchProgress">
-                <div class="progress-bar">
-                    <div class="progress-fill"></div>
+    {% include 'accounts/app_sidebar.html' %}
+    <div class="layout-wrapper">
+        <div class="main-content">
+            <header class="app-bar">
+                <button class="menu-btn" onclick="toggleSidebar()"><span
+                        class="material-symbols-rounded">menu</span></button>
+                <div>
+                    <div class="ab-title">Lead Activity Analyzer</div>
+                    <div class="ab-sub">Keyword → Profiles → Activity Analysis</div>
                 </div>
-                <div class="status-msg" id="searchMsg">Searching LinkedIn...</div>
-            </div>
-        </div>
+            </header>
 
-        <!-- Step 2: Profile Selection -->
-        <div class="card" id="step2Card" style="display:none">
-            <div class="card-title" style="justify-content:space-between">
-                <span><span class="material-symbols-rounded"
-                        style="color:var(--primary);vertical-align:middle">checklist</span> Select Profiles to
-                    Analyze</span>
+            <main class="page">
 
-                <div id="paginationControls" style="display:none; justify-content:center; gap:8px; margin-top:16px;">
-                    <button class="btn btn-outlined" id="prevPageBtn" onclick="changeProfilePage(-1)"
-                        style="height:32px;padding:0 14px;font-size:13px">Previous</button>
-                    <span id="pageIndicator" style="font-size:14px; margin:auto 0; color:var(--on-sv)">Page 1 of
-                        1</span>
-                    <button class="btn btn-outlined" id="nextPageBtn" onclick="changeProfilePage(1)"
-                        style="height:32px;padding:0 14px;font-size:13px">Next</button>
+                <!-- Step indicators -->
+                <div class="steps">
+                    <div class="step-chip active" id="chip1"><span class="material-symbols-rounded"
+                            style="font-size:16px">search</span>Step 1: Search</div>
+                    <div class="step-chip" id="chip2"><span class="material-symbols-rounded"
+                            style="font-size:16px">checklist</span>Step 2: Select Profiles</div>
+                    <div class="step-chip" id="chip3"><span class="material-symbols-rounded"
+                            style="font-size:16px">analytics</span>Step 3: Analyze</div>
                 </div>
 
-
-                <span style="font-size:13px;color:var(--on-sv)" id="profileCount">0 profiles found</span>
-            </div>
-            <div style="display:flex;gap:8px;margin-bottom:12px">
-                <button class="btn btn-tonal" style="height:32px;padding:0 14px;font-size:13px"
-                    onclick="selectAll()">Select All</button>
-                <button class="btn btn-outlined" style="height:32px;padding:0 14px;font-size:13px"
-                    onclick="selectNone()">Deselect All</button>
-
-
-            </div>
-            <div class="profile-grid" id="profileGrid"></div>
-            <div id="paginationControls" style="display:none; justify-content:center; gap:8px; margin-top:16px;">
-                <button class="btn btn-outlined" id="prevPageBtn" onclick="changeProfilePage(-1)"
-                    style="height:32px;padding:0 14px;font-size:13px">Previous</button>
-                <span id="pageIndicator" style="font-size:14px; margin:auto 0; color:var(--on-sv)">Page 1 of 1</span>
-                <button class="btn btn-outlined" id="nextPageBtn" onclick="changeProfilePage(1)"
-                    style="height:32px;padding:0 14px;font-size:13px">Next</button>
-            </div>
-            <div class="sel-bar" id="selBar">
-                <span class="sel-count" id="selCount">0 selected</span>
-                <button class="btn btn-filled" id="analyzeBtn" onclick="analyzeSelected()">
-                    <span class="material-symbols-rounded" style="font-size:18px">analytics</span>Analyze Selected
-                </button>
-            </div>
-            <div class="progress-wrap" id="analyzeProgress">
-                <div class="progress-bar">
-                    <div class="progress-fill indeterminate" id="analyzeProgressFill"></div>
-                </div>
-                <div class="progress-label">
-                    <span class="status-msg" id="analyzeMsg">Analyzing profiles...</span>
-                    <span id="analyzePercent">0%</span>
-                </div>
-            </div>
-        </div>
-
-        <!-- Step 3: Results -->
-        <div id="step3Card" style="display:none">
-            <!-- Stat Cards -->
-            <div class="stat-row" id="resultStats"></div>
-            <!-- Active Results as Cards only -->
-            <div class="card">
-                <div class="card-title" style="justify-content:space-between">
-                    <span><span class="material-symbols-rounded"
-                            style="color:var(--success);vertical-align:middle">trending_up</span> Active Leads</span>
-                    <span style="font-size:13px;color:var(--on-sv)" id="activeCountLabel">0 active found</span>
-                </div>
-                <div class="profile-grid" id="activeResultsGrid">
-                    <div style="grid-column:1/-1;text-align:center;padding:32px;color:var(--on-sv);font-size:14px"
-                        id="noActiveMsg">
-                        Koi active user nathi malyo. Alag keyword try karo.
+                <!-- Step 1: Keyword Search -->
+                <div class="card" id="step1Card">
+                    <div class="card-title"><span class="material-symbols-rounded"
+                            style="color:var(--primary)">manage_search</span>Search LinkedIn Profiles by Keyword</div>
+                    <div class="search-row">
+                        <input type="text" id="keywordInput" class="tf" style="flex: 2;"
+                            placeholder="e.g. Python Developer Ahmedabad, HR Manager Mumbai..."
+                            onkeydown="if(event.key==='Enter') searchProfiles()">
+                        <input type="number" id="maxResultsInput" class="tf" style="flex: 0.5; min-width: 120px;"
+                            placeholder="Max Profiles" value="50" min="1" max="100">
+                        <button class="btn btn-filled" id="searchBtn" onclick="searchProfiles()">
+                            <span class="material-symbols-rounded" style="font-size:18px">search</span>Search
+                        </button>
+                    </div>
+                    <div class="progress-wrap" id="searchProgress">
+                        <div class="progress-bar">
+                            <div class="progress-fill"></div>
+                        </div>
+                        <div class="status-msg" id="searchMsg">Searching LinkedIn...</div>
                     </div>
                 </div>
-            </div>
-        </div>
 
-        <!-- Previous Leads -->
-        {% if leads %}
-        <div class="card" style="padding:0;overflow:hidden;margin-top:24px">
-            <div
-                style="padding:16px 20px;border-bottom:1px solid var(--outline);display:flex;justify-content:space-between;align-items:center">
-                <span style="font-size:16px;font-weight:500">Previous Analyses ({{ leads|length }})</span>
-                <div style="display:flex;align-items:center;gap:16px">
-                    <select id="prevFilter" class="tf" style="height:32px;font-size:13px;padding:0 8px;min-width:140px"
-                        onchange="filterPreviousLeads()">
-                        <option value="All">All Leads</option>
-                        <option value="Active" selected>Active & Moderate</option>
-                        <option value="Inactive">Inactive</option>
-                    </select>
-                    <div class="stat-row" style="margin:0;display:flex;gap:8px">
-                        <span class="chip chip-active">Active: {{ active_count }}</span>
-                        <span class="chip chip-moderate">Moderate: {{ moderate_count }}</span>
-                        <span class="chip chip-inactive">Inactive: {{ inactive_count }}</span>
+                <!-- Step 2: Profile Selection -->
+                <div class="card" id="step2Card" style="display:none">
+                    <div class="card-title" style="justify-content:space-between">
+                        <span><span class="material-symbols-rounded"
+                                style="color:var(--primary);vertical-align:middle">checklist</span> Select Profiles to
+                            Analyze</span>
+
+                        <div id="paginationControls"
+                            style="display:none; justify-content:center; gap:8px; margin-top:16px;">
+                            <button class="btn btn-outlined" id="prevPageBtn" onclick="changeProfilePage(-1)"
+                                style="height:32px;padding:0 14px;font-size:13px">Previous</button>
+                            <span id="pageIndicator" style="font-size:14px; margin:auto 0; color:var(--on-sv)">Page 1 of
+                                1</span>
+                            <button class="btn btn-outlined" id="nextPageBtn" onclick="changeProfilePage(1)"
+                                style="height:32px;padding:0 14px;font-size:13px">Next</button>
+                        </div>
+
+
+                        <span style="font-size:13px;color:var(--on-sv)" id="profileCount">0 profiles found</span>
+                    </div>
+                    <div style="display:flex;gap:8px;margin-bottom:12px">
+                        <button class="btn btn-tonal" style="height:32px;padding:0 14px;font-size:13px"
+                            onclick="selectAll()">Select All</button>
+                        <button class="btn btn-outlined" style="height:32px;padding:0 14px;font-size:13px"
+                            onclick="selectNone()">Deselect All</button>
+
+
+                    </div>
+                    <div class="profile-grid" id="profileGrid"></div>
+                    <div id="paginationControls"
+                        style="display:none; justify-content:center; gap:8px; margin-top:16px;">
+                        <button class="btn btn-outlined" id="prevPageBtn" onclick="changeProfilePage(-1)"
+                            style="height:32px;padding:0 14px;font-size:13px">Previous</button>
+                        <span id="pageIndicator" style="font-size:14px; margin:auto 0; color:var(--on-sv)">Page 1 of
+                            1</span>
+                        <button class="btn btn-outlined" id="nextPageBtn" onclick="changeProfilePage(1)"
+                            style="height:32px;padding:0 14px;font-size:13px">Next</button>
+                    </div>
+                    <div class="sel-bar" id="selBar">
+                        <span class="sel-count" id="selCount">0 selected</span>
+                        <button class="btn btn-filled" id="analyzeBtn" onclick="analyzeSelected()">
+                            <span class="material-symbols-rounded" style="font-size:18px">analytics</span>Analyze
+                            Selected
+                        </button>
+                    </div>
+                    <div class="progress-wrap" id="analyzeProgress">
+                        <div class="progress-bar">
+                            <div class="progress-fill indeterminate" id="analyzeProgressFill"></div>
+                        </div>
+                        <div class="progress-label">
+                            <span class="status-msg" id="analyzeMsg">Analyzing profiles...</span>
+                            <span id="analyzePercent">0%</span>
+                        </div>
                     </div>
                 </div>
-            </div>
-            <div style="overflow-x:auto">
-                <table class="results-table">
-                    <thead>
-                        <tr>
-                            <th>Profile</th>
-                            <th>Score</th>
-                            <th>Posts</th>
-                            <th>Comments</th>
-                            <th>Reposts</th>
-                            <th>Date</th>
-                            <th>Actions</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for lead in leads %}
-                        <tr class="prev-lead-row" data-score="{{ lead.activity_score }}">
-                            <td>
-                                <div style="display:flex;align-items:center;gap:10px">
-                                    <div class="p-avatar">{{ lead.name|slice:":1"|upper|default:"?" }}</div>
-                                    <div>
-                                        <div class="p-name">{{ lead.name|default:"Unknown" }}</div>
-                                        <div class="p-sub">{{ lead.headline|truncatechars:45|default:"—" }}</div>
-                                    </div>
-                                </div>
-                            </td>
-                            <td>
-                                {% if lead.activity_score == "Active" %}<span class="chip chip-active">Active</span>
-                                {% elif lead.activity_score == "Moderately Active" %}<span
-                                    class="chip chip-moderate">Moderate</span>
-                                {% else %}<span class="chip chip-inactive">Inactive</span>{% endif %}
-                            </td>
-                            <td><span class="chip chip-count">{{ lead.posts_count }}</span></td>
-                            <td><span class="chip chip-count">{{ lead.comments_count }}</span></td>
-                            <td><span class="chip chip-count">{{ lead.reposts_count }}</span></td>
-                            <td style="font-size:12px">{{ lead.created_at|date:"M d, Y" }}</td>
-                            <td>
-                                <div class="action-btns">
-                                    <a href="{% url 'download_lead_pdf' lead.id %}" class="icon-btn"
-                                        title="Download PDF"><span class="material-symbols-rounded"
-                                            style="font-size:18px">picture_as_pdf</span></a>
-                                    <button class="icon-btn danger" onclick="deleteLead('{{ lead.id }}', this)"
-                                        title="Delete"><span class="material-symbols-rounded"
-                                            style="font-size:18px">delete</span></button>
-                                </div>
-                            </td>
-                        </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
-            </div>
-        </div>
-        {% endif %}
 
-    </main>
+                <!-- Step 3: Results -->
+                <div id="step3Card" style="display:none">
+                    <!-- Stat Cards -->
+                    <div class="stat-row" id="resultStats"></div>
+                    <!-- Active Results as Cards only -->
+                    <div class="card">
+                        <div class="card-title" style="justify-content:space-between">
+                            <span><span class="material-symbols-rounded"
+                                    style="color:var(--success);vertical-align:middle">trending_up</span> Active
+                                Leads</span>
+                            <span style="font-size:13px;color:var(--on-sv)" id="activeCountLabel">0 active found</span>
+                        </div>
+                        <div class="profile-grid" id="activeResultsGrid">
+                            <div style="grid-column:1/-1;text-align:center;padding:32px;color:var(--on-sv);font-size:14px"
+                                id="noActiveMsg">
+                                Koi active user nathi malyo. Alag keyword try karo.
+                            </div>
+                        </div>
+                </div>
+
+                <!-- Previous Leads -->
+                {% if leads %}
+                <div class="card" style="padding:0;overflow:hidden;margin-top:24px">
+                    <div
+                        style="padding:16px 20px;border-bottom:1px solid var(--outline);display:flex;justify-content:space-between;align-items:center">
+                        <span style="font-size:16px;font-weight:500">Previous Analyses (<span id="totalLeadsCount">{{ leads|length }}</span>)</span>
+                        <div style="display:flex;align-items:center;gap:16px">
+                            <button class="btn btn-outlined danger" id="bulkDeleteBtn"
+                                style="display: none; height:32px;padding:0 14px;font-size:13px;color:var(--error);border-color:var(--error);"
+                                onclick="bulkDeleteLeads()">Delete Selected</button>
+                            <select id="prevFilter" class="tf"
+                                style="height:32px;font-size:13px;padding:0 8px;min-width:140px"
+                                onchange="filterPreviousLeads()">
+                                <option value="All">All Leads</option>
+                                <option value="Active" selected>Active & Moderate</option>
+                                <option value="Inactive">Inactive</option>
+                            </select>
+                            <div class="stat-row" style="margin:0;display:flex;gap:8px">
+                                <span class="chip chip-active" id="chipActiveCount">Active: {{ active_count }}</span>
+                                <span class="chip chip-moderate" id="chipModerateCount">Moderate: {{ moderate_count }}</span>
+                                <span class="chip chip-inactive" id="chipInactiveCount">Inactive: {{ inactive_count }}</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div style="overflow-x:auto">
+                        <table class="results-table">
+                            <thead>
+                                <tr>
+                                    <th style="width: 40px; text-align: center;"><input type="checkbox"
+                                            id="selectAllLeads" onchange="toggleAllLeads(this)"></th>
+                                    <th>Profile</th>
+                                    <th>Score</th>
+                                    <th>Posts</th>
+                                    <th>Comments</th>
+                                    <th>Reposts</th>
+                                    <th>Date</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for lead in leads %}
+                                <tr class="prev-lead-row" data-score="{{ lead.activity_score }}">
+                                    <td style="text-align: center;"><input type="checkbox" class="lead-checkbox"
+                                            value="{{ lead.id }}" onchange="updateLeadSelection()"></td>
+                                    <td>
+                                        <div style="display:flex;align-items:center;gap:10px">
+                                            <div class="p-avatar">{{ lead.name|slice:":1"|upper|default:"?" }}</div>
+                                            <div>
+                                                <div class="p-name">{{ lead.name|default:"Unknown" }}</div>
+                                                <div class="p-sub">{{ lead.headline|truncatechars:45|default:"—" }}
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        {% if lead.activity_score == "Active" %}<span
+                                            class="chip chip-active">Active</span>
+                                        {% elif lead.activity_score == "Moderately Active" %}<span
+                                            class="chip chip-moderate">Moderate</span>
+                                        {% else %}<span class="chip chip-inactive">Inactive</span>{% endif %}
+                                    </td>
+                                    <td><span class="chip chip-count">{{ lead.posts_count }}</span></td>
+                                    <td><span class="chip chip-count">{{ lead.comments_count }}</span></td>
+                                    <td><span class="chip chip-count">{{ lead.reposts_count }}</span></td>
+                                    <td style="font-size:12px">{{ lead.created_at|date:"M d, Y" }}</td>
+                                    <td>
+                                        <div class="action-btns">
+                                            <a href="{% url 'download_lead_pdf' lead.id %}" class="icon-btn"
+                                                title="Download PDF"><span class="material-symbols-rounded"
+                                                    style="font-size:18px">picture_as_pdf</span></a>
+                                            <button class="icon-btn danger" onclick="deleteLead('{{ lead.id }}', this)"
+                                                title="Delete"><span class="material-symbols-rounded"
+                                                    style="font-size:18px">delete</span></button>
+                                        </div>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                {% endif %}
+
+            </main>
+            {% include 'accounts/app_sidebar_footer.html' %}
 
     <script>
         function csrf() { return document.cookie.split('; ').find(row => row.startsWith('csrftoken='))?.split('=')[1] || ''; }
@@ -767,7 +907,12 @@
                 else if (filter === 'Inactive') show = (score === 'Inactive' || score === 'Error');
 
                 r.style.display = show ? '' : 'none';
+                if (!show) {
+                    const cb = r.querySelector('.lead-checkbox');
+                    if (cb) cb.checked = false;
+                }
             });
+            if (typeof updateLeadSelection === 'function') updateLeadSelection();
         }
 
         // ── Step 1: Search ────────────────────────────────────────
@@ -785,9 +930,11 @@
             const btn = document.getElementById('searchBtn');
             const prog = document.getElementById('searchProgress');
             const msg = document.getElementById('searchMsg');
+            const fill = prog.querySelector('.progress-fill');
 
             btn.disabled = true;
             prog.style.display = 'block';
+            fill.className = 'progress-fill indeterminate';
             msg.textContent = `"${kw}" mate LinkedIn search kari rahyo chu...`;
             msg.style.color = 'var(--on-sv)';
 
@@ -799,22 +946,29 @@
                 });
                 const data = await res.json();
 
+                fill.className = 'progress-fill';
                 if (data.success && data.profiles.length > 0) {
                     foundProfiles = data.profiles;
+                    fill.style.width = '100%';
                     msg.style.color = 'var(--success)';
                     msg.textContent = `✅ ${data.count} profiles collect`;
                     showProfileSelection(data.profiles);
                 } else {
+                    fill.style.width = '0%';
                     msg.style.color = 'var(--error)';
                     msg.textContent = data.message || 'Koi profiles na malya. Alag keyword try karo.';
                 }
             } catch (e) {
+                fill.className = 'progress-fill';
+                fill.style.width = '0%';
                 msg.style.color = 'var(--error)';
                 msg.textContent = 'Server error. Thodi vaar pachi try karo.';
             } finally {
                 btn.disabled = false;
             }
         }
+
+
 
         function showProfileSelection(profiles) {
             foundProfiles = profiles;
@@ -1032,12 +1186,99 @@
             if (!confirm('You want to delete?')) return;
             const res = await fetch(`/api/leads/${id}/delete/`, { method: 'POST', headers: { 'X-CSRFToken': csrf() } });
             const data = await res.json();
-            if (data.success) btn.closest('tr').remove();
-            else alert(data.message || 'Delete fail thayo.');
+            if (data.success) {
+                btn.closest('tr').remove();
+                if (typeof updateTotalLeadsCount === 'function') updateTotalLeadsCount();
+                if (typeof updateLeadSelection === 'function') updateLeadSelection();
+            } else {
+                alert(data.message || 'Delete fail thayo.');
+            }
+        }
+
+        function toggleAllLeads(source) {
+            const checkboxes = document.querySelectorAll('.lead-checkbox');
+            checkboxes.forEach(cb => {
+                if (cb.closest('tr').style.display !== 'none') {
+                    cb.checked = source.checked;
+                }
+            });
+            updateLeadSelection();
+        }
+
+        function updateLeadSelection() {
+            const selected = document.querySelectorAll('.lead-checkbox:checked').length;
+            const btn = document.getElementById('bulkDeleteBtn');
+            if (btn) {
+                if (selected > 0) {
+                    btn.style.display = 'inline-flex';
+                    btn.textContent = `Delete Selected (${selected})`;
+                } else {
+                    btn.style.display = 'none';
+                }
+            }
+            const visibleRows = document.querySelectorAll('.prev-lead-row:not([style*="display: none"])');
+            const visibleCheckboxes = Array.from(visibleRows).map(row => row.querySelector('.lead-checkbox'));
+            const allChecked = visibleCheckboxes.length > 0 && visibleCheckboxes.every(cb => cb.checked);
+            const selectAllCb = document.getElementById('selectAllLeads');
+            if (selectAllCb) selectAllCb.checked = allChecked;
+        }
+
+        async function bulkDeleteLeads() {
+            const selected = Array.from(document.querySelectorAll('.lead-checkbox:checked')).map(cb => cb.value);
+            if (selected.length === 0) return;
+            if (!confirm(`Are you sure you want to delete ${selected.length} selected leads?`)) return;
+
+            const btn = document.getElementById('bulkDeleteBtn');
+            btn.disabled = true;
+
+            try {
+                const res = await fetch('/api/leads/bulk-delete/', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'X-CSRFToken': csrf() },
+                    body: JSON.stringify({ lead_ids: selected })
+                });
+                const data = await res.json();
+                if (data.success) {
+                    selected.forEach(id => {
+                        const cb = document.querySelector(`.lead-checkbox[value="${id}"]`);
+                        if (cb) cb.closest('tr').remove();
+                    });
+                    updateTotalLeadsCount();
+                    updateLeadSelection();
+                } else {
+                    alert(data.message || 'Delete failed.');
+                }
+            } catch (e) {
+                alert('Server error.');
+            } finally {
+                btn.disabled = false;
+            }
+        }
+
+        function updateTotalLeadsCount() {
+            const total = document.querySelectorAll('.prev-lead-row').length;
+            const countEl = document.getElementById('totalLeadsCount');
+            if (countEl) countEl.textContent = total;
+
+            const rows = document.querySelectorAll('.prev-lead-row');
+            let active = 0, moderate = 0, inactive = 0;
+            rows.forEach(r => {
+                const score = r.dataset.score;
+                if (score === 'Active') active++;
+                else if (score === 'Moderately Active') moderate++;
+                else inactive++;
+            });
+            const chipActive = document.getElementById('chipActiveCount');
+            const chipMod = document.getElementById('chipModerateCount');
+            const chipInact = document.getElementById('chipInactiveCount');
+            if (chipActive) chipActive.textContent = `Active: ${active}`;
+            if (chipMod) chipMod.textContent = `Moderate: ${moderate}`;
+            if (chipInact) chipInact.textContent = `Inactive: ${inactive}`;
         }
 
         function esc(s) { return String(s || '').replaceAll('&', '&amp;').replaceAll('<', '&lt;').replaceAll('>', '&gt;').replaceAll('"', '&quot;'); }
     </script>
+    {% include 'accounts/app_sidebar_footer.html' %}
 </body>
 
 </html>

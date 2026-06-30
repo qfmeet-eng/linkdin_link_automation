@@ -653,14 +653,14 @@
       background-color: white;
       transition: .3s;
       border-radius: 50%;
-      box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
     }
 
-    input:checked + .slider {
+    input:checked+.slider {
       background-color: var(--md-primary);
     }
 
-    input:checked + .slider:before {
+    input:checked+.slider:before {
       transform: translateX(20px);
     }
 
@@ -859,8 +859,15 @@
     }
 
     @keyframes fadeIn {
-      from { opacity: 0; transform: translateY(10px); }
-      to { opacity: 1; transform: translateY(0); }
+      from {
+        opacity: 0;
+        transform: translateY(10px);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
     }
 
     /* ── Profile Detail UI ─────────────────────────────────── */
@@ -964,13 +971,19 @@
     }
 
     @keyframes spin {
-      from { transform: rotate(0deg); }
-      to { transform: rotate(360deg); }
+      from {
+        transform: rotate(0deg);
+      }
+
+      to {
+        transform: rotate(360deg);
+      }
     }
   </style>
 </head>
 
 <body>
+  {% include 'accounts/app_sidebar.html' %}
 
   <!-- ── Top App Bar ── -->
   <header class="app-bar">
@@ -1008,231 +1021,243 @@
     <div id="users-tab" class="tab-content active">
 
       <!-- Stat Cards -->
-    <div class="stat-row">
-      <div class="stat-card blue">
-        <div class="stat-icon-wrap">
-          <span class="material-symbols-rounded">group</span>
-        </div>
-        <div>
-          <div class="stat-value" id="statTotal">{{ details_list|length }}</div>
-          <div class="stat-label">Total Users</div>
-        </div>
-      </div>
-
-      <div class="stat-card green">
-        <div class="stat-icon-wrap">
-          <span class="material-symbols-rounded">login</span>
-        </div>
-        <div>
-          <div class="stat-value" id="statLogins">0</div>
-          <div class="stat-label">Users Logged In</div>
-        </div>
-      </div>
-
-      <div class="stat-card amber">
-        <div class="stat-icon-wrap">
-          <span class="material-symbols-rounded">schedule</span>
-        </div>
-        <div>
-          <div class="stat-value" id="statRecent">0</div>
-          <div class="stat-label">Active (24h)</div>
-        </div>
-      </div>
-    </div>
-
-    <!-- LinkedIn Scraper Settings Card -->
-    <div class="table-card" style="margin-bottom: 28px; padding: 24px; box-sizing: border-box;">
-      <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; border-bottom: 1px solid var(--md-outline); padding-bottom: 12px; flex-wrap: wrap; gap: 12px;">
-        <div style="display: flex; align-items: center; gap: 10px;">
-          <span class="material-symbols-rounded" style="color: var(--md-primary); font-size: 28px;">settings_applications</span>
-          <span style="font-size: 16px; font-weight: 500; color: var(--md-on-surface);">LinkedIn Scraper Cookie Configuration</span>
-        </div>
-        <div>
-          <span class="chip {% if linkedin_config.li_at_cookie %}chip-active{% else %}chip-empty{% endif %}" id="cookieStatusLabel" style="font-size: 12px; font-weight: 500;">
-            {% if linkedin_config.li_at_cookie %}Configured{% else %}Not configured{% endif %}
-          </span>
-        </div>
-      </div>
-      
-      <form id="cookieConfigForm" autocomplete="off">
-        <div class="form-group" style="margin-bottom: 16px;">
-          <label class="form-label" for="cookieInput" style="font-size: 13px; font-weight: 500; color: var(--md-on-surface-var); margin-bottom: 6px; display: block;">LinkedIn <code>li_at</code> session cookie value:</label>
-          <textarea class="form-control" id="cookieInput" name="li_at_cookie" style="height: 64px; padding: 12px 16px; font-family: 'Roboto Mono', monospace; font-size: 13px; resize: vertical; border: 1px solid var(--md-outline); border-radius: var(--md-radius-md); background: var(--md-surface-1); width: 100%; color: var(--md-on-surface); box-sizing: border-box;" placeholder="Paste your li_at session cookie value here... (starts with AQED...)">{{ linkedin_config.li_at_cookie|default:"" }}</textarea>
-        </div>
-        <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 16px;">
-          <div style="font-size: 12px; color: var(--md-on-surface-var);">
-            Last updated: <span id="cookieLastUpdated" style="font-weight: 500;">{{ linkedin_config.updated_at|date:"d M Y, H:i"|default:"Never" }}</span>
+      <div class="stat-row">
+        <div class="stat-card blue">
+          <div class="stat-icon-wrap">
+            <span class="material-symbols-rounded">group</span>
           </div>
-          <button class="btn btn-filled" type="submit" id="saveCookieBtn" style="height: 36px; padding: 0 16px; border-radius: var(--md-radius-full); font-size: 13px; display: inline-flex; align-items: center; gap: 8px;">
-            <span class="material-symbols-rounded" style="font-size: 18px;">save</span>
-            Save Configuration
-          </button>
-        </div>
-      </form>
-    </div>
-
-    <!-- Table Card -->
-    <div class="table-card">
-
-      <!-- Toolbar -->
-      <div class="table-toolbar">
-        <span class="toolbar-title">All Registered Users</span>
-        <div class="toolbar-right">
-          <div class="search-field">
-            <span class="material-symbols-rounded">search</span>
-            <input type="text" id="searchInput" placeholder="Search name, email, phone, IP…" aria-label="Search users">
+          <div>
+            <div class="stat-value" id="statTotal">{{ details_list|length }}</div>
+            <div class="stat-label">Total Users</div>
           </div>
-          <span id="rowCounter" style="font-size:13px; color:var(--md-on-surface-var); white-space:nowrap;">
-            <span id="visibleCount">{{ details_list|length }}</span> / {{ details_list|length }} users
-          </span>
+        </div>
+
+        <div class="stat-card green">
+          <div class="stat-icon-wrap">
+            <span class="material-symbols-rounded">login</span>
+          </div>
+          <div>
+            <div class="stat-value" id="statLogins">0</div>
+            <div class="stat-label">Users Logged In</div>
+          </div>
+        </div>
+
+        <div class="stat-card amber">
+          <div class="stat-icon-wrap">
+            <span class="material-symbols-rounded">schedule</span>
+          </div>
+          <div>
+            <div class="stat-value" id="statRecent">0</div>
+            <div class="stat-label">Active (24h)</div>
+          </div>
         </div>
       </div>
 
-      <!-- Table -->
-      <div style="overflow-x:auto;">
-        <table class="data-table" id="userTable">
-          <thead>
-            <tr>
-              <th>User</th>
-              <th>Phone</th>
-              <th>Status</th>
-              <th>Last Login</th>
-              <th>IP Address</th>
-              <th>User Agent</th>
-              <th>Joined</th>
-              <th style="text-align: center;">Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            {% for item in details_list %}
-            <tr class="user-row" id="user-row-{{ item.user.id }}"
-              data-user-id="{{ item.user.id }}"
-              data-name="{{ item.name }}"
-              data-email="{{ item.email }}"
-              data-phone="{{ item.phone }}"
-              data-active="{% if item.user.is_active %}true{% else %}false{% endif %}"
-              data-search-name="{{ item.name|lower }}"
-              data-search-email="{{ item.email|lower }}"
-              data-search-phone="{{ item.phone|lower }}"
-              data-ip="{{ item.ip_address|default:'' }}"
-              data-ts="{{ item.last_login|date:'U'|default:'0' }}">
+      <!-- LinkedIn Scraper Settings Card -->
+      <div class="table-card" style="margin-bottom: 28px; padding: 24px; box-sizing: border-box;">
+        <div
+          style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; border-bottom: 1px solid var(--md-outline); padding-bottom: 12px; flex-wrap: wrap; gap: 12px;">
+          <div style="display: flex; align-items: center; gap: 10px;">
+            <span class="material-symbols-rounded"
+              style="color: var(--md-primary); font-size: 28px;">settings_applications</span>
+            <span style="font-size: 16px; font-weight: 500; color: var(--md-on-surface);">LinkedIn Scraper Cookie
+              Configuration</span>
+          </div>
+          <div>
+            <span class="chip {% if linkedin_config.li_at_cookie %}chip-active{% else %}chip-empty{% endif %}"
+              id="cookieStatusLabel" style="font-size: 12px; font-weight: 500;">
+              {% if linkedin_config.li_at_cookie %}Configured{% else %}Not configured{% endif %}
+            </span>
+          </div>
+        </div>
 
-              <!-- User -->
-              <td>
-                <div class="user-cell">
-                  {% if item.profile_picture_url %}
-                  <img class="avatar" src="{{ item.profile_picture_url }}" alt="Avatar" style="object-fit: cover;">
-                  {% else %}
-                  <div class="avatar">{{ item.name|slice:":1" }}</div>
-                  {% endif %}
-                  <div>
-                    <div class="user-name">{{ item.name }}</div>
-                    <div class="user-email">{{ item.email }}</div>
+        <form id="cookieConfigForm" autocomplete="off">
+          <div class="form-group" style="margin-bottom: 16px;">
+            <label class="form-label" for="cookieInput"
+              style="font-size: 13px; font-weight: 500; color: var(--md-on-surface-var); margin-bottom: 6px; display: block;">LinkedIn
+              <code>li_at</code> session cookie value:</label>
+            <textarea class="form-control" id="cookieInput" name="li_at_cookie"
+              style="height: 64px; padding: 12px 16px; font-family: 'Roboto Mono', monospace; font-size: 13px; resize: vertical; border: 1px solid var(--md-outline); border-radius: var(--md-radius-md); background: var(--md-surface-1); width: 100%; color: var(--md-on-surface); box-sizing: border-box;"
+              placeholder="Paste your li_at session cookie value here... (starts with AQED...)">{{ linkedin_config.li_at_cookie|default:"" }}</textarea>
+          </div>
+          <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 16px;">
+            <div style="font-size: 12px; color: var(--md-on-surface-var);">
+              Last updated: <span id="cookieLastUpdated" style="font-weight: 500;">{{ linkedin_config.updated_at|date:"d
+                M Y, H:i"|default:"Never" }}</span>
+            </div>
+            <button class="btn btn-filled" type="submit" id="saveCookieBtn"
+              style="height: 36px; padding: 0 16px; border-radius: var(--md-radius-full); font-size: 13px; display: inline-flex; align-items: center; gap: 8px;">
+              <span class="material-symbols-rounded" style="font-size: 18px;">save</span>
+              Save Configuration
+            </button>
+          </div>
+        </form>
+      </div>
+
+      <!-- Table Card -->
+      <div class="table-card">
+
+        <!-- Toolbar -->
+        <div class="table-toolbar">
+          <span class="toolbar-title">All Registered Users</span>
+          <div class="toolbar-right">
+            <div class="search-field">
+              <span class="material-symbols-rounded">search</span>
+              <input type="text" id="searchInput" placeholder="Search name, email, phone, IP…"
+                aria-label="Search users">
+            </div>
+            <span id="rowCounter" style="font-size:13px; color:var(--md-on-surface-var); white-space:nowrap;">
+              <span id="visibleCount">{{ details_list|length }}</span> / {{ details_list|length }} users
+            </span>
+          </div>
+        </div>
+
+        <!-- Table -->
+        <div style="overflow-x:auto;">
+          <table class="data-table" id="userTable">
+            <thead>
+              <tr>
+                <th>User</th>
+                <th>Phone</th>
+                <th>Status</th>
+                <th>Last Login</th>
+                <th>IP Address</th>
+                <th>User Agent</th>
+                <th>Joined</th>
+                <th style="text-align: center;">Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for item in details_list %}
+              <tr class="user-row" id="user-row-{{ item.user.id }}" data-user-id="{{ item.user.id }}"
+                data-name="{{ item.name }}" data-email="{{ item.email }}" data-phone="{{ item.phone }}"
+                data-active="{% if item.user.is_active %}true{% else %}false{% endif %}"
+                data-search-name="{{ item.name|lower }}" data-search-email="{{ item.email|lower }}"
+                data-search-phone="{{ item.phone|lower }}" data-ip="{{ item.ip_address|default:'' }}"
+                data-ts="{{ item.last_login|date:'U'|default:'0' }}">
+
+                <!-- User -->
+                <td>
+                  <div class="user-cell">
+                    {% if item.profile_picture_url %}
+                    <img class="avatar" src="{{ item.profile_picture_url }}" alt="Avatar" style="object-fit: cover;">
+                    {% else %}
+                    <div class="avatar">{{ item.name|slice:":1" }}</div>
+                    {% endif %}
+                    <div>
+                      <div class="user-name">{{ item.name }}</div>
+                      <div class="user-email">{{ item.email }}</div>
+                    </div>
                   </div>
-                </div>
-              </td>
+                </td>
 
-              <!-- Phone -->
-              <td>
-                {% if item.phone %}
-                <span class="chip chip-phone">
-                  <span class="material-symbols-rounded" style="font-size:14px;">phone</span>
-                  {{ item.phone }}
-                </span>
-                {% else %}
-                <span class="chip chip-empty">—</span>
-                {% endif %}
-              </td>
-
-              <!-- Status -->
-              <td>
-                <button class="status-toggle-btn" onclick="toggleUserStatus({{ item.user.id }})" title="Click to toggle status">
-                  {% if item.user.is_active %}
-                  <span class="chip chip-active">
-                    <span class="material-symbols-rounded" style="font-size:14px; margin-right:4px;">check_circle</span>
-                    Active
+                <!-- Phone -->
+                <td>
+                  {% if item.phone %}
+                  <span class="chip chip-phone">
+                    <span class="material-symbols-rounded" style="font-size:14px;">phone</span>
+                    {{ item.phone }}
                   </span>
                   {% else %}
-                  <span class="chip chip-inactive">
-                    <span class="material-symbols-rounded" style="font-size:14px; margin-right:4px;">cancel</span>
-                    Inactive
-                  </span>
+                  <span class="chip chip-empty">—</span>
                   {% endif %}
-                </button>
-              </td>
+                </td>
 
-              <!-- Last Login -->
-              <td>
-                {% if item.last_login %}
-                <div class="ts-date">{{ item.last_login|date:"M d, Y" }}</div>
-                <div class="ts-time">{{ item.last_login|date:"H:i:s" }}</div>
-                {% else %}
-                <span class="chip chip-empty">Never</span>
-                {% endif %}
-              </td>
-
-              <!-- IP -->
-              <td>
-                {% if item.ip_address %}
-                <span class="chip chip-ip">{{ item.ip_address }}</span>
-                {% else %}
-                <span class="chip chip-empty">—</span>
-                {% endif %}
-              </td>
-
-              <!-- User Agent -->
-              <td style="max-width:200px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; font-size:12px;"
-                title="{{ item.user_agent|default:'N/A' }}">
-                {{ item.user_agent|truncatechars:40|default:"—" }}
-              </td>
-
-              <!-- Joined -->
-              <td>
-                <div class="ts-date">{{ item.created_at|date:"M d, Y" }}</div>
-                <div class="ts-time">{{ item.created_at|date:"H:i:s" }}</div>
-              </td>
-
-              <!-- Actions -->
-              <td>
-                <div style="display: flex; gap: 4px; justify-content: center; align-items: center;">
-                  <button class="action-btn" onclick="openEditModal({{ item.user.id }})" title="Edit User">
-                    <span class="material-symbols-rounded" style="font-size:18px;">edit</span>
+                <!-- Status -->
+                <td>
+                  <button class="status-toggle-btn" onclick="toggleUserStatus({{ item.user.id }})"
+                    title="Click to toggle status">
+                    {% if item.user.is_active %}
+                    <span class="chip chip-active">
+                      <span class="material-symbols-rounded"
+                        style="font-size:14px; margin-right:4px;">check_circle</span>
+                      Active
+                    </span>
+                    {% else %}
+                    <span class="chip chip-inactive">
+                      <span class="material-symbols-rounded" style="font-size:14px; margin-right:4px;">cancel</span>
+                      Inactive
+                    </span>
+                    {% endif %}
                   </button>
-                  <button class="action-btn" onclick="openLogsModal({{ item.user.id }}, '{{ item.name|escapejs }}')" title="Login History">
-                    <span class="material-symbols-rounded" style="font-size:18px;">history</span>
-                  </button>
-                  <button class="action-btn delete-btn" onclick="openDeleteModal({{ item.user.id }}, '{{ item.name|escapejs }}')" title="Delete User">
-                    <span class="material-symbols-rounded" style="font-size:18px;">delete</span>
-                  </button>
-                </div>
-              </td>
-            </tr>
-            {% empty %}
-            <tr>
-              <td colspan="8" style="text-align:center; padding:56px; color:var(--md-on-surface-var);">
-                <span class="material-symbols-rounded"
-                  style="font-size:48px; display:block; margin-bottom:12px;">inbox</span>
-                <div style="font-size:15px; font-weight:500;">No users yet</div>
-                <div style="font-size:13px; margin-top:4px;">Register thayelaa users yahan dikhse.</div>
-              </td>
-            </tr>
-            {% endfor %}
-          </tbody>
-        </table>
+                </td>
 
-        <!-- JS Empty State -->
-        <div class="empty-state" id="emptyState">
-          <span class="material-symbols-rounded">search_off</span>
-          <p>No users match your search.</p>
+                <!-- Last Login -->
+                <td>
+                  {% if item.last_login %}
+                  <div class="ts-date">{{ item.last_login|date:"M d, Y" }}</div>
+                  <div class="ts-time">{{ item.last_login|date:"H:i:s" }}</div>
+                  {% else %}
+                  <span class="chip chip-empty">Never</span>
+                  {% endif %}
+                </td>
+
+                <!-- IP -->
+                <td>
+                  {% if item.ip_address %}
+                  <span class="chip chip-ip">{{ item.ip_address }}</span>
+                  {% else %}
+                  <span class="chip chip-empty">—</span>
+                  {% endif %}
+                </td>
+
+                <!-- User Agent -->
+                <td
+                  style="max-width:200px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; font-size:12px;"
+                  title="{{ item.user_agent|default:'N/A' }}">
+                  {{ item.user_agent|truncatechars:40|default:"—" }}
+                </td>
+
+                <!-- Joined -->
+                <td>
+                  <div class="ts-date">{{ item.created_at|date:"M d, Y" }}</div>
+                  <div class="ts-time">{{ item.created_at|date:"H:i:s" }}</div>
+                </td>
+
+                <!-- Actions -->
+                <td>
+                  <div style="display: flex; gap: 4px; justify-content: center; align-items: center;">
+                    <button class="action-btn" onclick="openEditModal({{ item.user.id }})" title="Edit User">
+                      <span class="material-symbols-rounded" style="font-size:18px;">edit</span>
+                    </button>
+                    <button class="action-btn" onclick="openLogsModal({{ item.user.id }}, '{{ item.name|escapejs }}')"
+                      title="Login History">
+                      <span class="material-symbols-rounded" style="font-size:18px;">history</span>
+                    </button>
+                    <button class="action-btn delete-btn"
+                      onclick="openDeleteModal({{ item.user.id }}, '{{ item.name|escapejs }}')" title="Delete User">
+                      <span class="material-symbols-rounded" style="font-size:18px;">delete</span>
+                    </button>
+                  </div>
+                </td>
+              </tr>
+              {% empty %}
+              <tr>
+                <td colspan="8" style="text-align:center; padding:56px; color:var(--md-on-surface-var);">
+                  <span class="material-symbols-rounded"
+                    style="font-size:48px; display:block; margin-bottom:12px;">inbox</span>
+                  <div style="font-size:15px; font-weight:500;">No users yet</div>
+                  <div style="font-size:13px; margin-top:4px;">Register thayelaa users yahan dikhse.</div>
+                </td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+
+          <!-- JS Empty State -->
+          <div class="empty-state" id="emptyState">
+            <span class="material-symbols-rounded">search_off</span>
+            <p>No users match your search.</p>
+          </div>
         </div>
-      </div>
 
-      <!-- Footer -->
-      <div class="table-footer">
-        <span>Showing <strong id="footerVisible">{{ details_list|length }}</strong> of <strong>{{ details_list|length }}</strong> records</span>
-      </div>
+        <!-- Footer -->
+        <div class="table-footer">
+          <span>Showing <strong id="footerVisible">{{ details_list|length }}</strong> of <strong>{{ details_list|length
+              }}</strong> records</span>
+        </div>
 
-    </div>
+      </div>
     </div><!-- End of Users & Config tab-content -->
 
     <!-- Tab 2: Scraped Profiles -->
@@ -1245,10 +1270,12 @@
           <div class="toolbar-right">
             <div class="search-field">
               <span class="material-symbols-rounded">search</span>
-              <input type="text" id="searchScrapedInput" placeholder="Search name, headline, location, user…" aria-label="Search profiles">
+              <input type="text" id="searchScrapedInput" placeholder="Search name, headline, location, user…"
+                aria-label="Search profiles">
             </div>
             <span id="scrapedRowCounter" style="font-size:13px; color:var(--md-on-surface-var); white-space:nowrap;">
-              <span id="visibleScrapedCount">{{ scraped_profiles|length }}</span> / {{ scraped_profiles|length }} profiles
+              <span id="visibleScrapedCount">{{ scraped_profiles|length }}</span> / {{ scraped_profiles|length }}
+              profiles
             </span>
           </div>
         </div>
@@ -1267,17 +1294,13 @@
             </thead>
             <tbody>
               {% for p in scraped_profiles %}
-              <tr class="scraped-row" id="scraped-row-{{ p.id }}"
-                data-profile-id="{{ p.id }}"
-                data-name="{{ p.name }}"
-                data-headline="{{ p.headline }}"
-                data-location="{{ p.location }}"
+              <tr class="scraped-row" id="scraped-row-{{ p.id }}" data-profile-id="{{ p.id }}" data-name="{{ p.name }}"
+                data-headline="{{ p.headline }}" data-location="{{ p.location }}"
                 data-scraped-by="{% if p.user %}{{ p.user.email }}{% else %}System{% endif %}"
-                data-search-name="{{ p.name|lower }}"
-                data-search-headline="{{ p.headline|lower }}"
+                data-search-name="{{ p.name|lower }}" data-search-headline="{{ p.headline|lower }}"
                 data-search-location="{{ p.location|lower }}"
                 data-search-by="{% if p.user %}{{ p.user.email|lower }}{% else %}system{% endif %}">
-                
+
                 <!-- Profile Info -->
                 <td>
                   <div class="user-cell">
@@ -1286,14 +1309,17 @@
                     </div>
                     <div>
                       <div class="user-name">{{ p.name|default:"Unknown Name" }}</div>
-                      <div class="user-email" style="max-width: 300px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;" title="{{ p.headline }}">{{ p.headline|default:"No headline" }}</div>
+                      <div class="user-email"
+                        style="max-width: 300px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;"
+                        title="{{ p.headline }}">{{ p.headline|default:"No headline" }}</div>
                     </div>
                   </div>
                 </td>
 
                 <!-- LinkedIn URL -->
                 <td>
-                  <a href="{% if not p.url|slice:':4' == 'http' %}https://{% endif %}{{ p.url }}" target="_blank" style="color: var(--md-primary); text-decoration: none; display: inline-flex; align-items: center; gap: 4px;">
+                  <a href="{% if not p.url|slice:':4' == 'http' %}https://{% endif %}{{ p.url }}" target="_blank"
+                    style="color: var(--md-primary); text-decoration: none; display: inline-flex; align-items: center; gap: 4px;">
                     <span class="material-symbols-rounded" style="font-size: 16px;">open_in_new</span>
                     Link
                   </a>
@@ -1302,8 +1328,10 @@
                 <!-- Scraped By -->
                 <td>
                   {% if p.user %}
-                  <span class="chip chip-phone" style="background: var(--md-info-cont); color: var(--md-primary); border-color: var(--md-outline);">
-                    <span class="material-symbols-rounded" style="font-size:14px; margin-right:4px;">account_circle</span>
+                  <span class="chip chip-phone"
+                    style="background: var(--md-info-cont); color: var(--md-primary); border-color: var(--md-outline);">
+                    <span class="material-symbols-rounded"
+                      style="font-size:14px; margin-right:4px;">account_circle</span>
                     {{ p.user.first_name|default:p.user.email }}
                   </span>
                   {% else %}
@@ -1323,7 +1351,8 @@
                     <button class="action-btn" onclick="openScrapedDetailModal({{ p.id }})" title="View Details">
                       <span class="material-symbols-rounded" style="font-size:18px;">visibility</span>
                     </button>
-                    <button class="action-btn delete-btn" onclick="openScrapedDeleteModal({{ p.id }}, '{{ p.name|escapejs }}')" title="Delete Profile">
+                    <button class="action-btn delete-btn"
+                      onclick="openScrapedDeleteModal({{ p.id }}, '{{ p.name|escapejs }}')" title="Delete Profile">
                       <span class="material-symbols-rounded" style="font-size:18px;">delete</span>
                     </button>
                   </div>
@@ -1332,9 +1361,11 @@
               {% empty %}
               <tr>
                 <td colspan="5" style="text-align:center; padding:56px; color:var(--md-on-surface-var);">
-                  <span class="material-symbols-rounded" style="font-size:48px; display:block; margin-bottom:12px;">database</span>
+                  <span class="material-symbols-rounded"
+                    style="font-size:48px; display:block; margin-bottom:12px;">database</span>
                   <div style="font-size:15px; font-weight:500;">No profiles scraped yet</div>
-                  <div style="font-size:13px; margin-top:4px;">LinkedIn assistant dwara scrape thayelaa profiles yahan dikhse.</div>
+                  <div style="font-size:13px; margin-top:4px;">LinkedIn assistant dwara scrape thayelaa profiles yahan
+                    dikhse.</div>
                 </td>
               </tr>
               {% endfor %}
@@ -1350,7 +1381,8 @@
 
         <!-- Footer -->
         <div class="table-footer">
-          <span>Showing <strong id="scrapedFooterVisible">{{ scraped_profiles|length }}</strong> of <strong>{{ scraped_profiles|length }}</strong> records</span>
+          <span>Showing <strong id="scrapedFooterVisible">{{ scraped_profiles|length }}</strong> of <strong>{{
+              scraped_profiles|length }}</strong> records</span>
         </div>
       </div>
     </div>
@@ -1428,7 +1460,8 @@
       </div>
       <div class="modal-footer">
         <button type="button" class="btn btn-outlined" onclick="closeDeleteModal()">Cancel</button>
-        <button type="button" class="btn btn-filled" style="background: var(--md-error); color: white;" onclick="confirmDeleteUser()">Delete</button>
+        <button type="button" class="btn btn-filled" style="background: var(--md-error); color: white;"
+          onclick="confirmDeleteUser()">Delete</button>
       </div>
     </div>
   </div>
@@ -1457,7 +1490,8 @@
           </tbody>
         </table>
         <div id="logsEmptyState" style="text-align: center; padding: 48px 16px; display: none;">
-          <span class="material-symbols-rounded" style="font-size: 40px; color: var(--md-on-surface-var);">history_toggle_off</span>
+          <span class="material-symbols-rounded"
+            style="font-size: 40px; color: var(--md-on-surface-var);">history_toggle_off</span>
           <p style="margin-top: 8px; color: var(--md-on-surface-var);">No login activities found for this user.</p>
         </div>
       </div>
@@ -1503,7 +1537,8 @@
       </div>
       <div class="modal-footer">
         <button type="button" class="btn btn-outlined" onclick="closeScrapedDeleteModal()">Cancel</button>
-        <button type="button" class="btn btn-filled" style="background: var(--md-error); color: white;" onclick="confirmDeleteScraped()">Delete</button>
+        <button type="button" class="btn btn-filled" style="background: var(--md-error); color: white;"
+          onclick="confirmDeleteScraped()">Delete</button>
       </div>
     </div>
   </div>
@@ -1581,7 +1616,7 @@
       const container = document.getElementById('toastContainer');
       const toast = document.createElement('div');
       toast.className = `toast ${type}`;
-      
+
       const icon = type === 'success' ? 'check_circle' : 'error';
       toast.innerHTML = `
         <span class="material-symbols-rounded" style="color: ${type === 'success' ? 'var(--md-success)' : 'var(--md-error)'}">${icon}</span>
@@ -1590,7 +1625,7 @@
           <span class="material-symbols-rounded" style="font-size: 16px;">close</span>
         </button>
       `;
-      
+
       container.appendChild(toast);
       setTimeout(() => {
         toast.style.animation = 'none';
@@ -1668,7 +1703,7 @@
       document.getElementById('logsUserName').textContent = name;
       const tbodyLogs = document.getElementById('logsTableBody');
       const emptyStateLogs = document.getElementById('logsEmptyState');
-      
+
       tbodyLogs.innerHTML = '<tr><td colspan="4" style="text-align:center; padding: 24px;">Loading logs...</td></tr>';
       emptyStateLogs.style.display = 'none';
       openModal('logsModal');
@@ -1685,10 +1720,10 @@
                 <tr>
                   <td>${act.login_at}</td>
                   <td>
-                    ${act.success 
-                      ? '<span class="chip chip-active"><span class="material-symbols-rounded" style="font-size:14px; margin-right:4px;">check_circle</span>Success</span>' 
-                      : `<span class="chip chip-inactive" title="${act.failure_reason}"><span class="material-symbols-rounded" style="font-size:14px; margin-right:4px;">cancel</span>Failed</span>`
-                    }
+                    ${act.success
+                  ? '<span class="chip chip-active"><span class="material-symbols-rounded" style="font-size:14px; margin-right:4px;">check_circle</span>Success</span>'
+                  : `<span class="chip chip-inactive" title="${act.failure_reason}"><span class="material-symbols-rounded" style="font-size:14px; margin-right:4px;">cancel</span>Failed</span>`
+                }
                   </td>
                   <td><span class="chip chip-ip">${act.ip_address}</span></td>
                   <td style="max-width:250px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;" title="${act.user_agent}">
@@ -1714,27 +1749,27 @@
     function saveUser(event) {
       event.preventDefault();
       clearErrors();
-      
+
       const userId = document.getElementById('formUserId').value;
       const name = document.getElementById('formName').value;
       const email = document.getElementById('formEmail').value;
       const phone = document.getElementById('formPhone').value;
       const password = document.getElementById('formPassword').value;
       const is_active = document.getElementById('formActive').checked;
-      
+
       const isEdit = !!userId;
       const url = isEdit ? `/api/admin/users/${userId}/update/` : '/api/admin/users/create/';
-      
+
       const payload = { name, email, phone, is_active };
       if (password) {
         payload.password = password;
       }
-      
+
       const btn = document.getElementById('btnSubmit');
       const originalText = btn.textContent;
       btn.disabled = true;
       btn.textContent = 'Saving...';
-      
+
       fetch(url, {
         method: 'POST',
         headers: {
@@ -1743,59 +1778,59 @@
         },
         body: JSON.stringify(payload)
       })
-      .then(res => res.json())
-      .then(data => {
-        btn.disabled = false;
-        btn.textContent = originalText;
-        
-        if (data.success) {
-          showToast(data.message, 'success');
-          closeUserModal();
-          setTimeout(() => window.location.reload(), 1000);
-        } else {
-          showToast(data.message || 'Validation failed.', 'error');
-          if (data.errors) {
-            for (const field in data.errors) {
-              const errDiv = document.getElementById(`error${field.charAt(0).toUpperCase() + field.slice(1)}`);
-              if (errDiv) {
-                errDiv.textContent = data.errors[field];
-                errDiv.style.display = 'block';
+        .then(res => res.json())
+        .then(data => {
+          btn.disabled = false;
+          btn.textContent = originalText;
+
+          if (data.success) {
+            showToast(data.message, 'success');
+            closeUserModal();
+            setTimeout(() => window.location.reload(), 1000);
+          } else {
+            showToast(data.message || 'Validation failed.', 'error');
+            if (data.errors) {
+              for (const field in data.errors) {
+                const errDiv = document.getElementById(`error${field.charAt(0).toUpperCase() + field.slice(1)}`);
+                if (errDiv) {
+                  errDiv.textContent = data.errors[field];
+                  errDiv.style.display = 'block';
+                }
               }
             }
           }
-        }
-      })
-      .catch(err => {
-        btn.disabled = false;
-        btn.textContent = originalText;
-        showToast('An unexpected error occurred.', 'error');
-      });
+        })
+        .catch(err => {
+          btn.disabled = false;
+          btn.textContent = originalText;
+          showToast('An unexpected error occurred.', 'error');
+        });
     }
 
     // ── Delete User ─────────────────────────────────────────
     function confirmDeleteUser() {
       if (!userIdToDelete) return;
-      
+
       fetch(`/api/admin/users/${userIdToDelete}/delete/`, {
         method: 'POST',
         headers: {
           'X-CSRFToken': csrftoken
         }
       })
-      .then(res => res.json())
-      .then(data => {
-        closeDeleteModal();
-        if (data.success) {
-          showToast(data.message, 'success');
-          setTimeout(() => window.location.reload(), 1000);
-        } else {
-          showToast(data.message, 'error');
-        }
-      })
-      .catch(err => {
-        closeDeleteModal();
-        showToast('An unexpected error occurred.', 'error');
-      });
+        .then(res => res.json())
+        .then(data => {
+          closeDeleteModal();
+          if (data.success) {
+            showToast(data.message, 'success');
+            setTimeout(() => window.location.reload(), 1000);
+          } else {
+            showToast(data.message, 'error');
+          }
+        })
+        .catch(err => {
+          closeDeleteModal();
+          showToast('An unexpected error occurred.', 'error');
+        });
     }
 
     // ── Toggle Status ───────────────────────────────────────
@@ -1806,45 +1841,45 @@
           'X-CSRFToken': csrftoken
         }
       })
-      .then(res => res.json())
-      .then(data => {
-        if (data.success) {
-          showToast(data.message, 'success');
-          const row = document.getElementById(`user-row-${userId}`);
-          if (row) {
-            row.dataset.active = data.is_active ? 'true' : 'false';
-            const btn = row.querySelector('.status-toggle-btn');
-            if (btn) {
-              btn.innerHTML = data.is_active 
-                ? '<span class="chip chip-active"><span class="material-symbols-rounded" style="font-size:14px; margin-right:4px;">check_circle</span>Active</span>' 
-                : '<span class="chip chip-inactive"><span class="material-symbols-rounded" style="font-size:14px; margin-right:4px;">cancel</span>Inactive</span>';
+        .then(res => res.json())
+        .then(data => {
+          if (data.success) {
+            showToast(data.message, 'success');
+            const row = document.getElementById(`user-row-${userId}`);
+            if (row) {
+              row.dataset.active = data.is_active ? 'true' : 'false';
+              const btn = row.querySelector('.status-toggle-btn');
+              if (btn) {
+                btn.innerHTML = data.is_active
+                  ? '<span class="chip chip-active"><span class="material-symbols-rounded" style="font-size:14px; margin-right:4px;">check_circle</span>Active</span>'
+                  : '<span class="chip chip-inactive"><span class="material-symbols-rounded" style="font-size:14px; margin-right:4px;">cancel</span>Inactive</span>';
+              }
+
+              // Recompute active/inactive count
+              let recentCount = 0;
+              const rowsList = document.querySelectorAll(".user-row");
+              const nowTime = Date.now() / 1000;
+              rowsList.forEach(r => {
+                const ts = parseInt(r.dataset.ts);
+                if (ts && (nowTime - ts) < 86400) recentCount++;
+              });
+              document.getElementById("statRecent").textContent = recentCount;
             }
-            
-            // Recompute active/inactive count
-            let recentCount = 0;
-            const rowsList = document.querySelectorAll(".user-row");
-            const nowTime = Date.now() / 1000;
-            rowsList.forEach(r => {
-              const ts = parseInt(r.dataset.ts);
-              if (ts && (nowTime - ts) < 86400) recentCount++;
-            });
-            document.getElementById("statRecent").textContent = recentCount;
+          } else {
+            showToast(data.message, 'error');
           }
-        } else {
-          showToast(data.message, 'error');
-        }
-      })
-      .catch(err => {
-        showToast('An unexpected error occurred.', 'error');
-      });
+        })
+        .catch(err => {
+          showToast('An unexpected error occurred.', 'error');
+        });
     }
 
     // ── Save LinkedIn Cookie Configuration ──────────────────
     const cookieForm = document.getElementById('cookieConfigForm');
     if (cookieForm) {
-      cookieForm.addEventListener('submit', function(event) {
+      cookieForm.addEventListener('submit', function (event) {
         event.preventDefault();
-        
+
         const cookieVal = document.getElementById('cookieInput').value.trim();
         const btn = document.getElementById('saveCookieBtn');
         const originalText = btn.innerHTML;
@@ -1859,35 +1894,35 @@
           },
           body: JSON.stringify({ li_at_cookie: cookieVal })
         })
-        .then(res => res.json())
-        .then(data => {
-          btn.disabled = false;
-          btn.innerHTML = originalText;
-          
-          if (data.success) {
-            showToast(data.message, 'success');
-            
-            // Update UI status label
-            const label = document.getElementById('cookieStatusLabel');
-            if (label) {
-              label.textContent = data.is_set ? 'Configured' : 'Not configured';
-              label.className = `chip ${data.is_set ? 'chip-active' : 'chip-empty'}`;
+          .then(res => res.json())
+          .then(data => {
+            btn.disabled = false;
+            btn.innerHTML = originalText;
+
+            if (data.success) {
+              showToast(data.message, 'success');
+
+              // Update UI status label
+              const label = document.getElementById('cookieStatusLabel');
+              if (label) {
+                label.textContent = data.is_set ? 'Configured' : 'Not configured';
+                label.className = `chip ${data.is_set ? 'chip-active' : 'chip-empty'}`;
+              }
+
+              // Update last updated timestamp
+              const timeText = document.getElementById('cookieLastUpdated');
+              if (timeText) {
+                timeText.textContent = data.last_updated;
+              }
+            } else {
+              showToast(data.message || 'Failed to update cookie.', 'error');
             }
-            
-            // Update last updated timestamp
-            const timeText = document.getElementById('cookieLastUpdated');
-            if (timeText) {
-              timeText.textContent = data.last_updated;
-            }
-          } else {
-            showToast(data.message || 'Failed to update cookie.', 'error');
-          }
-        })
-        .catch(err => {
-          btn.disabled = false;
-          btn.innerHTML = originalText;
-          showToast('An unexpected error occurred.', 'error');
-        });
+          })
+          .catch(err => {
+            btn.disabled = false;
+            btn.innerHTML = originalText;
+            showToast('An unexpected error occurred.', 'error');
+          });
       });
     }
 
@@ -1951,7 +1986,7 @@
         .then(data => {
           if (data.success) {
             const p = data.profile;
-            
+
             let experienceHtml = '<p style="color:var(--md-on-surface-var); font-style:italic;">No experience added</p>';
             if (p.experience && p.experience.length > 0) {
               experienceHtml = `<div class="card-list">` + p.experience.map(exp => `
@@ -2086,32 +2121,33 @@
           'X-CSRFToken': csrftoken
         }
       })
-      .then(res => res.json())
-      .then(data => {
-        closeScrapedDeleteModal();
-        if (data.success) {
-          showToast(data.message, 'success');
-          const row = document.getElementById(`scraped-row-${scrapedIdToDelete}`);
-          if (row) {
-            row.remove();
-            const currentCount = document.querySelectorAll('.scraped-row').length;
-            document.getElementById('visibleScrapedCount').textContent = currentCount;
-            document.getElementById('scrapedFooterVisible').textContent = currentCount;
-            const rowCounter = document.getElementById('scrapedRowCounter');
-            if (rowCounter) {
-              rowCounter.innerHTML = `<span id="visibleScrapedCount">${currentCount}</span> / ${currentCount} profiles`;
+        .then(res => res.json())
+        .then(data => {
+          closeScrapedDeleteModal();
+          if (data.success) {
+            showToast(data.message, 'success');
+            const row = document.getElementById(`scraped-row-${scrapedIdToDelete}`);
+            if (row) {
+              row.remove();
+              const currentCount = document.querySelectorAll('.scraped-row').length;
+              document.getElementById('visibleScrapedCount').textContent = currentCount;
+              document.getElementById('scrapedFooterVisible').textContent = currentCount;
+              const rowCounter = document.getElementById('scrapedRowCounter');
+              if (rowCounter) {
+                rowCounter.innerHTML = `<span id="visibleScrapedCount">${currentCount}</span> / ${currentCount} profiles`;
+              }
             }
+          } else {
+            showToast(data.message, 'error');
           }
-        } else {
-          showToast(data.message, 'error');
-        }
-      })
-      .catch(err => {
-        closeScrapedDeleteModal();
-        showToast('An unexpected error occurred.', 'error');
-      });
+        })
+        .catch(err => {
+          closeScrapedDeleteModal();
+          showToast('An unexpected error occurred.', 'error');
+        });
     }
   </script>
+  {% include 'accounts/app_sidebar_footer.html' %}
 </body>
 
 </html>

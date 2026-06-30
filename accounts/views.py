@@ -21,7 +21,9 @@ from django.utils.http import urlsafe_base64_encode
 from django.views.decorators.http import require_POST
 from django.contrib.admin.views.decorators import staff_member_required
 from django.template.loader import render_to_string
-
+from rest_framework.decorators import api_view
+from rest_framework.response import Response
+from rest_framework import status
 from .models import LoginActivity, UserProfile, UserDetails, ScrapedProfile, LinkedInConfig, LeadActivity
 from django.utils import timezone
 
@@ -1600,3 +1602,43 @@ def download_lead_pdf(request, lead_id):
         return response
     except Exception as e:
         return HttpResponse(f"Error generating PDF: {str(e)}", status=500)
+@api_view(["POST"])
+def run_complete_lead_workflow(request):
+
+    keyword = request.data.get("keyword")
+    max_results = request.data.get("max_results", 50)
+
+    from .lead_analyzer import search_profiles_by_keyword
+    from .lead_analyzer import analyze_lead
+    from .pdf_generator import generate_report
+
+    # Step 1
+    profiles = search_profiles_by_keyword(
+        keyword,
+        max_results=max_results
+    )
+
+    active_users = []
+
+    # Step 2
+    for profile in profiles:
+
+        result = analyze_lead(
+            profile["url"],
+            search_url=keyword,
+            user=request.user
+        )
+
+        if "lead" in result:
+            active_users.append(result["lead"])
+
+    # Step 3
+    pdf_path = generate_report(active_users)
+
+    return Response({
+        "success": True,
+        "keyword": keyword,
+        "total_profiles": len(profiles),
+        "active_profiles": len(active_users),
+        "pdf": pdf_path
+    })

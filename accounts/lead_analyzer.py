@@ -409,172 +409,275 @@ def run_lead_analysis_thread(search_url: str, user_id: int):
 
 def search_profiles_by_keyword(keyword: str, max_results: int = 50) -> list:
     """
-    Search LinkedIn for people using a keyword.
-    Uses multiple search URL variations to get more results.
-    Returns list of dicts: {url, name, headline, location}
+    Search LinkedIn profiles by keyword.
+    Returns:
+    [
+        {
+            "url": "...",
+            "name": "...",
+            "headline": "...",
+            "location": "..."
+        }
+    ]
     """
+
+    import re
+    import time
+    from urllib.parse import quote
+
     from selenium.webdriver.common.by import By
     from selenium.webdriver.support.ui import WebDriverWait
     from selenium.webdriver.support import expected_conditions as EC
-    from selenium.common.exceptions import TimeoutException, NoSuchElementException
-    from urllib.parse import quote
+    from selenium.common.exceptions import NoSuchElementException, TimeoutException
 
     driver = None
     profiles = []
     seen_urls = set()
 
-    # Build multiple search URLs to bypass the ~10 result limit
-    # LinkedIn shows different results for different network/connection filters
-    search_urls = [
-        f"https://www.linkedin.com/search/results/people/?keywords={quote(keyword)}&origin=GLOBAL_SEARCH_HEADER",
-        f"https://www.linkedin.com/search/results/people/?keywords={quote(keyword)}&page=2",
-        f"https://www.linkedin.com/search/results/people/?keywords={quote(keyword)}&page=3",
-        f"https://www.linkedin.com/search/results/people/?keywords={quote(keyword)}&page=4",
-        f"https://www.linkedin.com/search/results/people/?keywords={quote(keyword)}&page=5",
-        f"https://www.linkedin.com/search/results/people/?keywords={quote(keyword)}&page=6",
-    ]
-
     try:
         driver = _get_driver()
-        login_ok = _linkedin_login(driver)
-        if not login_ok:
-            raise Exception("LinkedIn login failed. Check LINKEDIN_LI_AT cookie.")
 
-        for search_url in search_urls:
-            if len(profiles) >= max_results:
-                break
+        if not _linkedin_login(driver):
+            raise Exception("LinkedIn login failed.")
 
-            print(f"[LeadSearch] Fetching: {search_url}")
+        page = 1
+
+        while len(profiles) < max_results:
+
+            search_url = (
+                f"https://www.linkedin.com/search/results/people/"
+                f"?keywords={quote(keyword)}&page={page}"
+            )
+
+            print(f"[LeadSearch] {search_url}")
+
             driver.get(search_url)
 
             try:
                 WebDriverWait(driver, 15).until(
-                    EC.presence_of_element_located((By.CSS_SELECTOR,
-                        ".reusable-search__result-container, .entity-result, "
-                        ".search-results-container, main"
-                    ))
+                    EC.presence_of_element_located(
+                        (
+                            By.CSS_SELECTOR,
+                            ".reusable-search__result-container,.entity-result"
+                        )
+                    )
                 )
             except TimeoutException:
                 pass
+
             time.sleep(3)
 
-            # Scroll to load all cards
-            for _ in range(3):
-                driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
+            # Scroll page
+            for _ in range(4):
+                driver.execute_script(
+                    "window.scrollTo(0, document.body.scrollHeight);"
+                )
                 time.sleep(1.5)
 
-            # Check for no results
-            body_text = driver.find_element(By.TAG_NAME, "body").text
-            if "No results found" in body_text or "0 results" in body_text.lower():
-                print(f"[LeadSearch] No results on this URL, skipping.")
-                continue
+            cards = driver.find_elements(
+                By.CSS_SELECTOR,
+                ".reusable-search__result-container, .entity-result, li.reusable-search__result-container, .search-result__info"
+            )
 
-            # Extract profile cards
-            cards = []
-            for sel in [
-                ".reusable-search__result-container",
-                ".entity-result",
-                "li.reusable-search__result-container",
-                ".search-result__info",
-            ]:
-                cards = driver.find_elements(By.CSS_SELECTOR, sel)
-                if cards:
-                    print(f"[LeadSearch] Found {len(cards)} cards with selector: {sel}")
-                    break
+            new_found = 0
 
-            # Fallback: extract all /in/ links directly
             if not cards:
-                print(f"[LeadSearch] No cards found, trying anchor fallback")
+                print("[LeadSearch] No cards found, trying anchor fallback")
                 anchors = driver.find_elements(By.CSS_SELECTOR, "a[href*='/in/']")
-                new_count = 0
                 for a in anchors:
                     href = a.get_attribute("href") or ""
-                    m = re.search(r"(https://www\.linkedin\.com/in/[^/?&#]+)", href)
+                    m = re.search(r"https://www\.linkedin\.com/in/[^/?&#]+", href)
                     if m:
-                        url = m.group(1).rstrip("/") + "/"
+                        url = m.group(0).rstrip("/") + "/"
                         if url not in seen_urls and "/search/" not in url:
                             seen_urls.add(url)
-                            name = a.text.strip()
-                            if name and len(name) > 2:
-                                profiles.append({"url": url, "name": name, "headline": "", "location": ""})
-                                new_count += 1
-                print(f"[LeadSearch] Anchor fallback got {new_count} new profiles")
-                continue
+                            txt = a.text.strip().split("\n")[0].strip()
+                            if len(txt) > 2:
+                                profiles.append({
+                                    "url": url, 
+                                    "name": txt, 
+                                    "headline": "Found via fallback", 
+                                    "location": "Unknown"
+                                })
+                                new_found += 1
+                                if len(profiles) >= max_results:
+                                    break
 
-            new_count = 0
             for card in cards:
-                try:
-                    url = ""
-                    for link_sel in ["a.app-aware-link[href*='/in/']", "a[href*='/in/']"]:
-                        try:
-                            link = card.find_element(By.CSS_SELECTOR, link_sel)
-                            href = link.get_attribute("href") or ""
-                            m = re.search(r"(https://www\.linkedin\.com/in/[^/?&#]+)", href)
-                            if m:
-                                url = m.group(1).rstrip("/") + "/"
-                                break
-                        except NoSuchElementException:
-                            pass
 
-                    if not url or url in seen_urls or "/search/" in url:
+                try:
+
+                    # ---------------- URL ----------------
+
+                    url = ""
+
+                    links = card.find_elements(
+                        By.CSS_SELECTOR,
+                        "a[href*='/in/']"
+                    )
+
+                    for a in links:
+                        href = a.get_attribute("href") or ""
+
+                        m = re.search(
+                            r"https://www\.linkedin\.com/in/[^/?&#]+",
+                            href,
+                        )
+
+                        if m:
+                            url = m.group(0).rstrip("/") + "/"
+                            break
+
+                    if (
+                        not url
+                        or url in seen_urls
+                        or "/search/" in url
+                    ):
                         continue
+
                     seen_urls.add(url)
 
+                    # ---------------- NAME ----------------
+
                     name = ""
-                    for name_sel in [
-                        ".entity-result__title-text a span[aria-hidden='true']",
-                        ".app-aware-link span[aria-hidden='true']",
-                        ".entity-result__title-line span",
-                    ]:
+
+                    selectors = [
+                        ".entity-result__title-text",
+                        ".entity-result__title-line",
+                        ".app-aware-link span",
+                        "span[aria-hidden='true']",
+                    ]
+
+                    for sel in selectors:
+
                         try:
-                            name = card.find_element(By.CSS_SELECTOR, name_sel).text.strip()
-                            if name:
-                                break
-                        except NoSuchElementException:
+
+                            txt = card.find_element(
+                                By.CSS_SELECTOR,
+                                sel,
+                            ).text.strip()
+
+                            if txt:
+
+                                txt = txt.split("\n")[0]
+
+                                txt = txt.replace("• 3rd+", "")
+                                txt = txt.replace("• 2nd", "")
+                                txt = txt.replace("• 1st", "")
+                                txt = txt.strip()
+
+                                if len(txt) > 2:
+                                    name = txt
+                                    break
+
+                        except:
                             pass
+
+                    # ---------------- HEADLINE ----------------
 
                     headline = ""
-                    for hl_sel in [".entity-result__primary-subtitle", ".entity-result__summary"]:
+
+                    selectors = [
+                        ".entity-result__primary-subtitle",
+                        ".entity-result__summary",
+                    ]
+
+                    for sel in selectors:
+
                         try:
-                            headline = card.find_element(By.CSS_SELECTOR, hl_sel).text.strip()
-                            if headline:
+
+                            txt = card.find_element(
+                                By.CSS_SELECTOR,
+                                sel,
+                            ).text.strip()
+
+                            if txt:
+                                headline = txt
                                 break
-                        except NoSuchElementException:
+
+                        except:
                             pass
 
-                    location = ""
-                    try:
-                        location = card.find_element(By.CSS_SELECTOR, ".entity-result__secondary-subtitle").text.strip()
-                    except NoSuchElementException:
-                        pass
+                    # ---------------- LOCATION ----------------
 
-                    profiles.append({
-                        "url": url,
-                        "name": name or "Unknown",
-                        "headline": headline,
-                        "location": location,
-                    })
-                    new_count += 1
+                    location = ""
+
+                    selectors = [
+                        ".entity-result__secondary-subtitle",
+                    ]
+
+                    for sel in selectors:
+
+                        try:
+
+                            txt = card.find_element(
+                                By.CSS_SELECTOR,
+                                sel,
+                            ).text.strip()
+
+                            if txt:
+                                location = txt
+                                break
+
+                        except:
+                            pass
+
+                    # ------------- FALLBACK -------------
+
+                    if not headline or not location:
+
+                        text = card.text.split("\n")
+
+                        if not headline and len(text) >= 2:
+                            headline = text[1]
+
+                        if not location:
+
+                            for line in text:
+
+                                if (
+                                    "India" in line
+                                    or "Mumbai" in line
+                                    or "Pune" in line
+                                    or "Bengaluru" in line
+                                    or "Delhi" in line
+                                    or "Hyderabad" in line
+                                    or "Chennai" in line
+                                    or "Gujarat" in line
+                                ):
+                                    location = line
+                                    break
+
+                    profiles.append(
+                        {
+                            "url": url,
+                            "name": name,
+                            "headline": headline,
+                            "location": location,
+                        }
+                    )
+
+                    new_found += 1
 
                     if len(profiles) >= max_results:
                         break
 
                 except Exception as e:
-                    print(f"[LeadSearch] Card parse error: {e}")
+                    print(e)
                     continue
 
-            print(f"[LeadSearch] Got {new_count} new profiles. Total: {len(profiles)}")
-            time.sleep(2)  # polite delay
+            print(f"Page {page}: {new_found} profiles")
 
-    except Exception as e:
-        print(f"[LeadSearch] Error: {e}")
-        raise
+            if new_found == 0:
+                break
+
+            page += 1
+
+            time.sleep(2)
+
     finally:
-        if driver:
-            try:
-                driver.quit()
-            except Exception:
-                pass
 
-    print(f"[LeadSearch] Final total: {len(profiles)} profiles (returning {min(len(profiles), max_results)})")
+        if driver:
+            driver.quit()
+
     return profiles[:max_results]

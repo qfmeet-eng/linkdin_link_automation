@@ -2,50 +2,31 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.auth.views import PasswordResetCompleteView, PasswordResetConfirmView
 from django.urls import path
 from django.urls import reverse_lazy
-
-from .views import (
-    chatbot_register_page,
-    chatbot_login_page,
-    chatbot_forgot_password_page,
-    chatbot_logout,
-    favicon,
-    forgot_password_user,
-    home_view,
-    linkedin_oauth_callback,
-    linkedin_oauth_start,
-    linkedin_userinfo_api,
-    login_chatbot_user,
-    register_chatbot_user,
-    scrape_linkedin_view,
-    user_details_view,
-    admin_create_user,
-    admin_update_user,
-    admin_delete_user,
-    admin_toggle_status,
-    admin_login_activities,
-    linkedin_assistant_view,
-    api_scrape_linkedin,
-    api_scraped_profiles_list,
-    api_delete_scraped_profile,
-    api_scraped_profile_detail,
-    api_update_linkedin_config,
-    admin_scraped_profile_detail,
-    admin_delete_scraped_profile,
-    # Lead Activity Analyzer
-    lead_dashboard_view,
-    api_start_lead_analysis,
-    api_search_linkedin_profiles,
-    api_analyze_selected_profiles,
-    api_analyze_progress,
-    api_leads_list,
-    api_lead_detail,
-    api_delete_lead,
-    download_lead_pdf,
+from .views.auth_views import (
+    chatbot_register_page, chatbot_login_page, chatbot_forgot_password_page,
+    chatbot_logout, register_chatbot_user, login_chatbot_user, forgot_password_user
 )
+from .views.core_views import home_view, favicon
+from .views.admin_views import (
+    user_details_view, admin_create_user, admin_update_user, admin_delete_user,
+    admin_toggle_status, admin_login_activities, api_update_linkedin_config,
+    admin_scraped_profile_detail, admin_delete_scraped_profile
+)
+from .views.linkedin_views import (
+    linkedin_oauth_start, linkedin_oauth_callback, linkedin_userinfo_api,
+    scrape_linkedin_view, linkedin_assistant_view, api_scrape_linkedin,
+    api_scraped_profiles_list, api_delete_scraped_profile, api_scraped_profile_detail
+)
+from .views.lead_views import (
+    lead_dashboard_view, api_start_lead_analysis, api_search_linkedin_profiles,
+    api_analyze_selected_profiles, api_analyze_progress, api_leads_list,
+    api_lead_detail, api_delete_lead, run_complete_workflow, api_bulk_delete_leads
+)
+from .views.pdf_views import download_lead_pdf
 
 
 urlpatterns = [
-    path("", chatbot_register_page, name="chatbot_register"),
+    path("register/", chatbot_register_page, name="chatbot_register"),
     path("login/", chatbot_login_page, name="chatbot_login"),
     path("forgot-password/", chatbot_forgot_password_page, name="chatbot_forgot_password"),
     path("home/", home_view, name="home"),
@@ -73,7 +54,7 @@ urlpatterns = [
     path("api/admin/scraped-profiles/<int:profile_id>/detail/", admin_scraped_profile_detail, name="admin_scraped_profile_detail"),
     path("api/admin/scraped-profiles/<int:profile_id>/delete/", admin_delete_scraped_profile, name="admin_delete_scraped_profile"),
     # ── Lead Activity Analyzer ──────────────────────────────────────────────
-    path("leads/", lead_dashboard_view, name="lead_dashboard"),
+    path("", lead_dashboard_view, name="lead_dashboard"),
     path("leads/<int:lead_id>/pdf/", download_lead_pdf, name="download_lead_pdf"),
     path("api/leads/analyze/", api_start_lead_analysis, name="api_start_lead_analysis"),
     path("api/leads/search/", api_search_linkedin_profiles, name="api_search_linkedin_profiles"),
@@ -82,6 +63,7 @@ urlpatterns = [
     path("api/leads/", api_leads_list, name="api_leads_list"),
     path("api/leads/<int:lead_id>/", api_lead_detail, name="api_lead_detail"),
     path("api/leads/<int:lead_id>/delete/", api_delete_lead, name="api_delete_lead"),
+    path("api/leads/bulk-delete/", api_bulk_delete_leads, name="api_bulk_delete_leads"),
     path(
         "reset/<uidb64>/<token>/",
         PasswordResetConfirmView.as_view(
@@ -97,4 +79,9 @@ urlpatterns = [
         ),
         name="password_reset_complete",
     ),
+    path(
+    "api/run-complete-workflow/",
+    run_complete_workflow,
+    name="run_complete_workflow",
+),
 ]
