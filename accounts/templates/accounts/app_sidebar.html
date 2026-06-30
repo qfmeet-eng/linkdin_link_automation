@@ -1,6 +1,6 @@
-
 <!-- Load Google Fonts and Material Symbols for icons -->
-<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@24,400,1,0" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@24,400,1,0"
+    rel="stylesheet">
 
 <style>
     #appSidebar {
@@ -136,24 +136,28 @@
 <aside class="sidebar" id="appSidebar">
     <div class="sidebar-header">
         <div class="ab-icon"><span class="material-symbols-rounded">person_search</span></div>
-        <div class="sidebar-brand">Automate X</div>
+        <div class="sidebar-brand">Automate</div>
     </div>
     <nav class="sidebar-nav">
-        <a href="{% url 'lead_dashboard' %}" class="nav-item {% if request.resolver_match.url_name == 'lead_dashboard' %}active{% endif %}">
+        <a href="{% url 'lead_dashboard' %}"
+            class="nav-item {% if request.resolver_match.url_name == 'lead_dashboard' %}active{% endif %}">
             <span class="material-symbols-rounded">analytics</span> Lead Analyzer
         </a>
-        <a href="{% url 'linkedin_assistant' %}" class="nav-item {% if request.resolver_match.url_name == 'linkedin_assistant' %}active{% endif %}">
+        <a href="{% url 'linkedin_assistant' %}"
+            class="nav-item {% if request.resolver_match.url_name == 'linkedin_assistant' %}active{% endif %}">
             <span class="material-symbols-rounded">assistant</span> LinkedIn Assistant
         </a>
         <a href="{% url 'home' %}" class="nav-item {% if request.resolver_match.url_name == 'home' %}active{% endif %}">
             <span class="material-symbols-rounded">person</span> Profile Dashboard
         </a>
         {% if user.is_staff %}
-        <a href="{% url 'user_details' %}" class="nav-item {% if request.resolver_match.url_name == 'user_details' %}active{% endif %}">
+        <a href="{% url 'user_details' %}"
+            class="nav-item {% if request.resolver_match.url_name == 'user_details' %}active{% endif %}">
             <span class="material-symbols-rounded">admin_panel_settings</span> Admin Panel
         </a>
         {% endif %}
-        <a href="{% url 'chatbot_register' %}" class="nav-item {% if request.resolver_match.url_name == 'chatbot_register' %}active{% endif %}">
+        <a href="{% url 'chatbot_register' %}"
+            class="nav-item {% if request.resolver_match.url_name == 'chatbot_register' %}active{% endif %}">
             <span class="material-symbols-rounded">smart_toy</span> Chatbot Register
         </a>
         <div style="flex: 1"></div>

@@ -138,9 +138,11 @@
 
         /* Page */
         .page {
+            width: 100%;
             max-width: 1280px;
             margin: 0 auto;
-            padding: 24px
+            padding: 24px;
+            box-sizing: border-box;
         }
 
         /* Steps */
@@ -603,8 +605,10 @@
             display: flex;
             flex-direction: column;
             overflow-y: auto;
+            overflow-x: hidden;
             background: var(--surface);
             position: relative;
+            min-width: 0;
         }
 
         .menu-btn {
@@ -718,6 +722,27 @@
                     </div>
                 </div>
 
+                <!-- Step 3: Results -->
+                <div id="step3Card" style="display:none">
+                    <!-- Stat Cards -->
+                    <div class="stat-row" id="resultStats"></div>
+                    <!-- Active Results as Cards only -->
+                    <div class="card">
+                        <div class="card-title" style="justify-content:space-between">
+                            <span><span class="material-symbols-rounded"
+                                    style="color:var(--success);vertical-align:middle">trending_up</span> Active
+                                Leads</span>
+                            <span style="font-size:13px;color:var(--on-sv)" id="activeCountLabel">0 active found</span>
+                        </div>
+                        <div class="profile-grid" id="activeResultsGrid">
+                            <div style="grid-column:1/-1;text-align:center;padding:32px;color:var(--on-sv);font-size:14px"
+                                id="noActiveMsg">
+                                Koi active user nathi malyo. Alag keyword try karo.
+                            </div>
+                        </div>
+                </div>
+                </div>
+
                 <!-- Step 2: Profile Selection -->
                 <div class="card" id="step2Card" style="display:none">
                     <div class="card-title" style="justify-content:space-between">
@@ -758,10 +783,14 @@
                     </div>
                     <div class="sel-bar" id="selBar">
                         <span class="sel-count" id="selCount">0 selected</span>
-                        <button class="btn btn-filled" id="analyzeBtn" onclick="analyzeSelected()">
-                            <span class="material-symbols-rounded" style="font-size:18px">analytics</span>Analyze
-                            Selected
-                        </button>
+                        <div style="display:flex; gap:8px">
+                            <button class="btn btn-filled" id="analyzeBtn" onclick="analyzeSelected()">
+                                <span class="material-symbols-rounded" style="font-size:18px">analytics</span>Analyze Selected
+                            </button>
+                            <button class="btn btn-filled" id="stopAnalyzeBtn" onclick="stopAnalysis()" style="display:none; background: var(--error); color: white;">
+                                <span class="material-symbols-rounded" style="font-size:18px">stop</span>Stop Analysis
+                            </button>
+                        </div>
                     </div>
                     <div class="progress-wrap" id="analyzeProgress">
                         <div class="progress-bar">
@@ -774,48 +803,32 @@
                     </div>
                 </div>
 
-                <!-- Step 3: Results -->
-                <div id="step3Card" style="display:none">
-                    <!-- Stat Cards -->
-                    <div class="stat-row" id="resultStats"></div>
-                    <!-- Active Results as Cards only -->
-                    <div class="card">
-                        <div class="card-title" style="justify-content:space-between">
-                            <span><span class="material-symbols-rounded"
-                                    style="color:var(--success);vertical-align:middle">trending_up</span> Active
-                                Leads</span>
-                            <span style="font-size:13px;color:var(--on-sv)" id="activeCountLabel">0 active found</span>
-                        </div>
-                        <div class="profile-grid" id="activeResultsGrid">
-                            <div style="grid-column:1/-1;text-align:center;padding:32px;color:var(--on-sv);font-size:14px"
-                                id="noActiveMsg">
-                                Koi active user nathi malyo. Alag keyword try karo.
-                            </div>
-                        </div>
-                </div>
-
                 <!-- Previous Leads -->
                 {% if leads %}
                 <div class="card" style="padding:0;overflow:hidden;margin-top:24px">
                     <div
-                        style="padding:16px 20px;border-bottom:1px solid var(--outline);display:flex;justify-content:space-between;align-items:center">
+                        style="padding:16px 20px;border-bottom:1px solid var(--outline);display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px">
                         <span style="font-size:16px;font-weight:500">Previous Analyses (<span id="totalLeadsCount">{{ leads|length }}</span>)</span>
-                        <div style="display:flex;align-items:center;gap:16px">
-                            <button class="btn btn-outlined danger" id="bulkDeleteBtn"
-                                style="display: none; height:32px;padding:0 14px;font-size:13px;color:var(--error);border-color:var(--error);"
-                                onclick="bulkDeleteLeads()">Delete Selected</button>
+                        <button class="btn btn-outlined danger" id="bulkDeleteBtn"
+                            style="display: none; height:32px;padding:0 14px;font-size:13px;color:var(--error);border-color:var(--error);"
+                            onclick="bulkDeleteLeads()">Delete Selected</button>
+                    </div>
+                    <!-- Table Toolbar -->
+                    <div style="padding: 12px 20px; background: rgba(0,0,0,0.02); border-bottom: 1px solid var(--outline); display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px;">
+                        <div style="display: flex; align-items: center; gap: 8px;">
+                            <span style="font-size: 13px; color: var(--on-sv); font-weight: 500;">Filter:</span>
                             <select id="prevFilter" class="tf"
                                 style="height:32px;font-size:13px;padding:0 8px;min-width:140px"
                                 onchange="filterPreviousLeads()">
-                                <option value="All">All Leads</option>
-                                <option value="Active" selected>Active & Moderate</option>
+                                <option value="All" selected>All Leads</option>
+                                <option value="Active">Active & Moderate</option>
                                 <option value="Inactive">Inactive</option>
                             </select>
-                            <div class="stat-row" style="margin:0;display:flex;gap:8px">
-                                <span class="chip chip-active" id="chipActiveCount">Active: {{ active_count }}</span>
-                                <span class="chip chip-moderate" id="chipModerateCount">Moderate: {{ moderate_count }}</span>
-                                <span class="chip chip-inactive" id="chipInactiveCount">Inactive: {{ inactive_count }}</span>
-                            </div>
+                        </div>
+                        <div style="display:flex;gap:8px;flex-wrap:wrap">
+                            <span class="chip chip-active" id="chipActiveCount">Active: {{ active_count }}</span>
+                            <span class="chip chip-moderate" id="chipModerateCount">Moderate: {{ moderate_count }}</span>
+                            <span class="chip chip-inactive" id="chipInactiveCount">Inactive: {{ inactive_count }}</span>
                         </div>
                     </div>
                     <div style="overflow-x:auto">
@@ -1054,13 +1067,18 @@
             if (selectedUrls.size === 0) { alert('Pehla profiles select karo.'); return; }
 
             const btn = document.getElementById('analyzeBtn');
+            const stopBtn = document.getElementById('stopAnalyzeBtn');
             const prog = document.getElementById('analyzeProgress');
             const msg = document.getElementById('analyzeMsg');
             const fill = document.getElementById('analyzeProgressFill');
             const pct = document.getElementById('analyzePercent');
             const total = selectedUrls.size;
 
-            btn.disabled = true;
+            btn.style.display = 'none';
+            stopBtn.style.display = 'inline-flex';
+            stopBtn.disabled = false;
+            stopBtn.innerHTML = '<span class="material-symbols-rounded" style="font-size:18px">stop</span>Stop Analysis';
+
             prog.style.display = 'block';
             msg.style.color = 'var(--on-sv)';
             msg.textContent = `⏳ Analysis sharu kari rahyo chu... (${total} profiles)`;
@@ -1113,7 +1131,34 @@
                 msg.style.color = 'var(--error)';
                 msg.textContent = 'Server error. Thodi vaar pachi try karo.';
             } finally {
+                btn.style.display = 'inline-flex';
                 btn.disabled = false;
+                stopBtn.style.display = 'none';
+            }
+        }
+
+        async function stopAnalysis() {
+            const stopBtn = document.getElementById('stopAnalyzeBtn');
+            stopBtn.disabled = true;
+            stopBtn.innerHTML = '<span class="material-symbols-rounded" style="font-size:18px">hourglass_empty</span>Stopping...';
+
+            try {
+                const res = await fetch("{% url 'api_stop_lead_analysis' %}", {
+                    method: 'POST',
+                    headers: { 'X-CSRFToken': csrf() }
+                });
+                const data = await res.json();
+                if (data.success) {
+                    // Stop signal received successfully.
+                } else {
+                    alert(data.message || 'Failed to stop analysis.');
+                    stopBtn.disabled = false;
+                    stopBtn.innerHTML = '<span class="material-symbols-rounded" style="font-size:18px">stop</span>Stop Analysis';
+                }
+            } catch (e) {
+                alert('Error sending stop command.');
+                stopBtn.disabled = false;
+                stopBtn.innerHTML = '<span class="material-symbols-rounded" style="font-size:18px">stop</span>Stop Analysis';
             }
         }
 

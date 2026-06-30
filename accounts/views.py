@@ -415,14 +415,28 @@ def forgot_password_user(request):
 def home_view(request):
     user = request.user
     user_detail = None
+    stats = {}
     if user.is_authenticated:
         try:
             user_detail = UserDetails.objects.get(user=user)
         except UserDetails.DoesNotExist:
             user_detail = None
+        try:
+            from django.contrib.auth import get_user_model
+            User = get_user_model()
+            stats = {
+                "total_users": User.objects.count(),
+                "active_users": User.objects.filter(is_active=True).count(),
+                "scraped_profiles": ScrapedProfile.objects.count(),
+                "total_leads": LeadActivity.objects.count(),
+                "active_leads": LeadActivity.objects.filter(activity_score="Active").count(),
+            }
+        except Exception:
+            stats = {}
     return render(request, "accounts/home.html", {
         "user": user,
         "user_detail": user_detail,
+        "stats": stats,
     })
 
 

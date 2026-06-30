@@ -188,9 +188,11 @@
 
     /* ── Page Content ──────────────────────────────────────── */
     .page {
+      width: 100%;
       max-width: 1280px;
       margin: 0 auto;
       padding: 28px 24px 48px;
+      box-sizing: border-box;
     }
 
     /* ── Stat Cards Row ────────────────────────────────────── */
@@ -284,6 +286,7 @@
       display: flex;
       align-items: center;
       gap: 12px;
+      flex-wrap: wrap;
     }
 
     /* MD3 Search Field */
@@ -297,7 +300,8 @@
       border: 1px solid var(--md-outline);
       border-radius: var(--md-radius-full);
       transition: border-color var(--md-transition), box-shadow var(--md-transition);
-      min-width: 280px;
+      min-width: 200px;
+      flex: 1;
     }
 
     .search-field:focus-within {
@@ -979,15 +983,60 @@
         transform: rotate(360deg);
       }
     }
+    .layout-wrapper {
+      display: flex;
+      height: 100vh;
+      width: 100%;
+      overflow: hidden;
+    }
+
+    .main-content {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      overflow-y: auto;
+      overflow-x: hidden;
+      position: relative;
+      min-width: 0;
+    }
+
+    .menu-btn {
+      display: none;
+      background: transparent;
+      border: none;
+      color: var(--md-on-surface-var);
+      cursor: pointer;
+      padding: 8px;
+      margin-right: 8px;
+      align-items: center;
+      justify-content: center;
+      border-radius: 50%;
+      transition: background var(--md-transition);
+    }
+
+    .menu-btn:hover {
+      background: rgba(0, 0, 0, 0.05);
+    }
+
+    @media (max-width: 768px) {
+      .menu-btn {
+        display: inline-flex;
+      }
+    }
   </style>
 </head>
 
 <body>
   {% include 'accounts/app_sidebar.html' %}
 
-  <!-- ── Top App Bar ── -->
-  <header class="app-bar">
-    <div class="app-bar-leading">
+  <div class="layout-wrapper">
+    <div class="main-content">
+      <!-- ── Top App Bar ── -->
+      <header class="app-bar">
+        <button class="menu-btn" onclick="toggleSidebar()" aria-label="Toggle Sidebar">
+          <span class="material-symbols-rounded">menu</span>
+        </button>
+        <div class="app-bar-leading">
       <div class="app-bar-icon">
         <span class="material-symbols-rounded">manage_accounts</span>
       </div>
@@ -1540,6 +1589,7 @@
         <button type="button" class="btn btn-filled" style="background: var(--md-error); color: white;"
           onclick="confirmDeleteScraped()">Delete</button>
       </div>
+    </div>
     </div>
   </div>
 

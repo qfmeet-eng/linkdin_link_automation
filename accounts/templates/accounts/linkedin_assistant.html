@@ -251,6 +251,7 @@
       height: 100vh;
       overflow: hidden;
       position: relative;
+      min-width: 0;
     }
 
     /* Header */
@@ -264,6 +265,24 @@
       justify-content: space-between;
       padding: 0 24px;
       z-index: 5;
+    }
+
+    .menu-btn {
+      display: none;
+      background: transparent;
+      border: none;
+      color: var(--text-muted);
+      cursor: pointer;
+      padding: 8px;
+      margin-right: 12px;
+      border-radius: var(--radius-sm);
+      transition: background var(--transition);
+      align-items: center;
+      justify-content: center;
+    }
+
+    .menu-btn:hover {
+      background: rgba(0, 0, 0, 0.05);
     }
 
     .view-selector {
@@ -727,6 +746,10 @@
 
     /* ── Responsive adjustments ──────────────────────────── */
     @media (max-width: 768px) {
+      .menu-btn {
+        display: inline-flex;
+      }
+
       .app-container {
         grid-template-columns: 1fr;
       }
@@ -769,6 +792,9 @@
     <main class="main-viewport">
       <!-- Toolbar -->
       <header class="main-header">
+        <button class="menu-btn" onclick="toggleSidebar()" aria-label="Toggle Sidebar">
+          <span class="material-symbols-rounded">menu</span>
+        </button>
         <div class="view-selector">
           <button class="tab-btn active" id="btnChatView" onclick="switchView('chat')">Assistant Chat</button>
           <button class="tab-btn" id="btnProfileView" onclick="switchView('profile')">Profile Details</button>

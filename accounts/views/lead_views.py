@@ -193,14 +193,23 @@ def api_analyze_selected_profiles(request):
     urls_to_process = profile_urls[:50]
     total = len(urls_to_process)
 
-    # Reset progress in session
+    # Reset progress in session and delete stop flag in cache
     request.session["analyze_progress"] = {"done": 0, "total": total, "current": ""}
     request.session.save()
+
+    from django.core.cache import cache
+    cache_key = f"stop_analysis_{request.user.id}"
+    cache.delete(cache_key)
 
     from accounts.lead_analyzer import analyze_lead
     results = []
 
     for i, url in enumerate(urls_to_process):
+        # Check if stop requested
+        if cache.get(cache_key):
+            cache.delete(cache_key)
+            break
+
         # Update progress
         name_hint = url.split("/in/")[-1].strip("/").replace("-", " ").title()[:30]
         request.session["analyze_progress"] = {
@@ -244,6 +253,19 @@ def api_analyze_progress(request):
         return JsonResponse({"done": 0, "total": 0, "current": ""})
     progress = request.session.get("analyze_progress", {"done": 0, "total": 0, "current": ""})
     return JsonResponse(progress)
+
+@csrf_exempt
+@require_POST
+def api_stop_lead_analysis(request):
+    """POST /api/leads/stop-analysis/ — signals the running loop to break early."""
+    if not request.user.is_authenticated:
+        return JsonResponse({"success": False, "message": "Login required."}, status=401)
+    
+    from django.core.cache import cache
+    cache_key = f"stop_analysis_{request.user.id}"
+    cache.set(cache_key, True, 60) # Set flag for 60 seconds
+    
+    return JsonResponse({"success": True, "message": "Stop signal sent."})
 
 @csrf_exempt
 def api_leads_list(request):

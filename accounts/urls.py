@@ -20,7 +20,8 @@ from .views.linkedin_views import (
 from .views.lead_views import (
     lead_dashboard_view, api_start_lead_analysis, api_search_linkedin_profiles,
     api_analyze_selected_profiles, api_analyze_progress, api_leads_list,
-    api_lead_detail, api_delete_lead, run_complete_workflow, api_bulk_delete_leads
+    api_lead_detail, api_delete_lead, run_complete_workflow, api_bulk_delete_leads,
+    api_stop_lead_analysis
 )
 from .views.pdf_views import download_lead_pdf
 
@@ -60,6 +61,7 @@ urlpatterns = [
     path("api/leads/search/", api_search_linkedin_profiles, name="api_search_linkedin_profiles"),
     path("api/leads/analyze-selected/", api_analyze_selected_profiles, name="api_analyze_selected_profiles"),
     path("api/leads/progress/", api_analyze_progress, name="api_analyze_progress"),
+    path("api/leads/stop-analysis/", api_stop_lead_analysis, name="api_stop_lead_analysis"),
     path("api/leads/", api_leads_list, name="api_leads_list"),
     path("api/leads/<int:lead_id>/", api_lead_detail, name="api_lead_detail"),
     path("api/leads/<int:lead_id>/delete/", api_delete_lead, name="api_delete_lead"),
